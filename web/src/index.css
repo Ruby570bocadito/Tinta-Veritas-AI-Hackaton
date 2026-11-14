@@ -428,3 +428,21 @@ textarea {
     transition: none;
   }
 }
+
+/* Printing keeps only the result and the note for the doctor. */
+@media print {
+  body {
+    background: #fff;
+  }
+  .noprint,
+  .row,
+  .page > button,
+  .honest:not(.note),
+  .mascot {
+    display: none !important;
+  }
+  .honest,
+  .ink {
+    box-shadow: none;
+  }
+}

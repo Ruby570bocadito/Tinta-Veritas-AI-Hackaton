@@ -77,7 +77,8 @@ def main():
     df = pd.read_csv(DATA)
     y = (df["class"] == "P").astype(int).values
     outer = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=2)
-    factors = [0.5, 0.7, 1.0, 1.5, 2.0]
+    factors = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]
+    table = [0.5, 0.7, 1.0, 1.5, 2.0]
     rows = {}
 
     def add(name, f, y_te, p):
@@ -108,9 +109,15 @@ def main():
 
     names = list(dict.fromkeys(n for n, _ in rows))
     print("Accuracy when the test device is f times slower (f = 1 is the tablet itself)\n")
-    print(f"{'':<40}" + "".join(f"  f={f:<4}" for f in factors))
+    print(f"{'':<40}" + "".join(f"  f={f:<4}" for f in table))
     for n in names:
-        print(f"{n:<40}" + "".join(f"  {np.mean([r[0] for r in rows[(n, f)]]):.3f} " for f in factors))
+        print(f"{n:<40}" + "".join(f"  {np.mean([r[0] for r in rows[(n, f)]]):.3f} " for f in table))
+    import json
+    out = Path(__file__).resolve().parent / "results" / "4_device_shift.json"
+    out.write_text(json.dumps({n: {str(f): dict(accuracy=float(np.mean([r[0] for r in rows[(n, f)]])),
+                                               false_alarms=float(1 - np.mean([r[2] for r in rows[(n, f)]])),
+                                               missed=float(1 - np.mean([r[1] for r in rows[(n, f)]])))
+                                   for f in factors} for n in names}, indent=1))
     print("\nAt f = 1 (no shift): accuracy ±sd | sensitivity | specificity | AUC")
     for n in names:
         a = np.array(rows[(n, 1.0)])

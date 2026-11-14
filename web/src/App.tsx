@@ -284,6 +284,28 @@ export default function App() {
           </button>
         </div>
       )}
+      {!ex && (
+        <section className="honest note">
+          <h2>Note for the doctor</h2>
+          <p>
+            {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}. A 2-minute
+            writing check done at home on a phone, with a finger. Result: <strong>{v.title.toLowerCase()}</strong>{' '}
+            (score {Math.round(p * 100)}/100).
+          </p>
+          <p>
+            Warm-up pace: {seconds(Math.exp(WARMUP_IDS.reduce((s, t) => s + Math.log(byTask[t].total_time), 0) / WARMUP_IDS.length))}{' '}
+            per task. Against that pace, the circle took ×{slowdown(byTask, 5).toFixed(1)}, the loops ×
+            {slowdown(byTask, 9).toFixed(1)} and the dictated phone number ×{slowdown(byTask, 23).toFixed(1)}.
+          </p>
+          <p>
+            Tinta is a student prototype trained on the public DARWIN dataset (174 people). It is not a medical device
+            and has not been validated with patients on phones. It is meant to start a conversation.
+          </p>
+          <button className="ghost noprint" onClick={() => window.print()}>
+            Print or save as PDF
+          </button>
+        </section>
+      )}
       {study && !ex && (
         <section className="honest">
           <h2>Study mode</h2>

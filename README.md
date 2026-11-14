@@ -39,6 +39,8 @@ All numbers are on people the model did not see (5-fold cross-validation repeate
 | **Baseline: stopwatch rule**, 3 tasks | 80% accurate | 68% (64% false alarms) | 55% (92% false alarms) |
 | **Tinta**, 3 tasks + 2 warm-ups | 79% accurate | 79% (18% false alarms) | 79% (18% false alarms) |
 
+![Accuracy and false alarms as the device gets slower or faster](docs/device-shift.png)
+
 On the study's own tablet, **our model does not beat a stopwatch**. With only a few tasks, nothing we tried did. A trained model only pulls ahead with all 25 tasks (91% against 81%). What Tinta adds is that it keeps working when the device changes, and a stopwatch does not.
 
 On a fixed held-out set of 35 people, Tinta missed 4 of 18 patients and raised 4 false alarms among 17 healthy people.
@@ -62,6 +64,7 @@ On a fixed held-out set of 35 people, Tinta missed 4 of 18 patients and raised 4
 cd web && npm install && npm run dev        # the app
 python -m venv .venv && .venv/Scripts/python -m pip install -r requirements.txt
 cd ml && ../.venv/Scripts/python device_shift.py   # any experiment; saved outputs are in ml/results/
+../.venv/Scripts/python figures.py                 # redraw the charts in docs/
 ```
 
 ## Sources
