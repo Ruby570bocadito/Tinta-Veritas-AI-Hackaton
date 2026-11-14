@@ -8,7 +8,9 @@
 
 > This project is a prototype and is not medical advice.
 
-<!-- TODO before submitting: live demo link, video link, screenshot or GIF -->
+**[Try it now in your browser](https://ruby570bocadito.github.io/Tinta-Veritas-AI-Hackaton/)** (best on a phone) · [see real cases from the study](https://ruby570bocadito.github.io/Tinta-Veritas-AI-Hackaton/) · add `?closer` to the address to always see the closer look
+
+<!-- TODO before submitting: video link -->
 
 ## The problem
 

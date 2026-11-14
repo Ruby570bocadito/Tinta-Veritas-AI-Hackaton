@@ -94,6 +94,35 @@ const EXTRA: Task[] = [
   },
 ]
 
+// A kind word after each task, so the person always knows where they are.
+const CHEERS = [
+  'Lovely. That was the first warm-up.',
+  'Warm-ups done. Now the real ones.',
+  'Nice circles! Two to go.',
+  'Almost there. One more.',
+  'That is all five. Thank you!',
+  'Thank you. Two more.',
+  'One more and we are done.',
+  'That is everything. Thank you!',
+]
+
+// Plain next steps for each answer.
+const NEXT_STEPS: Record<Verdict, string[]> = {
+  typical: [
+    'There is nothing you need to do today.',
+    'Come back in a few months: the most useful comparison is you against you.',
+  ],
+  unsure: [
+    'One unclear result means nothing on its own.',
+    'Try again another day, rested and without hurry.',
+  ],
+  mention: [
+    'Do not worry about a single result: tiredness or a new phone can cause it.',
+    'Book a normal appointment with your family doctor and show the note below.',
+    'Try again another day to see if the pattern repeats.',
+  ],
+}
+
 const VERDICTS: Record<Verdict, { title: string; body: string; mood: Mood }> = {
   typical: {
     title: 'Within the usual pattern',
@@ -326,10 +355,14 @@ export default function App() {
               ))}
             </ol>
             <p className="step">
-              {screen.index + 1} of {list.length} · {task.title}
+              Step {screen.index + 1} of {list.length} · {task.title}
             </p>
           </div>
+          <button className="link quit" onClick={() => window.confirm('Stop the check and go back to the start?') && restart()}>
+            Quit
+          </button>
         </header>
+        {screen.review && <p className="bubble cheer">{CHEERS[screen.index]}</p>}
         <h2>{screen.review ? 'Here is your invisible ink' : task.instruction}</h2>
         {task.prompt && !screen.review && <p className="prompt">{task.prompt}</p>}
         {task.picture && !screen.review && (
@@ -351,6 +384,11 @@ export default function App() {
             onChange={screen.review ? undefined : (s) => setInk({ ...ink, [task.id]: [...s] })}
             showInvisibleInk={screen.review}
           />
+          {!screen.review && strokes.length === 0 && (
+            <div className={'hint hint-' + (task.guide ?? 'write')} aria-hidden="true">
+              {task.guide ? <span className="finger" /> : <span className="here">Write here with your finger</span>}
+            </div>
+          )}
         </div>
         {screen.review ? (
           <>
@@ -376,20 +414,23 @@ export default function App() {
               className="primary"
               onClick={() => (last ? afterShort() : setScreen({ name: 'task', index: screen.index + 1, review: false }))}
             >
-              {last ? 'See the result' : 'Next task'}
+              {last ? 'See the result' : 'Next'}
             </button>
           </>
         ) : (
           <div className="row">
             <button className="ghost" onClick={() => setInk({ ...ink, [task.id]: [] })} disabled={!strokes.length}>
-              Clear
+              Start over
             </button>
             <button
               className="primary"
-              onClick={() => setScreen({ ...screen, review: true })}
+              onClick={() => {
+                navigator.vibrate?.(15)
+                setScreen({ ...screen, review: true })
+              }}
               disabled={!strokes.length}
             >
-              Done
+              I'm done
             </button>
           </div>
         )}
@@ -492,6 +533,18 @@ export default function App() {
       <p className="fine">
         Score {Math.round(p * 100)}/100. Under 35: usual pattern. Over 65: worth mentioning. In between: I don't know.
       </p>
+      {!ex && (
+        <section className="honest steps">
+          <h2>What now?</h2>
+          <ol>
+            {NEXT_STEPS[verdict(p)].map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </section>
+      )}
+      <details className="fold" open={Boolean(ex)}>
+        <summary>See the measurements</summary>
       <table className="table">
         <thead>
           <tr>
@@ -512,6 +565,7 @@ export default function App() {
           ))}
         </tbody>
       </table>
+      </details>
       {ex && (
         <div className="row">
           <button className="ghost" onClick={() => setExample((example! + 1) % examples.length)}>
@@ -566,6 +620,8 @@ export default function App() {
           </button>
         </section>
       )}
+      <details className="fold" open={Boolean(ex)}>
+        <summary>How sure can you be? The honest numbers</summary>
       <section className="honest">
         <h2>How well does it work?</h2>
         <p>
@@ -591,6 +647,7 @@ export default function App() {
           as a reason to talk to a doctor, never as an answer.
         </p>
       </section>
+      </details>
       <button className="primary" onClick={restart}>
         Start again
       </button>

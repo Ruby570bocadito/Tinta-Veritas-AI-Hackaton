@@ -85,7 +85,7 @@ for (const [i, plan] of PLANS.entries()) {
     await stroke(s)
     await sleep(300)
   }
-  await tap(button('Done'))
+  await tap(button("I'm done"))
   console.log(`task ${i + 1}:`, (await js(`document.querySelector('.stats').innerText`)).replace(/\n/g, ' '))
   await tap(i === 4 ? button('See the result') : button('Next'))
 }
@@ -98,7 +98,7 @@ if (await js(`Boolean(${button('Three more')})`)) {
       await stroke(s)
       await sleep(300)
     }
-    await tap(button('Done'))
+    await tap(button("I'm done"))
     await tap((await js(`Boolean(${button('See the result')})`)) ? button('See the result') : button('Next'))
   }
 }

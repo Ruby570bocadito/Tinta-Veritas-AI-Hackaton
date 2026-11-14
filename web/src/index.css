@@ -443,6 +443,129 @@ textarea {
   font-size: 0.75rem;
 }
 
+/* A moving orange dot shows what to do, until the first touch. */
+.hint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+
+.finger {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--air);
+  opacity: 0.75;
+  box-shadow: 0 0 0 0.5rem rgba(232, 98, 42, 0.18);
+}
+
+.hint-hline .finger {
+  animation: side 2.2s ease-in-out infinite;
+}
+
+.hint-vline .finger {
+  animation: updown 2.2s ease-in-out infinite;
+}
+
+.hint-circle .finger {
+  animation: orbit 2.6s linear infinite;
+}
+
+.here {
+  font-family: var(--hand);
+  font-size: 1.4rem;
+  color: var(--soft);
+  opacity: 0.6;
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+/* the dots sit at 18% and 82% of the sheet; the circle is 3 cm across */
+@keyframes side {
+  0%,
+  100% {
+    transform: translateX(calc(-0.32 * (100vw - 2rem)));
+  }
+  50% {
+    transform: translateX(calc(0.32 * (100vw - 2rem)));
+  }
+}
+
+@keyframes updown {
+  0%,
+  100% {
+    transform: translateY(calc(-0.32 * min(44dvh, 21rem)));
+  }
+  50% {
+    transform: translateY(calc(0.32 * min(44dvh, 21rem)));
+  }
+}
+
+@keyframes orbit {
+  from {
+    transform: rotate(0turn) translateX(1.5cm) rotate(0turn);
+  }
+  to {
+    transform: rotate(1turn) translateX(1.5cm) rotate(-1turn);
+  }
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.quit {
+  margin-left: auto;
+}
+
+.cheer {
+  align-self: flex-start;
+  transform: rotate(-1deg);
+}
+
+/* What now: numbered paper steps */
+.steps ol {
+  margin: 0;
+  padding-left: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.steps li::marker {
+  color: var(--air-text);
+  font-weight: 700;
+}
+
+/* folded sheets: tap to open */
+.fold {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.fold > summary {
+  cursor: pointer;
+  font-family: var(--hand);
+  font-size: 1.2rem;
+  color: var(--felt);
+  padding: 0.6rem 0.9rem;
+  min-height: 2.75rem;
+  background: var(--card) var(--grain);
+  border-radius: 0.5rem 0.8rem 0.55rem 0.75rem;
+  box-shadow: var(--lift);
+  list-style-position: inside;
+}
+
+.fold[open] > summary {
+  margin-bottom: 0.8rem;
+}
+
 /* the object to name, pinned like a photo */
 .picture {
   align-self: center;
@@ -611,7 +734,9 @@ textarea {
 
 @media (prefers-reduced-motion: reduce) {
   .mascot,
-  .page {
+  .page,
+  .finger,
+  .here {
     animation: none;
   }
   button {
