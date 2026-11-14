@@ -443,6 +443,49 @@ textarea {
   font-size: 0.75rem;
 }
 
+/* the object to name, pinned like a photo */
+.picture {
+  align-self: center;
+  background: var(--card) var(--grain);
+  padding: 0.4rem;
+  border-radius: 0.4rem;
+  box-shadow: var(--lift);
+  transform: rotate(-2deg);
+}
+
+/* three paper tickets, one per model */
+.votes ul {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.votes li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  background: var(--card) var(--grain);
+  border-radius: 0.5rem 0.7rem 0.45rem 0.65rem;
+  padding: 0.5rem;
+  box-shadow: var(--lift);
+  font-size: 0.8rem;
+  line-height: 1.2;
+  color: var(--soft);
+}
+
+.votes li:nth-child(2) {
+  transform: rotate(1.2deg);
+}
+
+.votes strong {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  color: var(--ink);
+}
+
 /* Each screen arrives like a sheet of paper being laid on the table. */
 .page {
   animation: lay 0.32s ease-out both;

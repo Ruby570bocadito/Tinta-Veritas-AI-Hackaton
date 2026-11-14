@@ -2,9 +2,32 @@ import { useState } from 'react'
 import InkCanvas, { type Guide } from './components/InkCanvas'
 import Mascot, { type Mood } from './components/Mascot'
 import { measure, seconds, type Measures, type Stroke } from './lib/ink'
-import { counts, examples, metrics, predict, reference, slowdown, verdict, TASK_IDS, WARMUP_IDS, type Verdict } from './lib/model'
+import {
+  counts,
+  examples,
+  isGrey,
+  metrics,
+  predict,
+  predictCloser,
+  reference,
+  slowdown,
+  verdict,
+  EXTRA_IDS,
+  TASK_IDS,
+  WARMUP_IDS,
+  type Verdict,
+} from './lib/model'
 
-type Task = { id: number; title: string; instruction: string; pose: Mood; prompt?: string; speak?: string; guide?: Guide }
+type Task = {
+  id: number
+  title: string
+  instruction: string
+  pose: Mood
+  prompt?: string
+  speak?: string
+  guide?: Guide
+  picture?: string // an image to name, for the naming task
+}
 
 // Five of the 25 tasks of the DARWIN protocol (numbers are the original task numbers).
 // 2 and 3 are warm-ups that measure the person's own pace; 5, 9 and 23 are scored against it.
@@ -43,6 +66,31 @@ const TASKS: Task[] = [
     title: 'Phone number',
     instruction: 'Tap "Listen", then write the phone number you hear.',
     speak: '3 4 7. 5 9 2. 0 1 6 8',
+  },
+]
+
+// Three more tasks (15, 18 and 22 of the original protocol), asked only when the short check is unsure.
+const EXTRA: Task[] = [
+  {
+    id: 15,
+    title: 'Backwards',
+    pose: 'task-reverse',
+    instruction: 'Copy this word backwards, starting from its last letter.',
+    prompt: 'bottle',
+  },
+  {
+    id: 18,
+    title: 'Name it',
+    pose: 'watching',
+    instruction: 'Write the name of the object in the picture.',
+    picture: 'obj-chair',
+  },
+  {
+    id: 22,
+    title: 'Copy a number',
+    pose: 'task-copy',
+    instruction: 'Copy this phone number.',
+    prompt: '091 748 2356',
   },
 ]
 
@@ -94,6 +142,8 @@ function say(text: string) {
 }
 
 const study = new URLSearchParams(location.search).has('study')
+// For demos: ?closer always shows the closer look, whatever the first score is.
+const forceCloser = new URLSearchParams(location.search).has('closer')
 const isWrong = (e: (typeof examples)[number]) => e.p >= 0.5 !== (e.label === 'patient')
 
 type Screen =
@@ -101,6 +151,7 @@ type Screen =
   | { name: 'guide'; step: number }
   | { name: 'ready' }
   | { name: 'task'; index: number; review: boolean }
+  | { name: 'closer' }
   | { name: 'result' }
 
 // What Tinta explains before the first check. Three ideas, one picture each.
@@ -133,6 +184,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'intro' })
   const [ink, setInk] = useState<Record<number, Stroke[]>>({})
   const [example, setExample] = useState<number | null>(null)
+  const [closer, setCloser] = useState(false) // true once the person accepts the three extra tasks
   const [age, setAge] = useState('')
   const [copied, setCopied] = useState(false)
 
@@ -140,6 +192,7 @@ export default function App() {
     setInk({})
     setExample(null)
     setCopied(false)
+    setCloser(false)
     setScreen({ name: 'intro' })
   }
 
@@ -251,27 +304,37 @@ export default function App() {
   }
 
   if (screen.name === 'task') {
-    const task = TASKS[screen.index]
+    const list = closer ? [...TASKS, ...EXTRA] : TASKS
+    const task = list[screen.index]
     const strokes = ink[task.id] ?? []
     const m = measure(strokes)
-    const last = screen.index === TASKS.length - 1
+    const last = screen.index === list.length - 1
+    // After the fifth task Tinta already has a first answer. If it is unsure, she asks for a closer look.
+    const afterShort = () => {
+      const byTask: Record<number, Measures> = {}
+      for (const id of [...WARMUP_IDS, ...TASK_IDS]) byTask[id] = measure(ink[id] ?? [])
+      setScreen(!closer && (forceCloser || isGrey(predict(byTask))) ? { name: 'closer' } : { name: 'result' })
+    }
     return (
       <main className="page" key={'task' + screen.index + screen.review}>
         <header className="taskbar">
           <Mascot mood={screen.review ? 'writing' : task.pose} size={96} />
           <div>
-            <ol className="dots" aria-label={`Task ${screen.index + 1} of ${TASKS.length}`}>
-              {TASKS.map((t, i) => (
+            <ol className="dots" aria-label={`Task ${screen.index + 1} of ${list.length}`}>
+              {list.map((t, i) => (
                 <li key={t.id} className={i < screen.index ? 'done' : i === screen.index ? 'now' : ''} />
               ))}
             </ol>
             <p className="step">
-              {screen.index + 1} of {TASKS.length} · {task.title}
+              {screen.index + 1} of {list.length} · {task.title}
             </p>
           </div>
         </header>
         <h2>{screen.review ? 'Here is your invisible ink' : task.instruction}</h2>
         {task.prompt && !screen.review && <p className="prompt">{task.prompt}</p>}
+        {task.picture && !screen.review && (
+          <img className="picture" src={`${import.meta.env.BASE_URL}img/tinta-${task.picture}.webp`} alt="" width={150} height={150} />
+        )}
         {task.speak && !screen.review && canSpeak && (
           <button className="ghost" onClick={() => say(task.speak!)}>
             ▶ Listen
@@ -311,9 +374,7 @@ export default function App() {
             </dl>
             <button
               className="primary"
-              onClick={() =>
-                setScreen(last ? { name: 'result' } : { name: 'task', index: screen.index + 1, review: false })
-              }
+              onClick={() => (last ? afterShort() : setScreen({ name: 'task', index: screen.index + 1, review: false }))}
             >
               {last ? 'See the result' : 'Next task'}
             </button>
@@ -336,14 +397,52 @@ export default function App() {
     )
   }
 
+  if (screen.name === 'closer') {
+    return (
+      <main className="page" key="closer">
+        <header className="brandbar">
+          <span className="brand">Tinta</span>
+        </header>
+        <div className="poster">
+          <Mascot mood="closer-look" size={220} />
+        </div>
+        <h1>Let me look a little closer</h1>
+        <p className="lead">
+          Your pattern sits between the two groups, so I would rather not guess. Three more short tasks, and I will ask
+          two more models for a second opinion.
+        </p>
+        <div className="row push">
+          <button className="ghost" onClick={() => setScreen({ name: 'result' })}>
+            Stop here
+          </button>
+          <button
+            className="primary"
+            onClick={() => {
+              setCloser(true)
+              setScreen({ name: 'task', index: TASKS.length, review: false })
+            }}
+          >
+            Three more
+          </button>
+        </div>
+      </main>
+    )
+  }
+
   // Result: either the person's own writing or a held-out case from the study.
   const ex = example === null ? null : examples[example]
   const byTask: Record<number, Measures> = {}
-  for (const id of [...WARMUP_IDS, ...TASK_IDS]) {
+  for (const id of [...WARMUP_IDS, ...TASK_IDS, ...EXTRA_IDS]) {
     byTask[id] = ex ? (ex.measures as Record<string, Measures>)[String(id)] : measure(ink[id] ?? [])
   }
-  const p = predict(byTask)
+  const first = predict(byTask)
+  // The closer look is used when the short check was unsure and the three extra tasks were done.
+  const hasExtra = ex ? true : closer && EXTRA_IDS.every((id) => (ink[id] ?? []).length > 0)
+  const second = (isGrey(first) || (forceCloser && !ex)) && hasExtra ? predictCloser(byTask) : null
+  const p = second ? second.p : first
   const v = VERDICTS[verdict(p)]
+  const shown = second ? [...TASKS, ...EXTRA] : TASKS
+  const adaptive = metrics.adaptive
   const same = metrics['1.0']
   const slow = metrics['1.5']
   const wrong = ex ? isWrong(ex) : false
@@ -370,6 +469,23 @@ export default function App() {
         </p>
       )}
       {ex && wrong && <p className="why">{whyWrong(ex.label, byTask)}</p>}
+      {second && (
+        <div className="votes">
+          <p className="fine">
+            {isGrey(first)
+              ? `The short check was unsure (${Math.round(first * 100)}/100), so three models looked at all six tasks:`
+              : `Demo mode: the short check was clear (${Math.round(first * 100)}/100), but here is the closer look anyway:`}
+          </p>
+          <ul>
+            {second.votes.map((vote) => (
+              <li key={vote.name}>
+                <span>{vote.name}</span>
+                <strong>{Math.round(vote.p * 100)}</strong>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="meter" role="img" aria-label={`Model score ${Math.round(p * 100)} out of 100`}>
         <div className="meter-pin" style={{ left: `${Math.round(p * 100)}%` }} />
       </div>
@@ -386,7 +502,7 @@ export default function App() {
           </tr>
         </thead>
         <tbody>
-          {TASKS.filter((t) => TASK_IDS.includes(t.id)).map((t) => (
+          {shown.filter((t) => !WARMUP_IDS.includes(t.id)).map((t) => (
             <tr key={t.id}>
               <td>{t.title}</td>
               <td>×{slowdown(byTask, t.id).toFixed(1)}</td>
@@ -412,7 +528,7 @@ export default function App() {
           <p>
             {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}. A 2-minute
             writing check done at home on a phone, with a finger. Result: <strong>{v.title.toLowerCase()}</strong>{' '}
-            (score {Math.round(p * 100)}/100).
+            (score {Math.round(p * 100)}/100{second ? ', after a closer look with three extra tasks' : ''}).
           </p>
           <p>
             Warm-up pace: {seconds(Math.exp(WARMUP_IDS.reduce((s, t) => s + Math.log(byTask[t].total_time), 0) / WARMUP_IDS.length))}{' '}
@@ -454,9 +570,15 @@ export default function App() {
         <h2>How well does it work?</h2>
         <p>
           Trained on {counts.train} people, checked on {counts.test} it never saw ({same.model.patients} patients,{' '}
-          {same.model.healthy} healthy). Tinta missed {same.model.missed} patients and raised {same.model.false_alarms}{' '}
+          {same.model.healthy} healthy). With the short check alone, Tinta missed {same.model.missed} patients and raised {same.model.false_alarms}{' '}
           false alarms. A plain stopwatch rule missed {same.stopwatch.missed} and raised {same.stopwatch.false_alarms}:
           on the study's own tablet, the stopwatch is slightly better.
+        </p>
+        <p>
+          When the short check is unsure, Tinta asks for three more tasks and averages three models. With that closer
+          look ({adaptive.closer_look} of the {counts.test} needed it), she missed {adaptive.missed} patients and raised{' '}
+          {adaptive.false_alarms} false alarm{adaptive.false_alarms === 1 ? '' : 's'}, and still said "I can't tell" for{' '}
+          {adaptive.still_unsure}.
         </p>
         <p>
           But a phone is not that tablet. If a device makes everyone 1.5 times slower, the stopwatch raises{' '}

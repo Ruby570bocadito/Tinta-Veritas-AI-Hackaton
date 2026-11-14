@@ -1,4 +1,6 @@
-model tasks: [5, 23, 9] | stopwatch tasks: [15, 23, 6]
+stage 1 tasks: [5, 23, 9] | stage 2 adds: [15, 18, 22] | stopwatch tasks: [15, 23, 6]
+chosen settings: [{'logisticregression__C': 0.3}, {'svc__C': 1, 'svc__gamma': 'scale'}, {'randomforestclassifier__max_depth': 5, 'randomforestclassifier__min_samples_leaf': 5}]
+largest difference between sklearn and the exported maths: 0.00000
 {
  "1.0": {
   "model": {
@@ -18,41 +20,23 @@ model tasks: [5, 23, 9] | stopwatch tasks: [15, 23, 6]
    "auc": 0.892
   }
  },
- "1.5": {
-  "model": {
-   "accuracy": 0.771,
-   "missed": 4,
-   "patients": 18,
-   "false_alarms": 4,
-   "healthy": 17,
-   "auc": 0.918
-  },
-  "stopwatch": {
-   "accuracy": 0.743,
-   "missed": 0,
-   "patients": 18,
-   "false_alarms": 9,
-   "healthy": 17,
-   "auc": 0.892
-  }
+ "adaptive": {
+  "accuracy": 0.857,
+  "missed": 4,
+  "patients": 18,
+  "false_alarms": 1,
+  "healthy": 17,
+  "auc": 0.935,
+  "closer_look": 9,
+  "still_unsure": 3
  },
- "2.0": {
-  "model": {
-   "accuracy": 0.771,
-   "missed": 4,
-   "patients": 18,
-   "false_alarms": 4,
-   "healthy": 17,
-   "auc": 0.918
-  },
-  "stopwatch": {
-   "accuracy": 0.543,
-   "missed": 0,
-   "patients": 18,
-   "false_alarms": 16,
-   "healthy": 17,
-   "auc": 0.892
-  }
+ "long": {
+  "accuracy": 0.829,
+  "missed": 4,
+  "patients": 18,
+  "false_alarms": 2,
+  "healthy": 17,
+  "auc": 0.915
  }
 }
-wrote C:\Users\rby\Desktop\Veritas AI - Hackaton\tinta\web\src\model.json
+wrote C:\Users\rby\Desktop\Veritas AI - Hackaton\tinta\web\src\model.json 125 KB

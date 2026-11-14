@@ -1,0 +1,31 @@
+fold 1/20 done
+fold 2/20 done
+fold 3/20 done
+fold 4/20 done
+fold 5/20 done
+fold 6/20 done
+fold 7/20 done
+fold 8/20 done
+fold 9/20 done
+fold 10/20 done
+fold 11/20 done
+fold 12/20 done
+fold 13/20 done
+fold 14/20 done
+fold 15/20 done
+fold 16/20 done
+fold 17/20 done
+fold 18/20 done
+fold 19/20 done
+fold 20/20 done
+
+Accuracy on unseen people (5-fold x 4 repeats, fully nested)
+
+short only (3 tasks)         acc 0.793 ±0.058 | sens 0.767 | spec 0.821 | AUC 0.867
+long only (6 tasks, blend)   acc 0.818 ±0.070 | sens 0.801 | spec 0.835 | AUC 0.902
+adaptive                     acc 0.815 ±0.070 | sens 0.787 | spec 0.844 | AUC 0.880
+
+People sent to the closer look: 26.0%
+Average number of scored tasks: 3.78
+Still 'I can't tell' after the closer look: 12.5%
+Accuracy among the people who get a clear answer: 0.847

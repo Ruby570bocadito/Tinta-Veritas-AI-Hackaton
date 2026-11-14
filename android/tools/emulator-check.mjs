@@ -32,7 +32,11 @@ const js = async (expression) =>
   (await cdp('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result.value
 
 // Where the web page sits on the physical screen.
-adb('shell', 'uiautomator', 'dump', '/sdcard/ui.xml')
+try {
+  adb('shell', 'uiautomator', 'dump', '/sdcard/ui.xml')
+} catch {
+  // the dump is written even when the tool gives up waiting for the animated page to go idle
+}
 const xml = adb('exec-out', 'cat', '/sdcard/ui.xml')
 const [, left, top] = xml.match(/class="android\.webkit\.WebView"[^>]*bounds="\[(\d+),(\d+)\]/).map(Number)
 const dpr = await js('devicePixelRatio')
@@ -73,6 +77,8 @@ await js(`location.reload()`)
 await sleep(2500)
 console.log('page:', await js('document.title'), '| native voice bridge:', await js('Boolean(window.TintaNative)'))
 await tap(button('Start'))
+await tap(button('Skip')) // the three-card guide
+await tap(button('Begin'))
 for (const [i, plan] of PLANS.entries()) {
   if (i === 4) await tap(button('▶')) // the dictated phone number, spoken by Android
   for (const s of plan) {
@@ -82,6 +88,19 @@ for (const [i, plan] of PLANS.entries()) {
   await tap(button('Done'))
   console.log(`task ${i + 1}:`, (await js(`document.querySelector('.stats').innerText`)).replace(/\n/g, ' '))
   await tap(i === 4 ? button('See the result') : button('Next'))
+}
+// If the short check is unsure, the app asks for a closer look: three more tasks.
+if (await js(`Boolean(${button('Three more')})`)) {
+  console.log('short check unsure -> closer look')
+  await tap(button('Three more'))
+  for (const plan of [[0.1, 0.25, 0.4, 0.55, 0.7, 0.85].map(digit), [0.2, 0.35, 0.5, 0.65, 0.8].map(digit), PLANS[4]]) {
+    for (const s of plan) {
+      await stroke(s)
+      await sleep(300)
+    }
+    await tap(button('Done'))
+    await tap((await js(`Boolean(${button('See the result')})`)) ? button('See the result') : button('Next'))
+  }
 }
 console.log('\n' + (await js(`document.querySelector('main').innerText`)).split('\n').filter(Boolean).slice(0, 12).join('\n'))
 await js('window.scrollTo(0, 0)')
