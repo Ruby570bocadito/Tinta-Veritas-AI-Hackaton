@@ -1,88 +1,74 @@
-"""Train the 3-task phone model and export it for the browser.
+"""Train the model that ships in the app and export it for the browser.
 
-- Uses only device-independent measures (times and pen-down counts).
-- Holds out 20% of people as a test set that the shipped model never sees.
-- Writes web/src/model.json (weights + held-out example profiles + metrics).
+Design (see experiments.py, model_search.py and device_shift.py for why):
+  - 2 warm-up tasks measure the person's own writing speed.
+  - 3 harder tasks are measured *relative to that speed*, so a slower or faster device cancels out.
+  - The 3 tasks are picked by forward selection on the training people only.
+  - 20% of people are held out; the shipped model never sees them.
 
-Run:  python ml/train_export.py
+Writes web/src/model.json.   Run:  python ml/train_export.py
 """
 import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
+
+from device_shift import HARD, WARMUP, logit, pick, relative, slower
+from experiments import POOL, Stopwatch, stopwatch
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data" / "darwin" / "data.csv"
 OUT = ROOT / "web" / "src" / "model.json"
-
-TASKS = [9, 15, 23]  # most often chosen inside the folds in feasibility.py
-MEASURES = ["air_time", "paper_time", "total_time", "num_of_pendown"]
 SEED = 0
+MEASURES = ["air_time", "paper_time", "total_time", "num_of_pendown"]
 
 
-def features(df):
-    names = [f"{m}{t}" for t in TASKS for m in MEASURES]
-    return np.log1p(df[names].values.astype(float)), names
-
-
-def fit(X, y):
-    mu, sd = X.mean(axis=0), X.std(axis=0)
-    model = LogisticRegression(C=0.3, max_iter=5000).fit((X - mu) / sd, y)
-    return model, mu, sd
-
-
-def rates(y, pred):
-    return dict(
-        accuracy=float((pred == y).mean()),
-        sensitivity=float(pred[y == 1].mean()),
-        specificity=float(1 - pred[y == 0].mean()),
-        missed=int(((pred == 0) & (y == 1)).sum()),
-        false_alarms=int(((pred == 1) & (y == 0)).sum()),
-        n=int(len(y)),
-    )
+def rates(y, p):
+    pred = (p >= 0.5).astype(int)
+    return dict(accuracy=round(float((pred == y).mean()), 3),
+                missed=int(((pred == 0) & (y == 1)).sum()), patients=int(y.sum()),
+                false_alarms=int(((pred == 1) & (y == 0)).sum()), healthy=int((1 - y).sum()),
+                auc=round(float(roc_auc_score(y, p)), 3))
 
 
 def main():
     df = pd.read_csv(DATA)
     y = (df["class"] == "P").astype(int).values
-    X, names = features(df)
-    idx = np.arange(len(df))
-    tr, te = train_test_split(idx, test_size=0.2, stratify=y, random_state=SEED)
+    tr, te = train_test_split(np.arange(len(df)), test_size=0.2, stratify=y, random_state=SEED)
+    dtr, dte = df.iloc[tr], df.iloc[te]
 
-    model, mu, sd = fit(X[tr], y[tr])
-    p = model.predict_proba((X[te] - mu) / sd)[:, 1]
-    pred = (p >= 0.5).astype(int)
+    tasks = pick(dtr, y[tr], 3, logit, relative, HARD)
+    model = logit().fit(relative(dtr, tasks), y[tr])
+    sw_tasks = pick(dtr, y[tr], 3, Stopwatch, stopwatch, POOL)
+    sw = Stopwatch().fit(stopwatch(dtr, sw_tasks), y[tr])
+    print("model tasks:", tasks, "| stopwatch tasks:", sw_tasks)
 
-    # Simple rule on the same three tasks: total time only.
-    tot = np.log(df[[f"total_time{t}" for t in TASKS]].sum(axis=1).values).reshape(-1, 1)
-    base, bmu, bsd = fit(tot[tr], y[tr])
-    bp = base.predict_proba((tot[te] - bmu) / bsd)[:, 1]
-    bpred = (bp >= 0.5).astype(int)
-
-    metrics = dict(model=rates(y[te], pred) | dict(auc=float(roc_auc_score(y[te], p))),
-                   baseline=rates(y[te], bpred) | dict(auc=float(roc_auc_score(y[te], bp))))
+    metrics = {}
+    for f in (1.0, 1.5, 2.0):
+        d = slower(dte, f)
+        metrics[str(f)] = dict(model=rates(y[te], model.proba(relative(d, tasks))),
+                               stopwatch=rates(y[te], sw.proba(stopwatch(d, sw_tasks))))
     print(json.dumps(metrics, indent=1))
 
-    examples = []
-    for i, pi, bi in zip(te, p, bp):
-        raw = {t: {m: float(df.iloc[i][f"{m}{t}"]) for m in MEASURES} for t in TASKS}
-        examples.append(dict(id=str(df.iloc[i]["ID"]), label="patient" if y[i] else "healthy",
-                             p=float(pi), baseline_p=float(bi), measures=raw))
+    p = model.proba(relative(dte, tasks))
+    needed = sorted(set(WARMUP + tasks))
+    examples = [dict(id=str(dte.iloc[i]["ID"]), label="patient" if y[te][i] else "healthy", p=round(float(p[i]), 4),
+                     measures={str(t): {m: float(dte.iloc[i][f"{m}{t}"]) for m in MEASURES} for t in needed})
+                for i in range(len(te))]
 
-    OUT.parent.mkdir(parents=True, exist_ok=True)
+    lr = model.m
     OUT.write_text(json.dumps(dict(
-        tasks=TASKS, measures=MEASURES, feature_names=names,
-        transform="log1p then (x - mean) / std",
-        mean=mu.tolist(), std=sd.tolist(),
-        coef=model.coef_[0].tolist(), intercept=float(model.intercept_[0]),
-        baseline=dict(mean=float(bmu[0]), std=float(bsd[0]),
-                      coef=float(base.coef_[0][0]), intercept=float(base.intercept_[0])),
-        metrics=metrics, train_n=int(len(tr)), examples=examples,
-        note="Times are in the units of the DARWIN CSV (assumed milliseconds; not stated by the source).",
+        warmup=WARMUP, tasks=tasks,
+        features="per task: [log(total) - mean log(total of warm-ups), air/total, log1p(pen-downs)]",
+        mean=np.asarray(model.mu).tolist(), std=np.asarray(model.sd).tolist(),
+        coef=lr.coef_[0].tolist(), intercept=float(lr.intercept_[0]),
+        stopwatch=dict(tasks=sw_tasks, mean=sw.mu.tolist(), std=sw.sd.tolist(),
+                       coef=float(sw.m.coef_[0][0]), intercept=float(sw.m.intercept_[0])),
+        metrics=metrics, train_n=int(len(tr)), test_n=int(len(te)), examples=examples,
+        note="DARWIN times are assumed to be milliseconds (the source does not state units).",
     ), indent=1), encoding="utf-8")
     print("wrote", OUT)
 

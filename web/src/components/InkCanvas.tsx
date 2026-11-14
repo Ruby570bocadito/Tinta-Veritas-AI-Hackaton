@@ -1,16 +1,21 @@
 import { useEffect, useRef } from 'react'
 import { gaps, type Stroke } from '../lib/ink'
 
+export type Guide = 'hline' | 'vline' | 'circle'
+
 type Props = {
   strokes: Stroke[]
   onChange?: (strokes: Stroke[]) => void // omit to make the canvas read-only
   showInvisibleInk?: boolean
+  guide?: Guide
 }
 
 const INK = '#1d2433'
 const AIR = '#e4572e'
+const GUIDE = '#c9bfa9'
+const CM = 37.8 // CSS pixels per centimetre
 
-function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean) {
+function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, guide?: Guide) {
   const ctx = canvas.getContext('2d')!
   const ratio = window.devicePixelRatio || 1
   const { width, height } = canvas.getBoundingClientRect()
@@ -22,6 +27,30 @@ function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean) 
   ctx.clearRect(0, 0, width, height)
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
+
+  // Printed guide, like the sheet of paper in the original study.
+  const cx = width / 2
+  const cy = height / 2
+  ctx.fillStyle = GUIDE
+  ctx.strokeStyle = GUIDE
+  ctx.lineWidth = 2
+  ctx.setLineDash([])
+  const dot = (x: number, y: number) => {
+    ctx.beginPath()
+    ctx.arc(x, y, 7, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  if (guide === 'hline') {
+    dot(cx - width * 0.32, cy)
+    dot(cx + width * 0.32, cy)
+  } else if (guide === 'vline') {
+    dot(cx, cy - height * 0.32)
+    dot(cx, cy + height * 0.32)
+  } else if (guide === 'circle') {
+    ctx.beginPath()
+    ctx.arc(cx, cy, CM * 1.5, 0, Math.PI * 2) // 3 cm across, as in the study
+    ctx.stroke()
+  }
 
   ctx.strokeStyle = INK
   ctx.fillStyle = INK
@@ -61,7 +90,7 @@ function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean) 
   }
 }
 
-export default function InkCanvas({ strokes, onChange, showInvisibleInk = false }: Props) {
+export default function InkCanvas({ strokes, onChange, showInvisibleInk = false, guide }: Props) {
   const ref = useRef<HTMLCanvasElement>(null)
   const live = useRef<Stroke[]>(strokes)
   const drawing = useRef(false)
@@ -69,11 +98,11 @@ export default function InkCanvas({ strokes, onChange, showInvisibleInk = false 
   useEffect(() => {
     live.current = strokes
     const canvas = ref.current!
-    const redraw = () => draw(canvas, live.current, showInvisibleInk)
+    const redraw = () => draw(canvas, live.current, showInvisibleInk, guide)
     redraw()
     window.addEventListener('resize', redraw)
     return () => window.removeEventListener('resize', redraw)
-  }, [strokes, showInvisibleInk])
+  }, [strokes, showInvisibleInk, guide])
 
   const point = (e: React.PointerEvent) => {
     const r = ref.current!.getBoundingClientRect()
@@ -85,12 +114,12 @@ export default function InkCanvas({ strokes, onChange, showInvisibleInk = false 
     e.currentTarget.setPointerCapture(e.pointerId)
     drawing.current = true
     live.current = [...live.current, [point(e)]]
-    draw(ref.current!, live.current, false)
+    draw(ref.current!, live.current, false, guide)
   }
   const move = (e: React.PointerEvent) => {
     if (!drawing.current) return
     live.current[live.current.length - 1].push(point(e))
-    draw(ref.current!, live.current, false)
+    draw(ref.current!, live.current, false, guide)
   }
   const up = () => {
     if (!drawing.current) return

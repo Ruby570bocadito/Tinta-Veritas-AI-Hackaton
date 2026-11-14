@@ -1,118 +1,154 @@
 {
+ "warmup": [
+  2,
+  3
+ ],
  "tasks": [
-  9,
-  15,
-  23
+  5,
+  23,
+  9
  ],
- "measures": [
-  "air_time",
-  "paper_time",
-  "total_time",
-  "num_of_pendown"
- ],
- "feature_names": [
-  "air_time9",
-  "paper_time9",
-  "total_time9",
-  "num_of_pendown9",
-  "air_time15",
-  "paper_time15",
-  "total_time15",
-  "num_of_pendown15",
-  "air_time23",
-  "paper_time23",
-  "total_time23",
-  "num_of_pendown23"
- ],
- "transform": "log1p then (x - mean) / std",
+ "features": "per task: [log(total) - mean log(total of warm-ups), air/total, log1p(pen-downs)]",
  "mean": [
-  7.5648102080595585,
-  8.694063632428175,
-  9.07490873284711,
-  1.2065458920001804,
-  9.591239306253021,
-  8.798619214628085,
-  10.03536391013903,
-  2.6122907922387846,
-  8.580552250924526,
-  8.565049084846642,
-  9.297343296887538,
-  2.6027988781301064
+  0.5113167409260767,
+  0.14727616876174354,
+  1.0879742594275457,
+  0.055490576159993615,
+  0.5027086290870346,
+  2.6027988781301064,
+  -0.16698419937884634,
+  0.28446972009415605,
+  1.2065458920001804
  ],
  "std": [
-  1.2925608638727044,
-  0.5722687675274488,
-  0.7209301427421906,
-  0.6836178198126099,
-  1.054043055682612,
-  0.529163762318666,
-  0.849917971406472,
-  0.34494219203434867,
-  0.6583832376745254,
-  0.3655662569051759,
-  0.47959407685686767,
-  0.12010273695251689
+  0.8103819558056552,
+  0.16835876575348735,
+  0.5821920053105205,
+  0.5628927786764661,
+  0.11912611164298502,
+  0.12010273795251689,
+  0.7566670716280014,
+  0.19102554823068116,
+  0.6836178208126099
  ],
  "coef": [
-  -0.27843414026823415,
-  0.5230478769748601,
-  0.2165436179459005,
-  0.2344749466618987,
-  0.5634226890056675,
-  0.21246723667374964,
-  0.6761368025654246,
-  -0.20466150749069206,
-  0.5094796416170146,
-  0.1931954754853734,
-  0.4291232795770043,
-  -0.12870541126650337
+  -0.49106762252789915,
+  0.3914390208700335,
+  0.577738279333341,
+  -0.16321063626478527,
+  0.5628541628782638,
+  0.28871416684903456,
+  0.12242088366341412,
+  -0.1303679623706579,
+  0.48730331477820177
  ],
- "intercept": 0.3175745533410848,
- "baseline": {
-  "mean": 10.744212560957704,
-  "std": 0.6727048164867041,
-  "coef": 1.8794089659669033,
-  "intercept": 0.2929105559085982
+ "intercept": 0.1493612369203189,
+ "stopwatch": {
+  "tasks": [
+   15,
+   23,
+   6
+  ],
+  "mean": [
+   10.035306247696605,
+   9.297242155858077,
+   9.096288764989644
+  ],
+  "std": [
+   0.8499506952839901,
+   0.47963239956230397,
+   0.7369669095181597
+  ],
+  "coef": 4.853766389377705,
+  "intercept": 0.5604102980877789
  },
  "metrics": {
-  "model": {
-   "accuracy": 0.8285714285714286,
-   "sensitivity": 0.7777777777777778,
-   "specificity": 0.8823529411764706,
-   "missed": 4,
-   "false_alarms": 2,
-   "n": 35,
-   "auc": 0.9150326797385621
+  "1.0": {
+   "model": {
+    "accuracy": 0.771,
+    "missed": 4,
+    "patients": 18,
+    "false_alarms": 4,
+    "healthy": 17,
+    "auc": 0.918
+   },
+   "stopwatch": {
+    "accuracy": 0.829,
+    "missed": 3,
+    "patients": 18,
+    "false_alarms": 3,
+    "healthy": 17,
+    "auc": 0.892
+   }
   },
-  "baseline": {
-   "accuracy": 0.8857142857142857,
-   "sensitivity": 0.8888888888888888,
-   "specificity": 0.8823529411764706,
-   "missed": 2,
-   "false_alarms": 2,
-   "n": 35,
-   "auc": 0.9215686274509803
+  "1.5": {
+   "model": {
+    "accuracy": 0.771,
+    "missed": 4,
+    "patients": 18,
+    "false_alarms": 4,
+    "healthy": 17,
+    "auc": 0.918
+   },
+   "stopwatch": {
+    "accuracy": 0.743,
+    "missed": 0,
+    "patients": 18,
+    "false_alarms": 9,
+    "healthy": 17,
+    "auc": 0.892
+   }
+  },
+  "2.0": {
+   "model": {
+    "accuracy": 0.771,
+    "missed": 4,
+    "patients": 18,
+    "false_alarms": 4,
+    "healthy": 17,
+    "auc": 0.918
+   },
+   "stopwatch": {
+    "accuracy": 0.543,
+    "missed": 0,
+    "patients": 18,
+    "false_alarms": 16,
+    "healthy": 17,
+    "auc": 0.892
+   }
   }
  },
  "train_n": 139,
+ "test_n": 35,
  "examples": [
   {
    "id": "id_126",
    "label": "healthy",
-   "p": 0.15909344268917053,
-   "baseline_p": 0.26601255558200293,
+   "p": 0.3065,
    "measures": {
+    "2": {
+     "air_time": 795.0,
+     "paper_time": 6940.0,
+     "total_time": 7735.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 615.0,
+     "paper_time": 4395.0,
+     "total_time": 5010.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 695.0,
+     "paper_time": 8205.0,
+     "total_time": 8900.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 375.0,
      "paper_time": 2825.0,
      "total_time": 3200.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 9790.0,
-     "paper_time": 8445.0,
-     "total_time": 18235.0,
-     "num_of_pendown": 14.0
     },
     "23": {
      "air_time": 3465.0,
@@ -125,20 +161,31 @@
   {
    "id": "id_22",
    "label": "patient",
-   "p": 0.9544360270065225,
-   "baseline_p": 0.9171310663825967,
+   "p": 0.8414,
    "measures": {
+    "2": {
+     "air_time": 2990.0,
+     "paper_time": 9435.0,
+     "total_time": 12425.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 1350.0,
+     "paper_time": 7440.0,
+     "total_time": 8790.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 6955.0,
+     "paper_time": 38940.0,
+     "total_time": 45895.0,
+     "num_of_pendown": 6.0
+    },
     "9": {
      "air_time": 17395.0,
      "paper_time": 12105.0,
      "total_time": 29500.0,
      "num_of_pendown": 15.0
-    },
-    "15": {
-     "air_time": 41585.0,
-     "paper_time": 16060.0,
-     "total_time": 57645.0,
-     "num_of_pendown": 19.0
     },
     "23": {
      "air_time": 6410.0,
@@ -151,20 +198,31 @@
   {
    "id": "id_155",
    "label": "healthy",
-   "p": 0.049007386232028424,
-   "baseline_p": 0.08045585808302554,
+   "p": 0.2482,
    "measures": {
+    "2": {
+     "air_time": 2645.0,
+     "paper_time": 9060.0,
+     "total_time": 11705.0,
+     "num_of_pendown": 3.0
+    },
+    "3": {
+     "air_time": 770.0,
+     "paper_time": 4435.0,
+     "total_time": 5205.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 640.0,
+     "paper_time": 9305.0,
+     "total_time": 9945.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 70.0,
      "paper_time": 2690.0,
      "total_time": 2760.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 6580.0,
-     "paper_time": 2725.0,
-     "total_time": 9305.0,
-     "num_of_pendown": 9.0
     },
     "23": {
      "air_time": 2315.0,
@@ -177,20 +235,31 @@
   {
    "id": "id_115",
    "label": "healthy",
-   "p": 0.01259620046258449,
-   "baseline_p": 0.06483495653631383,
+   "p": 0.1894,
    "measures": {
+    "2": {
+     "air_time": 1895.0,
+     "paper_time": 7265.0,
+     "total_time": 9160.0,
+     "num_of_pendown": 2.0
+    },
+    "3": {
+     "air_time": 720.0,
+     "paper_time": 3630.0,
+     "total_time": 4350.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 500.0,
+     "paper_time": 6280.0,
+     "total_time": 6780.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 85.0,
      "paper_time": 720.0,
      "total_time": 805.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 5860.0,
-     "paper_time": 3430.0,
-     "total_time": 9290.0,
-     "num_of_pendown": 9.0
     },
     "23": {
      "air_time": 2360.0,
@@ -203,20 +272,31 @@
   {
    "id": "id_134",
    "label": "healthy",
-   "p": 0.11511164857103856,
-   "baseline_p": 0.15886979075346516,
+   "p": 0.2835,
    "measures": {
+    "2": {
+     "air_time": 795.0,
+     "paper_time": 4155.0,
+     "total_time": 4950.0,
+     "num_of_pendown": 2.0
+    },
+    "3": {
+     "air_time": 1470.0,
+     "paper_time": 4470.0,
+     "total_time": 5940.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 590.0,
+     "paper_time": 15460.0,
+     "total_time": 16050.0,
+     "num_of_pendown": 2.0
+    },
     "9": {
      "air_time": 890.0,
      "paper_time": 4675.0,
      "total_time": 5565.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 5960.0,
-     "paper_time": 3655.0,
-     "total_time": 9615.0,
-     "num_of_pendown": 11.0
     },
     "23": {
      "air_time": 3840.0,
@@ -229,20 +309,31 @@
   {
    "id": "id_74",
    "label": "patient",
-   "p": 0.962622674768886,
-   "baseline_p": 0.8363630273694828,
+   "p": 0.6864,
    "measures": {
+    "2": {
+     "air_time": 9630.0,
+     "paper_time": 10730.0,
+     "total_time": 20360.0,
+     "num_of_pendown": 4.0
+    },
+    "3": {
+     "air_time": 85.0,
+     "paper_time": 3155.0,
+     "total_time": 3240.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 1860.0,
+     "paper_time": 15285.0,
+     "total_time": 17145.0,
+     "num_of_pendown": 4.0
+    },
     "9": {
      "air_time": 6980.0,
      "paper_time": 8520.0,
      "total_time": 15500.0,
      "num_of_pendown": 5.0
-    },
-    "15": {
-     "air_time": 21390.0,
-     "paper_time": 10795.0,
-     "total_time": 32185.0,
-     "num_of_pendown": 15.0
     },
     "23": {
      "air_time": 13630.0,
@@ -255,20 +346,31 @@
   {
    "id": "id_137",
    "label": "healthy",
-   "p": 0.021490667472131148,
-   "baseline_p": 0.06525760772076773,
+   "p": 0.1316,
    "measures": {
+    "2": {
+     "air_time": 695.0,
+     "paper_time": 2885.0,
+     "total_time": 3580.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 1785.0,
+     "paper_time": 5720.0,
+     "total_time": 7505.0,
+     "num_of_pendown": 3.0
+    },
+    "5": {
+     "air_time": 1025.0,
+     "paper_time": 11450.0,
+     "total_time": 12475.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 430.0,
      "paper_time": 2900.0,
      "total_time": 3330.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 3435.0,
-     "paper_time": 4030.0,
-     "total_time": 7465.0,
-     "num_of_pendown": 11.0
     },
     "23": {
      "air_time": 1890.0,
@@ -281,20 +383,31 @@
   {
    "id": "id_70",
    "label": "patient",
-   "p": 0.9126219170144668,
-   "baseline_p": 0.7970578493058945,
+   "p": 0.8248,
    "measures": {
+    "2": {
+     "air_time": 1735.0,
+     "paper_time": 5940.0,
+     "total_time": 7675.0,
+     "num_of_pendown": 3.0
+    },
+    "3": {
+     "air_time": 870.0,
+     "paper_time": 5730.0,
+     "total_time": 6600.0,
+     "num_of_pendown": 2.0
+    },
+    "5": {
+     "air_time": 3735.0,
+     "paper_time": 6110.0,
+     "total_time": 9845.0,
+     "num_of_pendown": 2.0
+    },
     "9": {
      "air_time": 4285.0,
      "paper_time": 5405.0,
      "total_time": 9690.0,
      "num_of_pendown": 3.0
-    },
-    "15": {
-     "air_time": 17740.0,
-     "paper_time": 7205.0,
-     "total_time": 24945.0,
-     "num_of_pendown": 19.0
     },
     "23": {
      "air_time": 19530.0,
@@ -307,20 +420,31 @@
   {
    "id": "id_11",
    "label": "patient",
-   "p": 0.9922436221377355,
-   "baseline_p": 0.9093045729359507,
+   "p": 0.9197,
    "measures": {
+    "2": {
+     "air_time": 58780.0,
+     "paper_time": 44840.0,
+     "total_time": 103620.0,
+     "num_of_pendown": 20.0
+    },
+    "3": {
+     "air_time": 9910.0,
+     "paper_time": 22450.0,
+     "total_time": 32360.0,
+     "num_of_pendown": 8.0
+    },
+    "5": {
+     "air_time": 7655.0,
+     "paper_time": 26215.0,
+     "total_time": 33870.0,
+     "num_of_pendown": 7.0
+    },
     "9": {
      "air_time": 10590.0,
      "paper_time": 7210.0,
      "total_time": 17800.0,
      "num_of_pendown": 10.0
-    },
-    "15": {
-     "air_time": 25515.0,
-     "paper_time": 13005.0,
-     "total_time": 38520.0,
-     "num_of_pendown": 8.0
     },
     "23": {
      "air_time": 19365.0,
@@ -333,20 +457,31 @@
   {
    "id": "id_60",
    "label": "patient",
-   "p": 0.46109238666063584,
-   "baseline_p": 0.5645910195367128,
+   "p": 0.3404,
    "measures": {
+    "2": {
+     "air_time": 34905.0,
+     "paper_time": 25800.0,
+     "total_time": 60705.0,
+     "num_of_pendown": 15.0
+    },
+    "3": {
+     "air_time": 7160.0,
+     "paper_time": 27845.0,
+     "total_time": 35005.0,
+     "num_of_pendown": 7.0
+    },
+    "5": {
+     "air_time": 1925.0,
+     "paper_time": 49740.0,
+     "total_time": 51665.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 8315.0,
      "paper_time": 6845.0,
      "total_time": 15160.0,
      "num_of_pendown": 2.0
-    },
-    "15": {
-     "air_time": 17245.0,
-     "paper_time": 5515.0,
-     "total_time": 22760.0,
-     "num_of_pendown": 12.0
     },
     "23": {
      "air_time": 3920.0,
@@ -359,20 +494,31 @@
   {
    "id": "id_127",
    "label": "healthy",
-   "p": 0.2019242945748054,
-   "baseline_p": 0.20944120974817337,
+   "p": 0.1967,
    "measures": {
+    "2": {
+     "air_time": 440.0,
+     "paper_time": 6785.0,
+     "total_time": 7225.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 3210.0,
+     "paper_time": 4660.0,
+     "total_time": 7870.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 2710.0,
+     "paper_time": 27685.0,
+     "total_time": 30395.0,
+     "num_of_pendown": 3.0
+    },
     "9": {
      "air_time": 1250.0,
      "paper_time": 7085.0,
      "total_time": 8335.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 3420.0,
-     "paper_time": 7640.0,
-     "total_time": 11060.0,
-     "num_of_pendown": 5.0
     },
     "23": {
      "air_time": 2580.0,
@@ -385,20 +531,31 @@
   {
    "id": "id_44",
    "label": "patient",
-   "p": 0.35759093297423494,
-   "baseline_p": 0.3697092578073252,
+   "p": 0.4167,
    "measures": {
+    "2": {
+     "air_time": 1990.0,
+     "paper_time": 5610.0,
+     "total_time": 7600.0,
+     "num_of_pendown": 2.0
+    },
+    "3": {
+     "air_time": 1260.0,
+     "paper_time": 5195.0,
+     "total_time": 6455.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 1370.0,
+     "paper_time": 21565.0,
+     "total_time": 22935.0,
+     "num_of_pendown": 2.0
+    },
     "9": {
      "air_time": 4625.0,
      "paper_time": 7470.0,
      "total_time": 12095.0,
      "num_of_pendown": 4.0
-    },
-    "15": {
-     "air_time": 10025.0,
-     "paper_time": 3870.0,
-     "total_time": 13895.0,
-     "num_of_pendown": 12.0
     },
     "23": {
      "air_time": 4460.0,
@@ -411,20 +568,31 @@
   {
    "id": "id_171",
    "label": "healthy",
-   "p": 0.2738786311165469,
-   "baseline_p": 0.252539453186246,
+   "p": 0.3837,
    "measures": {
+    "2": {
+     "air_time": 6490.0,
+     "paper_time": 5440.0,
+     "total_time": 11930.0,
+     "num_of_pendown": 5.0
+    },
+    "3": {
+     "air_time": 4355.0,
+     "paper_time": 5565.0,
+     "total_time": 9920.0,
+     "num_of_pendown": 4.0
+    },
+    "5": {
+     "air_time": 540.0,
+     "paper_time": 14550.0,
+     "total_time": 15090.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 910.0,
      "paper_time": 7730.0,
      "total_time": 8640.0,
      "num_of_pendown": 2.0
-    },
-    "15": {
-     "air_time": 6565.0,
-     "paper_time": 5080.0,
-     "total_time": 11645.0,
-     "num_of_pendown": 12.0
     },
     "23": {
      "air_time": 3810.0,
@@ -437,20 +605,31 @@
   {
    "id": "id_148",
    "label": "healthy",
-   "p": 0.06706810401480086,
-   "baseline_p": 0.12451279757185814,
+   "p": 0.2766,
    "measures": {
+    "2": {
+     "air_time": 1005.0,
+     "paper_time": 4295.0,
+     "total_time": 5300.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 900.0,
+     "paper_time": 7550.0,
+     "total_time": 8450.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 820.0,
+     "paper_time": 11760.0,
+     "total_time": 12580.0,
+     "num_of_pendown": 2.0
+    },
     "9": {
      "air_time": 515.0,
      "paper_time": 3950.0,
      "total_time": 4465.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 5805.0,
-     "paper_time": 4530.0,
-     "total_time": 10335.0,
-     "num_of_pendown": 10.0
     },
     "23": {
      "air_time": 2335.0,
@@ -463,20 +642,31 @@
   {
    "id": "id_37",
    "label": "patient",
-   "p": 0.7733462998677384,
-   "baseline_p": 0.6282933390878269,
+   "p": 0.8807,
    "measures": {
+    "2": {
+     "air_time": 15325.0,
+     "paper_time": 15340.0,
+     "total_time": 30665.0,
+     "num_of_pendown": 6.0
+    },
+    "3": {
+     "air_time": 5730.0,
+     "paper_time": 13800.0,
+     "total_time": 19530.0,
+     "num_of_pendown": 5.0
+    },
+    "5": {
+     "air_time": 3810.0,
+     "paper_time": 9635.0,
+     "total_time": 13445.0,
+     "num_of_pendown": 6.0
+    },
     "9": {
      "air_time": 1305.0,
      "paper_time": 8780.0,
      "total_time": 10085.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 20305.0,
-     "paper_time": 6060.0,
-     "total_time": 26365.0,
-     "num_of_pendown": 18.0
     },
     "23": {
      "air_time": 7350.0,
@@ -489,20 +679,31 @@
   {
    "id": "id_111",
    "label": "healthy",
-   "p": 0.11208675160298252,
-   "baseline_p": 0.1904544521423912,
+   "p": 0.5025,
    "measures": {
+    "2": {
+     "air_time": 2275.0,
+     "paper_time": 8875.0,
+     "total_time": 11150.0,
+     "num_of_pendown": 2.0
+    },
+    "3": {
+     "air_time": 500.0,
+     "paper_time": 4650.0,
+     "total_time": 5150.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 615.0,
+     "paper_time": 13195.0,
+     "total_time": 13810.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 3530.0,
      "paper_time": 4020.0,
      "total_time": 7550.0,
      "num_of_pendown": 6.0
-    },
-    "15": {
-     "air_time": 2250.0,
-     "paper_time": 8400.0,
-     "total_time": 10650.0,
-     "num_of_pendown": 5.0
     },
     "23": {
      "air_time": 3320.0,
@@ -515,20 +716,31 @@
   {
    "id": "id_78",
    "label": "patient",
-   "p": 0.7412808798548222,
-   "baseline_p": 0.5943113608011903,
+   "p": 0.6014,
    "measures": {
+    "2": {
+     "air_time": 3485.0,
+     "paper_time": 5780.0,
+     "total_time": 9265.0,
+     "num_of_pendown": 2.0
+    },
+    "3": {
+     "air_time": 1105.0,
+     "paper_time": 9020.0,
+     "total_time": 10125.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 925.0,
+     "paper_time": 16270.0,
+     "total_time": 17195.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 1940.0,
      "paper_time": 3265.0,
      "total_time": 5205.0,
      "num_of_pendown": 4.0
-    },
-    "15": {
-     "air_time": 12690.0,
-     "paper_time": 2925.0,
-     "total_time": 15615.0,
-     "num_of_pendown": 12.0
     },
     "23": {
      "air_time": 19030.0,
@@ -541,20 +753,31 @@
   {
    "id": "id_129",
    "label": "healthy",
-   "p": 0.4746582786853696,
-   "baseline_p": 0.4335257551584242,
+   "p": 0.1722,
    "measures": {
+    "2": {
+     "air_time": 4095.0,
+     "paper_time": 8370.0,
+     "total_time": 12465.0,
+     "num_of_pendown": 5.0
+    },
+    "3": {
+     "air_time": 1305.0,
+     "paper_time": 8200.0,
+     "total_time": 9505.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 835.0,
+     "paper_time": 17920.0,
+     "total_time": 18755.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 460.0,
      "paper_time": 10235.0,
      "total_time": 10695.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 13515.0,
-     "paper_time": 6550.0,
-     "total_time": 20065.0,
-     "num_of_pendown": 14.0
     },
     "23": {
      "air_time": 2475.0,
@@ -567,20 +790,31 @@
   {
    "id": "id_99",
    "label": "healthy",
-   "p": 0.06973797899189345,
-   "baseline_p": 0.09576624529848347,
+   "p": 0.598,
    "measures": {
+    "2": {
+     "air_time": 550.0,
+     "paper_time": 3495.0,
+     "total_time": 4045.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 330.0,
+     "paper_time": 3900.0,
+     "total_time": 4230.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 2050.0,
+     "paper_time": 4600.0,
+     "total_time": 6650.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 330.0,
      "paper_time": 4060.0,
      "total_time": 4390.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 4545.0,
-     "paper_time": 2155.0,
-     "total_time": 6700.0,
-     "num_of_pendown": 10.0
     },
     "23": {
      "air_time": 5225.0,
@@ -593,20 +827,31 @@
   {
    "id": "id_35",
    "label": "patient",
-   "p": 0.6284148976800885,
-   "baseline_p": 0.5150331008418296,
+   "p": 0.945,
    "measures": {
+    "2": {
+     "air_time": 23055.0,
+     "paper_time": 14945.0,
+     "total_time": 38000.0,
+     "num_of_pendown": 10.0
+    },
+    "3": {
+     "air_time": 4905.0,
+     "paper_time": 6190.0,
+     "total_time": 11095.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 715.0,
+     "paper_time": 6870.0,
+     "total_time": 7585.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 8045.0,
      "paper_time": 4745.0,
      "total_time": 12790.0,
      "num_of_pendown": 14.0
-    },
-    "15": {
-     "air_time": 3160.0,
-     "paper_time": 5775.0,
-     "total_time": 8935.0,
-     "num_of_pendown": 4.0
     },
     "23": {
      "air_time": 13530.0,
@@ -619,20 +864,31 @@
   {
    "id": "id_59",
    "label": "patient",
-   "p": 0.9328372202950085,
-   "baseline_p": 0.9190799221690639,
+   "p": 0.917,
    "measures": {
+    "2": {
+     "air_time": 2030.0,
+     "paper_time": 12925.0,
+     "total_time": 14955.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 1040.0,
+     "paper_time": 10380.0,
+     "total_time": 11420.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 7660.0,
+     "paper_time": 30615.0,
+     "total_time": 38275.0,
+     "num_of_pendown": 8.0
+    },
     "9": {
      "air_time": 33365.0,
      "paper_time": 11625.0,
      "total_time": 44990.0,
      "num_of_pendown": 18.0
-    },
-    "15": {
-     "air_time": 29320.0,
-     "paper_time": 13100.0,
-     "total_time": 42420.0,
-     "num_of_pendown": 20.0
     },
     "23": {
      "air_time": 6840.0,
@@ -645,20 +901,31 @@
   {
    "id": "id_3",
    "label": "patient",
-   "p": 0.8604508379641128,
-   "baseline_p": 0.6783781235519432,
+   "p": 0.2836,
    "measures": {
+    "2": {
+     "air_time": 560.0,
+     "paper_time": 6545.0,
+     "total_time": 7105.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 420.0,
+     "paper_time": 5110.0,
+     "total_time": 5530.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 680.0,
+     "paper_time": 11630.0,
+     "total_time": 12310.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 625.0,
      "paper_time": 6345.0,
      "total_time": 6970.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 22345.0,
-     "paper_time": 11350.0,
-     "total_time": 33695.0,
-     "num_of_pendown": 11.0
     },
     "23": {
      "air_time": 7330.0,
@@ -671,20 +938,31 @@
   {
    "id": "id_157",
    "label": "healthy",
-   "p": 0.06858055560114726,
-   "baseline_p": 0.12203132653345056,
+   "p": 0.1462,
    "measures": {
+    "2": {
+     "air_time": 10850.0,
+     "paper_time": 9275.0,
+     "total_time": 20125.0,
+     "num_of_pendown": 7.0
+    },
+    "3": {
+     "air_time": 425.0,
+     "paper_time": 3610.0,
+     "total_time": 4035.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 875.0,
+     "paper_time": 18570.0,
+     "total_time": 19445.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 550.0,
      "paper_time": 3060.0,
      "total_time": 3610.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 5585.0,
-     "paper_time": 4535.0,
-     "total_time": 10120.0,
-     "num_of_pendown": 8.0
     },
     "23": {
      "air_time": 2385.0,
@@ -697,20 +975,31 @@
   {
    "id": "id_4",
    "label": "patient",
-   "p": 0.8875348088257735,
-   "baseline_p": 0.7697658206863993,
+   "p": 0.9324,
    "measures": {
+    "2": {
+     "air_time": 13735.0,
+     "paper_time": 13520.0,
+     "total_time": 27255.0,
+     "num_of_pendown": 7.0
+    },
+    "3": {
+     "air_time": 3795.0,
+     "paper_time": 9760.0,
+     "total_time": 13555.0,
+     "num_of_pendown": 5.0
+    },
+    "5": {
+     "air_time": 10735.0,
+     "paper_time": 41200.0,
+     "total_time": 51935.0,
+     "num_of_pendown": 14.0
+    },
     "9": {
      "air_time": 13920.0,
      "paper_time": 8335.0,
      "total_time": 22255.0,
      "num_of_pendown": 18.0
-    },
-    "15": {
-     "air_time": 21890.0,
-     "paper_time": 6575.0,
-     "total_time": 28465.0,
-     "num_of_pendown": 14.0
     },
     "23": {
      "air_time": 7205.0,
@@ -723,20 +1012,31 @@
   {
    "id": "id_102",
    "label": "healthy",
-   "p": 0.14542825487250638,
-   "baseline_p": 0.30456304899568504,
+   "p": 0.1231,
    "measures": {
+    "2": {
+     "air_time": 575.0,
+     "paper_time": 5025.0,
+     "total_time": 5600.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 395.0,
+     "paper_time": 4255.0,
+     "total_time": 4650.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 1055.0,
+     "paper_time": 12365.0,
+     "total_time": 13420.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 7525.0,
      "paper_time": 4425.0,
      "total_time": 11950.0,
      "num_of_pendown": 3.0
-    },
-    "15": {
-     "air_time": 8240.0,
-     "paper_time": 4315.0,
-     "total_time": 12555.0,
-     "num_of_pendown": 10.0
     },
     "23": {
      "air_time": 2515.0,
@@ -749,20 +1049,31 @@
   {
    "id": "id_1",
    "label": "patient",
-   "p": 0.8919629666992499,
-   "baseline_p": 0.6661112732977189,
+   "p": 0.9143,
    "measures": {
+    "2": {
+     "air_time": 6085.0,
+     "paper_time": 18785.0,
+     "total_time": 24870.0,
+     "num_of_pendown": 6.0
+    },
+    "3": {
+     "air_time": 4345.0,
+     "paper_time": 11300.0,
+     "total_time": 15645.0,
+     "num_of_pendown": 4.0
+    },
+    "5": {
+     "air_time": 66034.0,
+     "paper_time": 64885.0,
+     "total_time": 130919.0,
+     "num_of_pendown": 17.0
+    },
     "9": {
      "air_time": 60.0,
      "paper_time": 4850.0,
      "total_time": 4910.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 17354.0,
-     "paper_time": 15030.0,
-     "total_time": 32384.0,
-     "num_of_pendown": 14.0
     },
     "23": {
      "air_time": 10965.0,
@@ -775,20 +1086,31 @@
   {
    "id": "id_24",
    "label": "patient",
-   "p": 0.9114699941508241,
-   "baseline_p": 0.9030281370866267,
+   "p": 0.9647,
    "measures": {
+    "2": {
+     "air_time": 9405.0,
+     "paper_time": 13325.0,
+     "total_time": 22730.0,
+     "num_of_pendown": 3.0
+    },
+    "3": {
+     "air_time": 840.0,
+     "paper_time": 10130.0,
+     "total_time": 10970.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 2120.0,
+     "paper_time": 0.0,
+     "total_time": 2120.0,
+     "num_of_pendown": 0.0
+    },
     "9": {
      "air_time": 30260.0,
      "paper_time": 4275.0,
      "total_time": 34535.0,
      "num_of_pendown": 11.0
-    },
-    "15": {
-     "air_time": 37115.0,
-     "paper_time": 5900.0,
-     "total_time": 43015.0,
-     "num_of_pendown": 9.0
     },
     "23": {
      "air_time": 8710.0,
@@ -801,20 +1123,31 @@
   {
    "id": "id_169",
    "label": "healthy",
-   "p": 0.9968781161619783,
-   "baseline_p": 0.9968122189139509,
+   "p": 0.5708,
    "measures": {
+    "2": {
+     "air_time": 3515.0,
+     "paper_time": 5920.0,
+     "total_time": 9435.0,
+     "num_of_pendown": 2.0
+    },
+    "3": {
+     "air_time": 835.0,
+     "paper_time": 7340.0,
+     "total_time": 8175.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 830.0,
+     "paper_time": 11225.0,
+     "total_time": 12055.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 2840.0,
      "paper_time": 5260.0,
      "total_time": 8100.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 17345.0,
-     "paper_time": 3730.0,
-     "total_time": 21075.0,
-     "num_of_pendown": 14.0
     },
     "23": {
      "air_time": 292670.0,
@@ -827,20 +1160,31 @@
   {
    "id": "id_88",
    "label": "patient",
-   "p": 0.9625679654510827,
-   "baseline_p": 0.9872821793078143,
+   "p": 0.5593,
    "measures": {
+    "2": {
+     "air_time": 12190.0,
+     "paper_time": 4890.0,
+     "total_time": 17080.0,
+     "num_of_pendown": 2.0
+    },
+    "3": {
+     "air_time": 565.0,
+     "paper_time": 6090.0,
+     "total_time": 6655.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 500.0,
+     "paper_time": 8995.0,
+     "total_time": 9495.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 340.0,
      "paper_time": 3570.0,
      "total_time": 3910.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 171445.0,
-     "paper_time": 8575.0,
-     "total_time": 180020.0,
-     "num_of_pendown": 19.0
     },
     "23": {
      "air_time": 9200.0,
@@ -853,20 +1197,31 @@
   {
    "id": "id_154",
    "label": "healthy",
-   "p": 0.3427023873911864,
-   "baseline_p": 0.33554455959008567,
+   "p": 0.5294,
    "measures": {
+    "2": {
+     "air_time": 4525.0,
+     "paper_time": 9855.0,
+     "total_time": 14380.0,
+     "num_of_pendown": 3.0
+    },
+    "3": {
+     "air_time": 1190.0,
+     "paper_time": 6615.0,
+     "total_time": 7805.0,
+     "num_of_pendown": 2.0
+    },
+    "5": {
+     "air_time": 1650.0,
+     "paper_time": 10855.0,
+     "total_time": 12505.0,
+     "num_of_pendown": 4.0
+    },
     "9": {
      "air_time": 3110.0,
      "paper_time": 6010.0,
      "total_time": 9120.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 7320.0,
-     "paper_time": 4900.0,
-     "total_time": 12220.0,
-     "num_of_pendown": 12.0
     },
     "23": {
      "air_time": 5625.0,
@@ -879,20 +1234,31 @@
   {
    "id": "id_51",
    "label": "patient",
-   "p": 0.99853044520523,
-   "baseline_p": 0.9863326041936136,
+   "p": 0.9468,
    "measures": {
+    "2": {
+     "air_time": 96485.0,
+     "paper_time": 42200.0,
+     "total_time": 138685.0,
+     "num_of_pendown": 36.0
+    },
+    "3": {
+     "air_time": 14120.0,
+     "paper_time": 6085.0,
+     "total_time": 20205.0,
+     "num_of_pendown": 3.0
+    },
+    "5": {
+     "air_time": 4985.0,
+     "paper_time": 13355.0,
+     "total_time": 18340.0,
+     "num_of_pendown": 5.0
+    },
     "9": {
      "air_time": 9730.0,
      "paper_time": 12875.0,
      "total_time": 22605.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 90625.0,
-     "paper_time": 6680.0,
-     "total_time": 97305.0,
-     "num_of_pendown": 14.0
     },
     "23": {
      "air_time": 39330.0,
@@ -905,20 +1271,31 @@
   {
    "id": "id_49",
    "label": "patient",
-   "p": 0.3308852732673236,
-   "baseline_p": 0.3752709128306087,
+   "p": 0.6563,
    "measures": {
+    "2": {
+     "air_time": 5135.0,
+     "paper_time": 8390.0,
+     "total_time": 13525.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 650.0,
+     "paper_time": 6360.0,
+     "total_time": 7010.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 435.0,
+     "paper_time": 6560.0,
+     "total_time": 6995.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 5770.0,
      "paper_time": 8200.0,
      "total_time": 13970.0,
      "num_of_pendown": 7.0
-    },
-    "15": {
-     "air_time": 1110.0,
-     "paper_time": 4595.0,
-     "total_time": 5705.0,
-     "num_of_pendown": 6.0
     },
     "23": {
      "air_time": 7535.0,
@@ -931,20 +1308,31 @@
   {
    "id": "id_43",
    "label": "patient",
-   "p": 0.4397098499065159,
-   "baseline_p": 0.5072984077654136,
+   "p": 0.3098,
    "measures": {
+    "2": {
+     "air_time": 2710.0,
+     "paper_time": 13465.0,
+     "total_time": 16175.0,
+     "num_of_pendown": 3.0
+    },
+    "3": {
+     "air_time": 1700.0,
+     "paper_time": 7875.0,
+     "total_time": 9575.0,
+     "num_of_pendown": 4.0
+    },
+    "5": {
+     "air_time": 1295.0,
+     "paper_time": 23055.0,
+     "total_time": 24350.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 5700.0,
      "paper_time": 8890.0,
      "total_time": 14590.0,
      "num_of_pendown": 5.0
-    },
-    "15": {
-     "air_time": 15435.0,
-     "paper_time": 4200.0,
-     "total_time": 19635.0,
-     "num_of_pendown": 17.0
     },
     "23": {
      "air_time": 3155.0,
@@ -957,20 +1345,31 @@
   {
    "id": "id_160",
    "label": "healthy",
-   "p": 0.5724834576127426,
-   "baseline_p": 0.5535295214992259,
+   "p": 0.2132,
    "measures": {
+    "2": {
+     "air_time": 6055.0,
+     "paper_time": 4560.0,
+     "total_time": 10615.0,
+     "num_of_pendown": 6.0
+    },
+    "3": {
+     "air_time": 1080.0,
+     "paper_time": 2855.0,
+     "total_time": 3935.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 595.0,
+     "paper_time": 15490.0,
+     "total_time": 16085.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 3685.0,
      "paper_time": 6070.0,
      "total_time": 9755.0,
      "num_of_pendown": 1.0
-    },
-    "15": {
-     "air_time": 16165.0,
-     "paper_time": 8080.0,
-     "total_time": 24245.0,
-     "num_of_pendown": 14.0
     },
     "23": {
      "air_time": 5580.0,
@@ -983,20 +1382,31 @@
   {
    "id": "id_136",
    "label": "healthy",
-   "p": 0.10413487439660175,
-   "baseline_p": 0.28062941846329403,
+   "p": 0.4,
    "measures": {
+    "2": {
+     "air_time": 515.0,
+     "paper_time": 4880.0,
+     "total_time": 5395.0,
+     "num_of_pendown": 1.0
+    },
+    "3": {
+     "air_time": 385.0,
+     "paper_time": 5430.0,
+     "total_time": 5815.0,
+     "num_of_pendown": 1.0
+    },
+    "5": {
+     "air_time": 1820.0,
+     "paper_time": 7330.0,
+     "total_time": 9150.0,
+     "num_of_pendown": 1.0
+    },
     "9": {
      "air_time": 4540.0,
      "paper_time": 2465.0,
      "total_time": 7005.0,
      "num_of_pendown": 5.0
-    },
-    "15": {
-     "air_time": 12220.0,
-     "paper_time": 3640.0,
-     "total_time": 15860.0,
-     "num_of_pendown": 13.0
     },
     "23": {
      "air_time": 2915.0,
@@ -1007,5 +1417,5 @@
    }
   }
  ],
- "note": "Times are in the units of the DARWIN CSV (assumed milliseconds; not stated by the source)."
+ "note": "DARWIN times are assumed to be milliseconds (the source does not state units)."
 }

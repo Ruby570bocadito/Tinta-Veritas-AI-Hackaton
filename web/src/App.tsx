@@ -1,23 +1,36 @@
 import { useState } from 'react'
-import InkCanvas from './components/InkCanvas'
+import InkCanvas, { type Guide } from './components/InkCanvas'
 import { measure, seconds, type Measures, type Stroke } from './lib/ink'
-import { baseline, examples, metrics, predict, verdict, TASK_IDS, type Verdict } from './lib/model'
+import { counts, examples, metrics, predict, slowdown, verdict, TASK_IDS, WARMUP_IDS, type Verdict } from './lib/model'
 
-type Task = { id: number; title: string; instruction: string; prompt?: string; speak?: string }
+type Task = { id: number; title: string; instruction: string; prompt?: string; speak?: string; guide?: Guide }
 
-// The three DARWIN tasks the model uses (tasks 9, 15 and 23 of the original 25).
+// Five of the 25 tasks of the DARWIN protocol (numbers are the original task numbers).
+// 2 and 3 are warm-ups that measure the person's own pace; 5, 9 and 23 are scored against it.
 const TASKS: Task[] = [
+  {
+    id: 2,
+    title: 'Warm-up: side to side',
+    instruction: 'Join the two dots with a line, back and forth four times, without lifting your finger.',
+    guide: 'hline',
+  },
+  {
+    id: 3,
+    title: 'Warm-up: up and down',
+    instruction: 'Join the two dots with a line, up and down four times, without lifting your finger.',
+    guide: 'vline',
+  },
+  {
+    id: 5,
+    title: 'Circle',
+    instruction: 'Trace over the circle four times in a row, without lifting your finger.',
+    guide: 'circle',
+  },
   {
     id: 9,
     title: 'Loops',
-    instruction: 'Write "le" four times in joined-up writing, without lifting your finger if you can.',
+    instruction: 'Write "le" four times in joined-up writing, in one smooth movement.',
     prompt: 'le le le le',
-  },
-  {
-    id: 15,
-    title: 'Backwards',
-    instruction: 'Copy this word backwards, starting from its last letter.',
-    prompt: 'bottle',
   },
   {
     id: 23,
@@ -30,7 +43,7 @@ const TASKS: Task[] = [
 const VERDICTS: Record<Verdict, { title: string; body: string }> = {
   typical: {
     title: 'Within the usual pattern',
-    body: 'The pauses and timing look like those of the healthy group in the study data.',
+    body: 'Compared with your own warm-up pace, the harder tasks slowed you down about as much as the healthy group in the study.',
   },
   unsure: {
     title: "I can't tell from this",
@@ -38,7 +51,7 @@ const VERDICTS: Record<Verdict, { title: string; body: string }> = {
   },
   mention: {
     title: 'Worth mentioning to a doctor',
-    body: 'The pauses and timing look more like the patient group in the study data. This is not a diagnosis.',
+    body: 'Compared with your own warm-up pace, the harder tasks slowed you down more like the patient group in the study. This is not a diagnosis.',
   },
 }
 
@@ -69,8 +82,8 @@ export default function App() {
         <p className="brand">Tinta</p>
         <h1>How you write says more than what you write.</h1>
         <p className="lead">
-          Three short writing tasks, about two minutes. Tinta times the pauses your eye can't see and compares them
-          with data from 174 people, 89 of them living with Alzheimer's.
+          Five short writing tasks, about two minutes. Tinta times the pauses your eye can't see and compares them with
+          data from 174 people, 89 of them living with Alzheimer's.
         </p>
         <button className="primary" onClick={() => setScreen({ name: 'task', index: 0, review: false })}>
           Start the check
@@ -109,6 +122,7 @@ export default function App() {
         <InkCanvas
           key={task.id + (screen.review ? 'r' : 'w')}
           strokes={strokes}
+          guide={task.guide}
           onChange={screen.review ? undefined : (s) => setInk({ ...ink, [task.id]: [...s] })}
           showInvisibleInk={screen.review}
         />
@@ -128,7 +142,7 @@ export default function App() {
                 <dd>{seconds(m.paper_time)}</dd>
               </div>
               <div>
-                <dt>Lifts</dt>
+                <dt>Touches</dt>
                 <dd>{m.num_of_pendown}</dd>
               </div>
             </dl>
@@ -162,12 +176,13 @@ export default function App() {
   // Result: either the person's own writing or a held-out case from the study.
   const ex = example === null ? null : examples[example]
   const byTask: Record<number, Measures> = {}
-  for (const id of TASK_IDS) {
+  for (const id of [...WARMUP_IDS, ...TASK_IDS]) {
     byTask[id] = ex ? (ex.measures as Record<string, Measures>)[String(id)] : measure(ink[id] ?? [])
   }
   const p = predict(byTask)
-  const b = baseline(byTask)
   const v = VERDICTS[verdict(p)]
+  const same = metrics['1.0']
+  const slow = metrics['1.5']
   return (
     <main className="page">
       <p className="step">{ex ? `Real case from the study · actually ${ex.label}` : 'Your result'}</p>
@@ -176,24 +191,22 @@ export default function App() {
       <div className="meter" role="img" aria-label={`Model score ${Math.round(p * 100)} out of 100`}>
         <div className="meter-fill" style={{ width: `${Math.round(p * 100)}%` }} />
       </div>
-      <p className="fine">
-        Model score {Math.round(p * 100)}/100 · Stopwatch-only rule {Math.round(b * 100)}/100
-      </p>
+      <p className="fine">Model score {Math.round(p * 100)}/100. Below 35 is the usual pattern, above 65 is worth mentioning.</p>
       <table className="table">
         <thead>
           <tr>
             <th>Task</th>
+            <th>Slower than your warm-up</th>
             <th>In the air</th>
-            <th>On screen</th>
-            <th>Lifts</th>
+            <th>Touches</th>
           </tr>
         </thead>
         <tbody>
-          {TASKS.map((t) => (
+          {TASKS.filter((t) => TASK_IDS.includes(t.id)).map((t) => (
             <tr key={t.id}>
               <td>{t.title}</td>
-              <td>{seconds(byTask[t.id].air_time)}</td>
-              <td>{seconds(byTask[t.id].paper_time)}</td>
+              <td>×{slowdown(byTask, t.id).toFixed(1)}</td>
+              <td>{Math.round((100 * byTask[t.id].air_time) / Math.max(byTask[t.id].total_time, 1))}%</td>
               <td>{byTask[t.id].num_of_pendown}</td>
             </tr>
           ))}
@@ -207,9 +220,15 @@ export default function App() {
       <section className="honest">
         <h2>How well does it work?</h2>
         <p>
-          On {metrics.model.n} people the model never saw: it missed {metrics.model.missed} of the patients and raised{' '}
-          {metrics.model.false_alarms} false alarms. A stopwatch-only rule on the same tasks missed{' '}
-          {metrics.baseline.missed} and raised {metrics.baseline.false_alarms}.
+          Trained on {counts.train} people, checked on {counts.test} it never saw ({same.model.patients} patients,{' '}
+          {same.model.healthy} healthy). Tinta missed {same.model.missed} patients and raised {same.model.false_alarms}{' '}
+          false alarms. A plain stopwatch rule missed {same.stopwatch.missed} and raised {same.stopwatch.false_alarms}:
+          on the study's own tablet, the stopwatch is slightly better.
+        </p>
+        <p>
+          But a phone is not that tablet. If the device makes everyone 1.5 times slower, the stopwatch raises{' '}
+          {slow.stopwatch.false_alarms} false alarms out of {slow.stopwatch.healthy} healthy people. Tinta still raises{' '}
+          {slow.model.false_alarms}, because it compares you with your own warm-up, not with a clock.
         </p>
         <p>
           The study used a pen on a tablet, in Italian. Tinta uses a finger on a phone. We have not tested it with
