@@ -1,8 +1,10 @@
 // The models run here, in the browser. Nothing leaves the phone.
 // Weights come from ml/train_export.py (trained on the DARWIN dataset).
 //
-// Every measure is relative to the person's own speed on two warm-up tasks,
-// so a device that is slower or faster overall does not change the score.
+// Two measures per task: the share of the task spent with the finger in the air, and the number
+// of touches. Neither depends on how fast the person or the device is overall.
+// (ml/ablation.py shows these two carry the signal, and what happens when a device changes
+// pauses and strokes by different amounts.)
 //
 // Stage 1: three scored tasks, logistic regression.
 // Stage 2: only when stage 1 is unsure. Three more tasks, and the average of three models
@@ -14,26 +16,22 @@ export const WARMUP_IDS: number[] = data.warmup
 export const TASK_IDS: number[] = data.tasks
 export const EXTRA_IDS: number[] = data.extra_tasks
 export const [GREY_LO, GREY_HI] = data.grey
+export const SPLIT: number = data.split
 export const metrics = data.metrics
 export const examples = data.examples
 export const counts = { train: data.train_n, test: data.test_n }
-export const reference = { healthyWarmupMs: data.healthy_warmup_ms }
+// Typical values among the healthy people the model learned from.
+export const typical = { air: data.healthy_air, touches: data.healthy_touches }
 
 type ByTask = Record<number, Measures>
 const sigmoid = (z: number) => 1 / (1 + Math.exp(-z))
 
-/** How much slower each task is than the person's own warm-up pace (1 = same pace). */
-export function slowdown(byTask: ByTask, task: number): number {
-  const ref = WARMUP_IDS.reduce((s, t) => s + Math.log(byTask[t].total_time), 0) / WARMUP_IDS.length
-  return Math.exp(Math.log(byTask[task].total_time) - ref)
-}
+/** Share of a task spent with the finger off the screen (0 to 1). */
+export const airShare = (m: Measures) => m.air_time / Math.max(m.total_time, 1)
 
-/** Three numbers per task: slowdown, share of time in the air, touches. */
+/** Two numbers per task: share of time in the air, and touches. */
 function features(byTask: ByTask, tasks: number[]): number[] {
-  return tasks.flatMap((task) => {
-    const m = byTask[task]
-    return [Math.log(slowdown(byTask, task)), m.air_time / Math.max(m.total_time, 1), Math.log1p(m.num_of_pendown)]
-  })
+  return tasks.flatMap((task) => [airShare(byTask[task]), Math.log1p(byTask[task].num_of_pendown)])
 }
 
 const scale = (x: number[], mean: number[], std: number[]) => x.map((v, i) => (v - mean[i]) / std[i])
@@ -73,14 +71,17 @@ function forest(x: number[]): number {
 }
 
 /** Stage 2. Three different models look at all six tasks and their answers are averaged. */
-export function predictCloser(byTask: ByTask): { p: number; votes: { name: string; p: number }[] } {
+export function predictCloser(byTask: ByTask): { p: number; votes: { name: string; p: number }[]; split: boolean } {
   const x = features(byTask, [...TASK_IDS, ...EXTRA_IDS])
   const votes = [
     { name: 'Straight-line model', p: logistic(x) },
     { name: 'Nearest-pattern model', p: svm(x) },
     { name: 'Forest of small trees', p: forest(x) },
   ]
-  return { p: votes.reduce((s, v) => s + v.p, 0) / votes.length, votes }
+  const ps = votes.map((v) => v.p)
+  // When the three models pull far apart, the honest answer is "I can't tell".
+  const split = Math.max(...ps) - Math.min(...ps) > SPLIT
+  return { p: ps.reduce((s, v) => s + v, 0) / ps.length, votes, split }
 }
 
 export const isGrey = (p: number) => p > GREY_LO && p < GREY_HI

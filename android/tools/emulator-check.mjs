@@ -80,7 +80,6 @@ await tap(button('Start'))
 await tap(button('Skip')) // the three-card guide
 await tap(button('Begin'))
 for (const [i, plan] of PLANS.entries()) {
-  if (i === 4) await tap(button('▶')) // the dictated phone number, spoken by Android
   for (const s of plan) {
     await stroke(s)
     await sleep(300)

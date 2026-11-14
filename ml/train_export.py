@@ -1,8 +1,9 @@
 """Train the models that ship in the app and export them for the browser.
 
 Design (see experiments.py, model_search.py, device_shift.py, deep_search.py and adaptive.py for why):
-  - 2 warm-up tasks measure the person's own writing speed.
-  - Stage 1: 3 harder tasks measured relative to that speed, logistic regression.
+  - 2 practice tasks come first so the person gets used to the screen. They are not scored.
+  - Stage 1: 3 tasks, two measures each (share of time in the air, number of touches), logistic regression.
+    These two measures do not depend on how fast the person or the device is (see ablation.py).
   - Stage 2, only when stage 1 is unsure: 3 more tasks and a blend of three models on all 6
     (logistic regression, RBF support vector machine, random forest).
   - Tasks and settings are chosen with the training people only; 20% of people are held out.
@@ -17,8 +18,9 @@ import pandas as pd
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold, train_test_split
 
-from adaptive import HI, LO, blend, stage2
-from device_shift import HARD, WARMUP, logit, pick, relative, slower
+from adaptive import HI, LO, SPLIT, blend, disagreement, stage2
+from ablation import reshape
+from device_shift import HARD, WARMUP, logit, pick, shape, slower
 from experiments import POOL, Stopwatch, stopwatch
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -42,7 +44,7 @@ def more_tasks(d, y, chosen, k):
     chosen = list(chosen)
     for _ in range(k):
         def score(t):
-            X = relative(d, chosen + [t])
+            X = shape(d, chosen + [t])
             return np.mean([roc_auc_score(y[b], logit().fit(X[a], y[a]).proba(X[b])) for a, b in cv.split(X, y)])
         chosen.append(max([t for t in HARD if t not in chosen], key=score))
     return chosen
@@ -99,18 +101,18 @@ def main():
     tr, te = train_test_split(np.arange(len(df)), test_size=0.2, stratify=y, random_state=SEED)
     dtr, dte = df.iloc[tr], df.iloc[te]
 
-    tasks = pick(dtr, y[tr], 3, logit, relative, HARD)
-    model = logit().fit(relative(dtr, tasks), y[tr])
+    tasks = pick(dtr, y[tr], 3, logit, shape, HARD)
+    model = logit().fit(shape(dtr, tasks), y[tr])
     sw_tasks = pick(dtr, y[tr], 3, Stopwatch, stopwatch, POOL)
     sw = Stopwatch().fit(stopwatch(dtr, sw_tasks), y[tr])
     all_tasks = more_tasks(dtr, y[tr], tasks, 3)
-    members = [m.fit(relative(dtr, all_tasks), y[tr]) for m in stage2()]
+    members = [m.fit(shape(dtr, all_tasks), y[tr]) for m in stage2()]
     print("stage 1 tasks:", tasks, "| stage 2 adds:", all_tasks[3:], "| stopwatch tasks:", sw_tasks)
     print("chosen settings:", [m.best_params_ for m in members])
 
     export = export_blend(members)
-    X2 = relative(dte, all_tasks)
-    p1 = model.proba(relative(dte, tasks))
+    X2 = shape(dte, all_tasks)
+    p1 = model.proba(shape(dte, tasks))
     p2 = blend(members, X2)
     gap = float(np.abs(blend_from_export(export, X2) - p2).max())
     print(f"largest difference between sklearn and the exported maths: {gap:.5f}")
@@ -121,10 +123,14 @@ def main():
     metrics = {}
     for f in (1.0, 1.5, 2.0):
         d = slower(dte, f)
-        metrics[str(f)] = dict(model=rates(y[te], model.proba(relative(d, tasks))),
+        metrics[str(f)] = dict(model=rates(y[te], model.proba(shape(d, tasks))),
                                stopwatch=rates(y[te], sw.proba(stopwatch(d, sw_tasks))))
+    # A device that does not slow everything equally: this is where the model can break.
+    metrics["screen2"] = rates(y[te], model.proba(shape(reshape(dte, tasks, paper=2.0), tasks)))
+    metrics["pauses2"] = rates(y[te], model.proba(shape(reshape(dte, tasks, air=2.0), tasks)))
     metrics["adaptive"] = rates(y[te], final) | dict(
-        closer_look=int(grey.sum()), still_unsure=int(((final > LO) & (final < HI)).sum()))
+        closer_look=int(grey.sum()),
+        still_unsure=int((((final > LO) & (final < HI)) | (grey & (disagreement(members, X2) > SPLIT))).sum()))
     metrics["long"] = rates(y[te], p2)
     print(json.dumps({k: metrics[k] for k in ("1.0", "adaptive", "long")}, indent=1))
 
@@ -136,16 +142,17 @@ def main():
 
     lr = model.m
     OUT.write_text(json.dumps(dict(
-        warmup=WARMUP, tasks=tasks, extra_tasks=all_tasks[3:], grey=[LO, HI],
-        features="per task: [log(total) - mean log(total of warm-ups), air/total, log1p(pen-downs)]",
+        warmup=WARMUP, tasks=tasks, extra_tasks=all_tasks[3:], grey=[LO, HI], split=SPLIT,
+        features="per task: [air/total, log1p(pen-downs)]",
         mean=np.asarray(model.mu).tolist(), std=np.asarray(model.sd).tolist(),
         coef=lr.coef_[0].tolist(), intercept=float(lr.intercept_[0]),
         blend=export,
         stopwatch=dict(tasks=sw_tasks, mean=sw.mu.tolist(), std=sw.sd.tolist(),
                        coef=float(sw.m.coef_[0][0]), intercept=float(sw.m.intercept_[0])),
         metrics=metrics, train_n=int(len(tr)), test_n=int(len(te)), examples=examples,
-        healthy_warmup_ms=float(np.median(np.exp(np.log(
-            dtr[y[tr] == 0][[f"total_time{t}" for t in WARMUP]].values.astype(float)).mean(1)))),
+        # Typical values in the healthy training people, used to explain a result in plain words.
+        healthy_air=float(np.median(shape(dtr[y[tr] == 0], tasks)[:, 0::2])),
+        healthy_touches=float(np.median(np.expm1(shape(dtr[y[tr] == 0], tasks)[:, 1::2]))),
         note="DARWIN times are assumed to be milliseconds (the source does not state units).",
     )), encoding="utf-8")
     print("wrote", OUT, OUT.stat().st_size // 1024, "KB")

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Only needed to load the two web fonts. The check itself runs offline and sends nothing. -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- No INTERNET permission: the app cannot send anything anywhere. -->
 
     <application
         android:allowBackup="false"

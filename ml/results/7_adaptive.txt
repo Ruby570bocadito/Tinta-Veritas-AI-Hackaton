@@ -21,11 +21,11 @@ fold 20/20 done
 
 Accuracy on unseen people (5-fold x 4 repeats, fully nested)
 
-short only (3 tasks)         acc 0.793 ±0.058 | sens 0.767 | spec 0.821 | AUC 0.867
-long only (6 tasks, blend)   acc 0.818 ±0.070 | sens 0.801 | spec 0.835 | AUC 0.902
-adaptive                     acc 0.815 ±0.070 | sens 0.787 | spec 0.844 | AUC 0.880
+short only (3 tasks)         acc 0.743 ±0.069 | sens 0.696 | spec 0.791 | AUC 0.811
+long only (6 tasks, blend)   acc 0.790 ±0.078 | sens 0.766 | spec 0.815 | AUC 0.876
+adaptive                     acc 0.773 ±0.071 | sens 0.735 | spec 0.812 | AUC 0.828
 
-People sent to the closer look: 26.0%
-Average number of scored tasks: 3.78
-Still 'I can't tell' after the closer look: 12.5%
-Accuracy among the people who get a clear answer: 0.847
+People sent to the closer look: 31.7%
+Average number of scored tasks: 3.95
+Still 'I can't tell' after the closer look: 14.1%
+Accuracy among the people who get a clear answer: 0.810

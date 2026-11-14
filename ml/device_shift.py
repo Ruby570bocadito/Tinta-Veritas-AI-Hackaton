@@ -44,6 +44,18 @@ def relative(df, tasks):
     return np.column_stack(cols)
 
 
+def shape(df, tasks):
+    """Where the time goes, not how much of it there is. Two measures per task:
+    the share of the task spent with the pen in the air, and the number of pen-downs.
+    No warm-up is needed, and a uniform change of speed cancels out of both.
+    (ablation.py shows these two carry the signal; "slower than own warm-up" adds almost nothing.)"""
+    cols = []
+    for t in tasks:
+        total = np.maximum(df[f"total_time{t}"].values.astype(float), 1)
+        cols += [df[f"air_time{t}"].values / total, np.log1p(df[f"num_of_pendown{t}"].values.astype(float))]
+    return np.column_stack(cols)
+
+
 def slower(df, f):
     out = df.copy()
     for c in out.columns:

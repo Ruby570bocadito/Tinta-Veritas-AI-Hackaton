@@ -1,0 +1,22 @@
+1. What is the model really using? (accuracy on unseen people, 5-fold x 3 repeats)
+
+  slower than own warm-up, alone             acc 0.586 ±0.077 | sens 0.577 | spec 0.596 | AUC 0.606
+  share of time in the air, alone            acc 0.752 ±0.064 | sens 0.752 | spec 0.753 | AUC 0.807
+  number of touches, alone                   acc 0.724 ±0.059 | sens 0.677 | spec 0.773 | AUC 0.799
+  air share + touches (no warm-up needed)    acc 0.770 ±0.071 | sens 0.730 | spec 0.812 | AUC 0.857
+  all three                                  acc 0.793 ±0.056 | sens 0.767 | spec 0.820 | AUC 0.881
+
+2. A device that does not slow everything equally (the shipped model: air share + touches)
+
+  same device                                    acc 0.749 | patients caught 0.686 | healthy wrongly flagged 0.184
+  everything 1.5x slower (uniform)               acc 0.749 | patients caught 0.686 | healthy wrongly flagged 0.184
+  on-screen time 1.5x slower, pauses unchanged   acc 0.745 | patients caught 0.570 | healthy wrongly flagged 0.071
+  on-screen time 2x slower, pauses unchanged     acc 0.707 | patients caught 0.457 | healthy wrongly flagged 0.031
+  pauses 1.5x longer, on-screen unchanged        acc 0.751 | patients caught 0.850 | healthy wrongly flagged 0.353
+  pauses 2x longer, on-screen unchanged          acc 0.701 | patients caught 0.895 | healthy wrongly flagged 0.502
+
+3. Slow and fast writers (by their time on the two practice tasks), shipped model, all test folds
+
+  slowest third  missed  37 of 148 patients (25%) | false alarms   9 of  26 healthy (35%)
+  middle third   missed  30 of  71 patients (42%) | false alarms  15 of 100 healthy (15%)
+  fastest third  missed  17 of  48 patients (35%) | false alarms  23 of 129 healthy (18%)

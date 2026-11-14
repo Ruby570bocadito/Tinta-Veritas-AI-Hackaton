@@ -11,8 +11,8 @@ import {
   metrics,
   predict,
   predictCloser,
-  reference,
-  slowdown,
+  airShare,
+  typical,
   verdict,
   EXTRA_IDS,
   TASK_IDS,
@@ -24,21 +24,21 @@ import { canSpeak, say } from './lib/voice'
 
 type Task = { id: number; pose: Mood; guide?: Guide; picture?: string }
 
-// Five of the 25 tasks of the DARWIN protocol (numbers are the original task numbers).
-// 2 and 3 are warm-ups that measure the person's own pace; 5, 9 and 23 are scored against it.
+// Tasks from the DARWIN protocol (numbers are the original task numbers).
+// 2 and 3 are practice, to get used to the screen: they are not scored. 5, 9 and 16 are scored.
 const TASKS: Task[] = [
   { id: 2, pose: 'task-warmup', guide: 'hline' },
   { id: 3, pose: 'task-lines', guide: 'vline' },
   { id: 5, pose: 'task-circle', guide: 'circle' },
   { id: 9, pose: 'task-loops' },
-  { id: 23, pose: 'task-phone' },
+  { id: 16, pose: 'task-reverse' },
 ]
 
-// Three more tasks (15, 18 and 22 of the original protocol), asked only when the short check is unsure.
+// Three more tasks (6, 22 and 23 of the original protocol), asked only when the short check is unsure.
 const EXTRA: Task[] = [
-  { id: 15, pose: 'task-reverse' },
-  { id: 18, pose: 'watching', picture: 'obj-chair' },
-  { id: 22, pose: 'task-copy' },
+  { id: 6, pose: 'task-copy' },
+  { id: 22, pose: 'watching' },
+  { id: 23, pose: 'task-phone' },
 ]
 
 const GUIDE_POSES: Mood[] = ['onb-pauses', 'onb-yourself', 'onb-private']
@@ -50,8 +50,6 @@ const study = params.has('study')
 // For demos: ?closer always shows the closer look, whatever the first score is.
 const forceCloser = params.has('closer')
 const isWrong = (e: (typeof examples)[number]) => e.p >= 0.5 !== (e.label === 'patient')
-const warmupPace = (byTask: Record<number, Measures>) =>
-  Math.exp(WARMUP_IDS.reduce((s, t) => s + Math.log(byTask[t].total_time), 0) / WARMUP_IDS.length)
 
 type Screen =
   | { name: 'intro' }
@@ -116,7 +114,7 @@ export default function App() {
   /** Finish the check: remember the score on this phone and show the result. */
   const finish = (withCloser: boolean) => {
     const { p, second } = ownAnswer(withCloser)
-    setHistory(addToHistory({ t: Date.now(), score: Math.round(p * 100), verdict: verdict(p), closer: Boolean(second) }))
+    setHistory(addToHistory({ t: Date.now(), score: Math.round(p * 100), verdict: second?.split ? 'unsure' : verdict(p), closer: Boolean(second) }))
     setScreen({ name: 'result' })
   }
 
@@ -437,7 +435,7 @@ export default function App() {
     ;({ byTask, first, second } = ownAnswer(closer))
   }
   const p = second ? second.p : first
-  const kind = verdict(p)
+  const kind: Verdict = second?.split ? 'unsure' : verdict(p)
   const v = t.verdicts[kind]
   const score = Math.round(p * 100)
   const shown = second ? [...TASKS, ...EXTRA] : TASKS
@@ -448,11 +446,11 @@ export default function App() {
       if (isWrong(examples[i])) return setExample(i)
     }
   }
-  const whyWrong = () => {
-    if (ex!.label !== 'patient') return t.why.falseAlarm
-    const pace = warmupPace(byTask)
-    return pace > 1.5 * reference.healthyWarmupMs ? t.why.slowAll(seconds(pace), seconds(reference.healthyWarmupMs)) : t.why.fastPatient
-  }
+  const whyWrong = () => (ex!.label === 'patient' ? t.why.fastPatient : t.why.falseAlarm)
+  // Averages over the three scored tasks, for the note in plain words.
+  const scored = TASK_IDS.map((id) => byTask[id])
+  const meanAir = Math.round((100 * scored.reduce((s, m) => s + airShare(m), 0)) / scored.length)
+  const meanTouches = Math.round(scored.reduce((s, m) => s + m.num_of_pendown, 0) / scored.length)
   const studyLine = JSON.stringify({ age, lang, score, tasks: byTask })
   const today = new Date().toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'long', year: 'numeric' })
   return (
@@ -478,6 +476,7 @@ export default function App() {
               </li>
             ))}
           </ul>
+          {second.split && <p className="why">{t.result.split}</p>}
         </div>
       )}
       <div className="meter" role="img" aria-label={`${score}/100`}>
@@ -518,7 +517,6 @@ export default function App() {
           <thead>
             <tr>
               <th>{t.result.colTask}</th>
-              <th>{t.result.colSlow}</th>
               <th>{t.result.colAir}</th>
               <th>{t.result.colTouches}</th>
             </tr>
@@ -529,8 +527,7 @@ export default function App() {
               .map((task) => (
                 <tr key={task.id}>
                   <td>{t.tasks[task.id].title}</td>
-                  <td>×{slowdown(byTask, task.id).toFixed(1)}</td>
-                  <td>{Math.round((100 * byTask[task.id].air_time) / Math.max(byTask[task.id].total_time, 1))}%</td>
+                  <td>{Math.round(100 * airShare(byTask[task.id]))}%</td>
                   <td>{byTask[task.id].num_of_pendown}</td>
                 </tr>
               ))}
@@ -551,14 +548,7 @@ export default function App() {
         <section className="honest note">
           <h2>{t.note.title}</h2>
           <p>{t.note.line(today, v.title.toLowerCase(), score, Boolean(second))}</p>
-          <p>
-            {t.note.pace(
-              seconds(warmupPace(byTask)),
-              slowdown(byTask, 5).toFixed(1),
-              slowdown(byTask, 9).toFixed(1),
-              slowdown(byTask, 23).toFixed(1),
-            )}
-          </p>
+          <p>{t.note.detail(meanAir, Math.round(100 * typical.air), meanTouches, Math.round(typical.touches))}</p>
           <p>{t.note.about}</p>
           <button className="ghost noprint" onClick={() => window.print()}>
             {t.note.print}
@@ -593,6 +583,7 @@ export default function App() {
           <p>{t.honest.short(metrics['1.0'].model, metrics['1.0'].stopwatch, counts.train, counts.test)}</p>
           <p>{t.honest.closer(metrics.adaptive, counts.test)}</p>
           <p>{t.honest.device(metrics['1.5'].stopwatch, metrics['1.5'].model)}</p>
+          <p>{t.honest.uneven(metrics.pauses2, metrics.screen2)}</p>
           <p>{t.honest.limits}</p>
         </section>
       </details>

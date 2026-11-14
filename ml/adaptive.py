@@ -1,6 +1,7 @@
 """The adaptive test: a short check first, a closer look only when the short check is unsure.
 
-Stage 1: 2 warm-ups + 3 scored tasks, logistic regression.
+Stage 1: 3 scored tasks, logistic regression on two measures per task
+         (share of time in the air, number of touches). Two practice tasks come first; they are not scored.
 Stage 2 (only if stage 1 lands in the grey zone 35-65): 3 more tasks, and a blend of three models
          (logistic regression, RBF support vector machine, random forest) on all 6 tasks.
 
@@ -21,11 +22,12 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-from device_shift import HARD, logit, pick, relative
+from device_shift import HARD, logit, pick, shape
 
 warnings.filterwarnings("ignore")
 DATA = Path(__file__).resolve().parent.parent / "data" / "darwin" / "data.csv"
 LO, HI = 0.35, 0.65
+SPLIT = 0.5  # if the three models disagree by more than this, the answer is "I can't tell"
 INNER = StratifiedKFold(n_splits=4, shuffle=True, random_state=0)
 
 
@@ -69,6 +71,12 @@ def blend(models, X):
     return np.mean([m.predict_proba(X)[:, 1] for m in models], axis=0)
 
 
+def disagreement(models, X):
+    """Gap between the most and the least worried of the three models."""
+    votes = np.array([m.predict_proba(X)[:, 1] for m in models])
+    return votes.max(axis=0) - votes.min(axis=0)
+
+
 def main():
     df = pd.read_csv(DATA)
     y = (df["class"] == "P").astype(int).values
@@ -78,10 +86,10 @@ def main():
 
     for fold, (tr, te) in enumerate(outer.split(df, y), 1):
         dtr, dte = df.iloc[tr], df.iloc[te]
-        order = pick(dtr, y[tr], 6, logit, relative, HARD)
-        p1 = stage1().fit(relative(dtr, order[:3]), y[tr]).predict_proba(relative(dte, order[:3]))[:, 1]
-        members = [m.fit(relative(dtr, order), y[tr]) for m in stage2()]
-        p2 = blend(members, relative(dte, order))
+        order = pick(dtr, y[tr], 6, logit, shape, HARD)
+        p1 = stage1().fit(shape(dtr, order[:3]), y[tr]).predict_proba(shape(dte, order[:3]))[:, 1]
+        members = [m.fit(shape(dtr, order), y[tr]) for m in stage2()]
+        p2 = blend(members, shape(dte, order))
         grey = (p1 > LO) & (p1 < HI)
         final = np.where(grey, p2, p1)
         for name, p in (("short only (3 tasks)", p1), ("long only (6 tasks, blend)", p2), ("adaptive", final)):
@@ -89,7 +97,8 @@ def main():
             rows[name].append(((pred == y[te]).mean(), pred[y[te] == 1].mean(), 1 - pred[y[te] == 0].mean(),
                                roc_auc_score(y[te], p)))
         escalated.append(grey.mean())
-        unsure = (final > LO) & (final < HI)
+        # Unsure if the final score is in the grey zone, or if the three models pull far apart.
+        unsure = ((final > LO) & (final < HI)) | (grey & (disagreement(members, shape(dte, order)) > SPLIT))
         still_unsure.append(unsure.mean())
         decided_acc.append((((final >= 0.5).astype(int) == y[te])[~unsure]).mean())
         print(f"fold {fold}/20 done", flush=True)

@@ -62,8 +62,31 @@ def few_tasks():
     fig.savefig(OUT / "few-tasks.png", dpi=160)
 
 
+def what_breaks():
+    """Where the shipped model holds and where it breaks, from the saved ablation output."""
+    text = (HERE / "results" / "8_ablation.txt").read_text(encoding="utf-8")
+    block = text.split("2. A device")[1].split("3. Slow")[0]
+    rows = re.findall(r"^  (.+?)\s+acc [\d.]+ \| patients caught ([\d.]+) \| healthy wrongly flagged ([\d.]+)", block, re.M)
+    labels = [r[0].strip() for r in rows][::-1]
+    caught = [100 * float(r[1]) for r in rows][::-1]
+    flagged = [100 * float(r[2]) for r in rows][::-1]
+    fig, axes = plt.subplots(1, 2, figsize=(10, 3.8), sharey=True)
+    for ax, vals, title, colour in ((axes[0], caught, "Patients caught (%)", INK),
+                                    (axes[1], flagged, "Healthy wrongly flagged (%)", AIR)):
+        ax.barh(labels, vals, color=colour, height=0.6)
+        for i, v in enumerate(vals):
+            ax.text(v + 1.5, i, f"{v:.0f}", va="center", fontsize=11)
+        ax.set_xlim(0, 100)
+        ax.set_title(title, loc="left", fontweight="bold")
+    fig.suptitle("Overall speed cancels out. A device that changes pauses and strokes differently does not.",
+                 x=0.01, ha="left", fontsize=13)
+    fig.tight_layout()
+    fig.savefig(OUT / "what-breaks.png", dpi=160)
+
+
 if __name__ == "__main__":
     OUT.mkdir(exist_ok=True)
     device_shift()
     few_tasks()
+    what_breaks()
     print("wrote", [p.name for p in OUT.glob("*.png")])

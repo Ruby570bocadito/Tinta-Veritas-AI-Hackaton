@@ -51,7 +51,6 @@ export type Strings = {
     whatNow: string
     measurements: string
     colTask: string
-    colSlow: string
     colAir: string
     colTouches: string
     nextCase: string
@@ -59,14 +58,15 @@ export type Strings = {
     votesUnsure: (s: number) => string
     votesDemo: (s: number) => string
     models: string[]
+    split: string
     restart: string
     home: string
   }
-  why: { slowAll: (own: string, usual: string) => string; fastPatient: string; falseAlarm: string }
+  why: { fastPatient: string; falseAlarm: string }
   note: {
     title: string
     line: (date: string, verdict: string, score: number, closer: boolean) => string
-    pace: (pace: string, circle: string, loops: string, phone: string) => string
+    detail: (air: number, usualAir: number, touches: number, usualTouches: number) => string
     about: string
     print: string
   }
@@ -84,6 +84,7 @@ export type Strings = {
     short: (m: Record<string, number>, s: Record<string, number>, train: number, test: number) => string
     closer: (a: Record<string, number>, test: number) => string
     device: (s: Record<string, number>, m: Record<string, number>) => string
+    uneven: (pauses: Record<string, number>, screen: Record<string, number>) => string
     limits: string
   }
   study: { title: string; body: string; age: string; choose: string; bands: string[]; copy: string; copied: string }
@@ -99,7 +100,7 @@ const en: Strings = {
   home: {
     bubble: "Hi, I'm Tinta. Lend me your finger for two minutes?",
     title: 'How you write says more than what you write.',
-    lead: "A two-minute writing check for early signs of Alzheimer's, on the phone you already have. Built on data from 174 people, 89 of them living with the disease.",
+    lead: "A two-minute writing check on the phone you already have. It looks for a pattern found in people with Alzheimer's, in a study of 174 people.",
     start: 'Start',
     cases: 'See real cases from the study',
     ask: 'Ask Tinta',
@@ -116,8 +117,8 @@ const en: Strings = {
         body: 'Between one stroke and the next, your finger leaves the screen for a moment. Those tiny pauses grow when the mind has to work harder. Paper hides them. I can time them.',
       },
       {
-        title: 'I compare you with yourself',
-        body: 'Some people write fast, some slowly, and every phone is different. So I start with two easy warm-ups to learn your own pace, and measure the harder tasks against it. Not against a clock.',
+        title: 'I look at where your time goes',
+        body: 'Some people write fast, some slowly, and every phone is different. So I do not time how fast you are. I look at how much of each task your finger spends in the air, and how often you lift it.',
       },
       {
         title: 'What you write stays here',
@@ -137,8 +138,10 @@ const en: Strings = {
     begin: 'Begin',
   },
   tasks: {
-    2: { title: 'Warm-up', instruction: 'Join the two dots with a line, back and forth four times, without lifting your finger.' },
-    3: { title: 'Warm-up', instruction: 'Now up and down: join the two dots four times, without lifting your finger.' },
+    2: { title: 'Practice', instruction: 'Join the two dots with a line, back and forth four times, without lifting your finger.' },
+    3: { title: 'Practice', instruction: 'Now up and down: join the two dots four times, without lifting your finger.' },
+    16: { title: 'Backwards', instruction: 'Copy this word backwards, starting from its last letter.', prompt: 'house' },
+    6: { title: 'Letters', instruction: 'Copy these three letters.', prompt: 'l  m  p' },
     5: { title: 'Circle', instruction: 'Trace over the circle four times in a row, without lifting your finger.' },
     9: { title: 'Loops', instruction: 'Write "le" four times in joined-up writing, in one smooth movement.', prompt: 'le le le le' },
     23: { title: 'Phone number', instruction: 'Tap "Listen", then write the phone number you hear.', speak: '3 4 7. 5 9 2. 0 1 6 8' },
@@ -165,8 +168,8 @@ const en: Strings = {
     screen: 'On the screen',
     touches: 'Touches',
     cheers: [
-      'Lovely. That was the first warm-up.',
-      'Warm-ups done. Now the real ones.',
+      'Lovely. That was just practice.',
+      'Practice done. Now the real ones.',
       'Nice circles! Two to go.',
       'Almost there. One more.',
       'That is all five. Thank you!',
@@ -184,7 +187,7 @@ const en: Strings = {
   verdicts: {
     typical: {
       title: 'Within the usual pattern',
-      body: 'Compared with your own warm-up pace, the harder tasks slowed you down about as much as the healthy group in the study.',
+      body: 'Your finger spent about as much time in the air, and lifted about as often, as the healthy group in the study.',
     },
     unsure: {
       title: "I can't tell from this",
@@ -192,11 +195,11 @@ const en: Strings = {
     },
     mention: {
       title: 'Worth mentioning to a doctor',
-      body: 'Compared with your own warm-up pace, the harder tasks slowed you down more like the patient group in the study. This is not a diagnosis.',
+      body: 'Your finger spent more time in the air, or lifted more often, in a way that looks more like the patient group in the study. This is not a diagnosis.',
     },
   },
   nextSteps: {
-    typical: ['There is nothing you need to do today.', 'Come back in a few months: the most useful comparison is you against you.'],
+    typical: ['This does not rule anything out: Tinta misses about three patients in ten.', 'If you are worried about someone, see a doctor anyway.', 'You can come back another day and compare with today.'],
     unsure: ['One unclear result means nothing on its own.', 'Try again another day, rested and without hurry.'],
     mention: [
       'Do not worry about a single result: tiredness or a new phone can cause it.',
@@ -215,7 +218,6 @@ const en: Strings = {
     whatNow: 'What now?',
     measurements: 'See the measurements',
     colTask: 'Task',
-    colSlow: 'Slower than own warm-up',
     colAir: 'In the air',
     colTouches: 'Touches',
     nextCase: 'Next case',
@@ -223,21 +225,20 @@ const en: Strings = {
     votesUnsure: (s) => `The short check was unsure (${s}/100), so three models looked at all six tasks:`,
     votesDemo: (s) => `Demo mode: the short check was clear (${s}/100), but here is the closer look anyway:`,
     models: ['Straight-line model', 'Nearest-pattern model', 'Forest of small trees'],
+    split: 'My three models disagree a lot about this one. When that happens I say "I can\'t tell" instead of picking a side.',
     restart: 'Start again',
     home: 'Back to the start',
   },
   why: {
-    slowAll: (own, usual) =>
-      `This patient was slow on the warm-ups too (${own} against ${usual} for a typical healthy person). Tinta compares people with their own pace, so someone who is slow at everything looks "consistent". That is the price of not depending on the device.`,
-    fastPatient: 'This patient wrote the scored tasks at a healthy pace. Timing cannot see everything: other tasks of the full study might have shown it.',
-    falseAlarm: 'This healthy person slowed down a lot on the harder tasks, more than most healthy people. A hesitation, a distraction or an unfamiliar task looks the same as a cognitive pause to Tinta.',
+    fastPatient: 'This patient wrote these tasks fluently, with few lifts and short pauses, just like a healthy person. Timing cannot see everything: other tasks of the full study might have shown it.',
+    falseAlarm: 'This healthy person lifted the pen often and paused for a long time. A hesitation, a distraction, or simply a careful way of writing looks the same as a cognitive pause to Tinta.',
   },
   note: {
     title: 'Note for the doctor',
     line: (date, verdict, score, closer) =>
       `${date}. A short writing check done at home on a phone, with a finger. Result: ${verdict} (score ${score}/100${closer ? ', after a closer look with three extra tasks' : ''}).`,
-    pace: (pace, circle, loops, phone) =>
-      `Warm-up pace: ${pace} per task. Against that pace, the circle took ×${circle}, the loops ×${loops} and the dictated phone number ×${phone}.`,
+    detail: (air, usualAir, touches, usualTouches) =>
+      `In the scored tasks the finger was off the screen ${air}% of the time (healthy people in the study: about ${usualAir}%) and touched down ${touches} times per task (about ${usualTouches}).`,
     about: 'Tinta is a student prototype trained on the public DARWIN dataset (174 people). It is not a medical device and has not been validated with patients on phones. It is meant to start a conversation.',
     print: 'Print or save as PDF',
   },
@@ -245,7 +246,7 @@ const en: Strings = {
     title: 'You against you',
     first: 'This is your first check on this phone. Come back another day and your line will start to grow.',
     many: (n, last) => `Check number ${n} on this phone. Last time you scored ${last}.`,
-    explain: 'One check says little. A line that stays flat, or one that climbs over the months, says much more.',
+    explain: 'One check says little. We have not measured how much a score moves from one day to the next, so read small changes with care.',
     clear: 'Forget my history',
     clearConfirm: 'Delete all your past results from this phone?',
   },
@@ -253,12 +254,14 @@ const en: Strings = {
     summary: 'How sure can you be? The honest numbers',
     title: 'How well does it work?',
     short: (m, s, train, test) =>
-      `Trained on ${train} people, checked on ${test} it never saw (${m.patients} patients, ${m.healthy} healthy). With the short check alone, Tinta missed ${m.missed} patients and raised ${m.false_alarms} false alarms. A plain stopwatch rule missed ${s.missed} and raised ${s.false_alarms}: on the study's own tablet, the stopwatch is slightly better.`,
+      `Trained on ${train} people, checked on ${test} it never saw (${m.patients} patients, ${m.healthy} healthy). With the short check alone, Tinta missed ${m.missed} patients and raised ${m.false_alarms} false alarms. A plain stopwatch rule missed ${s.missed} and raised ${s.false_alarms}: on the study's own tablet, a stopwatch is about as good.`,
     closer: (a, test) =>
       `When the short check is unsure, Tinta asks for three more tasks and averages three models. With that closer look (${a.closer_look} of the ${test} needed it), she missed ${a.missed} patients and raised ${a.false_alarms} false alarm${a.false_alarms === 1 ? '' : 's'}, and still said "I can't tell" for ${a.still_unsure}.`,
     device: (s, m) =>
-      `But a phone is not that tablet. If a device makes everyone 1.5 times slower, the stopwatch raises ${s.false_alarms} false alarms out of ${s.healthy} healthy people. Tinta still raises ${m.false_alarms}, because it compares you with your own warm-up, not with a clock.`,
-    limits: 'Limits: the study used a pen on a tablet, in Italian, and does not publish age or sex, so we cannot check that Tinta works equally well across groups. We have not tested it with patients on a phone. Treat a result as a reason to talk to a doctor, never as an answer.',
+      `But a phone is not that tablet. If a device makes everyone 1.5 times slower, the stopwatch raises ${s.false_alarms} false alarms out of ${s.healthy} healthy people. Tinta still raises ${m.false_alarms}: her two measures are a share and a count, so overall speed cancels out. That is arithmetic, not a discovery.`,
+    uneven: (pauses, screen) =>
+      `The real risk is a device that changes pauses and strokes by different amounts. If only the pauses doubled, Tinta would wrongly flag ${pauses.false_alarms} of ${pauses.healthy} healthy people. If only the strokes took twice as long, she would miss ${screen.missed} of ${screen.patients} patients. Only data from real phones can tell which happens.`,
+    limits: 'Limits: the study compared people already diagnosed with healthy people, half and half, using a pen on a tablet, in Italian. In real life far fewer people have the disease, so most "worth mentioning" results would be false alarms. Tinta raises more false alarms for slow writers and misses more patients among fast ones. The study does not publish age or sex, so we cannot check those groups. It has not been tested with patients on a phone. Treat a result as a reason to talk to a doctor, never as an answer.',
   },
   study: {
     title: 'Study mode',
@@ -278,8 +281,8 @@ const en: Strings = {
       {
         q: 'What exactly do you measure?',
         a: [
-          'Four simple things in each task: how long your finger is on the screen, how long it is off the screen between strokes, how long the whole task takes, and how many times you touch down.',
-          'I never look at what you wrote or how pretty it is. Only at the timing.',
+          'Two things in each task: what share of the time your finger is off the screen, and how many times you touch down.',
+          'I do not time how fast you are, and I never look at what you wrote or how pretty it is.',
         ],
       },
       {
@@ -320,14 +323,14 @@ const en: Strings = {
       {
         q: 'You said "worth mentioning to a doctor". Do I have Alzheimer\'s?',
         a: [
-          'No, I cannot know that. I only saw that the harder tasks slowed you down more than usual. Tiredness, nerves, a small screen, poor eyesight or sore hands can do the same.',
-          'Out of 17 healthy people I was tested on, I raised a false alarm for a few. So take it as a nudge to mention it at your next appointment, and try again another day.',
+          'No, I cannot know that. I only saw that your finger paused or lifted more than usual. Tiredness, nerves, a small screen, poor eyesight or sore hands can do the same.',
+          'About one healthy person in five gets a false alarm from me. So take it as a nudge to mention it at your next appointment, and try again another day.',
         ],
       },
       {
         q: 'How often are you right?',
         a: [
-          'About 8 times out of 10 on people I had never seen, in the study data. That means I am wrong about 2 times out of 10, in both directions.',
+          'About 3 times out of 4 on people I had never seen, in the study data. So I am wrong about 1 time in 4, in both directions. A simple stopwatch does a little better on the study\'s own tablet.',
           'And that study used a pen on a tablet. Nobody has tested me yet with patients on a phone. I say so on every result.',
         ],
       },
@@ -352,7 +355,7 @@ const es: Strings = {
   home: {
     bubble: 'Hola, soy Tinta. ¿Me prestas un dedo dos minutos?',
     title: 'Cómo escribes dice más que lo que escribes.',
-    lead: 'Una prueba de escritura de dos minutos para señales tempranas de alzhéimer, en el móvil que ya tienes. Hecha con datos de 174 personas, 89 de ellas con la enfermedad.',
+    lead: 'Una prueba de escritura de dos minutos en el móvil que ya tienes. Busca un patrón que se vio en personas con alzhéimer, en un estudio con 174 personas.',
     start: 'Empezar',
     cases: 'Ver casos reales del estudio',
     ask: 'Pregunta a Tinta',
@@ -369,8 +372,8 @@ const es: Strings = {
         body: 'Entre un trazo y el siguiente, tu dedo se levanta un momento. Esas pausas pequeñas crecen cuando la mente tiene que esforzarse más. El papel las esconde. Yo puedo medirlas.',
       },
       {
-        title: 'Te comparo contigo',
-        body: 'Hay quien escribe rápido y quien escribe despacio, y cada móvil es distinto. Por eso empiezo con dos ejercicios fáciles para conocer tu ritmo, y mido las tareas difíciles contra él. No contra un reloj.',
+        title: 'Miro en qué se te va el tiempo',
+        body: 'Hay quien escribe rápido y quien escribe despacio, y cada móvil es distinto. Por eso no mido lo rápido que eres. Miro qué parte de cada tarea pasa tu dedo en el aire y cuántas veces lo levantas.',
       },
       {
         title: 'Lo que escribes se queda aquí',
@@ -390,8 +393,10 @@ const es: Strings = {
     begin: 'Vamos',
   },
   tasks: {
-    2: { title: 'Calentamiento', instruction: 'Une los dos puntos con una línea, ida y vuelta cuatro veces, sin levantar el dedo.' },
-    3: { title: 'Calentamiento', instruction: 'Ahora de arriba abajo: une los dos puntos cuatro veces, sin levantar el dedo.' },
+    2: { title: 'Práctica', instruction: 'Une los dos puntos con una línea, ida y vuelta cuatro veces, sin levantar el dedo.' },
+    3: { title: 'Práctica', instruction: 'Ahora de arriba abajo: une los dos puntos cuatro veces, sin levantar el dedo.' },
+    16: { title: 'Al revés', instruction: 'Copia esta palabra al revés, empezando por la última letra.', prompt: 'casa' },
+    6: { title: 'Letras', instruction: 'Copia estas tres letras.', prompt: 'l  m  p' },
     5: { title: 'Círculo', instruction: 'Repasa el círculo cuatro veces seguidas, sin levantar el dedo.' },
     9: { title: 'Bucles', instruction: 'Escribe «le» cuatro veces con letra ligada, de un tirón.', prompt: 'le le le le' },
     23: { title: 'Teléfono', instruction: 'Pulsa «Escuchar» y escribe el número de teléfono que oigas.', speak: '3, 4, 7. 5, 9, 2. 0, 1, 6, 8' },
@@ -418,8 +423,8 @@ const es: Strings = {
     screen: 'En la pantalla',
     touches: 'Toques',
     cheers: [
-      'Muy bien. Ese era el primer calentamiento.',
-      'Calentamiento hecho. Ahora las de verdad.',
+      'Muy bien. Eso era solo para practicar.',
+      'Práctica hecha. Ahora las de verdad.',
       '¡Bonitos círculos! Quedan dos.',
       'Ya casi. Una más.',
       'Ya están las cinco. ¡Gracias!',
@@ -437,7 +442,7 @@ const es: Strings = {
   verdicts: {
     typical: {
       title: 'Dentro de lo habitual',
-      body: 'Comparadas con tu propio ritmo, las tareas difíciles te frenaron más o menos lo mismo que al grupo sano del estudio.',
+      body: 'Tu dedo pasó en el aire más o menos el mismo tiempo, y se levantó más o menos las mismas veces, que el grupo sano del estudio.',
     },
     unsure: {
       title: 'Con esto no lo sé',
@@ -445,11 +450,11 @@ const es: Strings = {
     },
     mention: {
       title: 'Coméntalo con tu médico',
-      body: 'Comparadas con tu propio ritmo, las tareas difíciles te frenaron de una forma más parecida al grupo de pacientes del estudio. Esto no es un diagnóstico.',
+      body: 'Tu dedo pasó más tiempo en el aire, o se levantó más veces, de una forma más parecida al grupo de pacientes del estudio. Esto no es un diagnóstico.',
     },
   },
   nextSteps: {
-    typical: ['Hoy no tienes que hacer nada.', 'Vuelve dentro de unos meses: la comparación más útil es contigo.'],
+    typical: ['Esto no descarta nada: a Tinta se le escapan unos tres pacientes de cada diez.', 'Si alguien te preocupa, ve al médico igualmente.', 'Puedes volver otro día y comparar con hoy.'],
     unsure: ['Un resultado dudoso, él solo, no significa nada.', 'Prueba otro día, con calma y sin prisa.'],
     mention: [
       'No te preocupes por un solo resultado: el cansancio o un móvil nuevo pueden causarlo.',
@@ -468,7 +473,6 @@ const es: Strings = {
     whatNow: '¿Y ahora qué?',
     measurements: 'Ver las medidas',
     colTask: 'Tarea',
-    colSlow: 'Más lento que tu ritmo',
     colAir: 'En el aire',
     colTouches: 'Toques',
     nextCase: 'Otro caso',
@@ -476,21 +480,20 @@ const es: Strings = {
     votesUnsure: (s) => `La prueba corta no lo tenía claro (${s}/100), así que tres modelos miraron las seis tareas:`,
     votesDemo: (s) => `Modo demostración: la prueba corta era clara (${s}/100), pero aquí va la segunda mirada:`,
     models: ['Modelo de línea recta', 'Modelo de parecidos', 'Bosque de arbolitos'],
+    split: 'Mis tres modelos no se ponen de acuerdo con este caso. Cuando pasa eso, digo «no lo sé» en vez de elegir un bando.',
     restart: 'Empezar otra vez',
     home: 'Volver al principio',
   },
   why: {
-    slowAll: (own, usual) =>
-      `Este paciente también fue lento en el calentamiento (${own} frente a ${usual} de una persona sana típica). Tinta compara a cada uno con su propio ritmo, así que alguien lento en todo parece «constante». Es el precio de no depender del aparato.`,
-    fastPatient: 'Este paciente hizo las tareas puntuadas a un ritmo sano. El tiempo no lo ve todo: otras tareas del estudio completo quizá lo habrían mostrado.',
-    falseAlarm: 'Esta persona sana se frenó mucho en las tareas difíciles, más que la mayoría. Una duda, un despiste o una tarea poco conocida se parecen, para Tinta, a una pausa cognitiva.',
+    fastPatient: 'Este paciente escribió estas tareas con soltura, levantando poco el lápiz y con pausas cortas, igual que una persona sana. El tiempo no lo ve todo: otras tareas del estudio completo quizá lo habrían mostrado.',
+    falseAlarm: 'Esta persona sana levantó mucho el lápiz e hizo pausas largas. Una duda, un despiste o simplemente una forma cuidadosa de escribir se parecen, para Tinta, a una pausa cognitiva.',
   },
   note: {
     title: 'Nota para el médico',
     line: (date, verdict, score, closer) =>
       `${date}. Prueba corta de escritura hecha en casa con el dedo, en un móvil. Resultado: ${verdict} (nota ${score}/100${closer ? ', tras una segunda mirada con tres tareas más' : ''}).`,
-    pace: (pace, circle, loops, phone) =>
-      `Ritmo de calentamiento: ${pace} por tarea. Respecto a ese ritmo, el círculo llevó ×${circle}, los bucles ×${loops} y el teléfono dictado ×${phone}.`,
+    detail: (air, usualAir, touches, usualTouches) =>
+      `En las tareas puntuadas, el dedo estuvo sin tocar la pantalla el ${air} % del tiempo (personas sanas del estudio: alrededor del ${usualAir} %) y se apoyó ${touches} veces por tarea (alrededor de ${usualTouches}).`,
     about: 'Tinta es un prototipo de estudiante entrenado con el conjunto público DARWIN (174 personas). No es un producto sanitario y no se ha validado con pacientes en móviles. Sirve para empezar una conversación.',
     print: 'Imprimir o guardar en PDF',
   },
@@ -498,7 +501,7 @@ const es: Strings = {
     title: 'Tú contra ti',
     first: 'Es tu primera prueba en este móvil. Vuelve otro día y tu línea empezará a crecer.',
     many: (n, last) => `Prueba número ${n} en este móvil. La última vez sacaste un ${last}.`,
-    explain: 'Una sola prueba dice poco. Una línea que se mantiene, o que sube con los meses, dice mucho más.',
+    explain: 'Una sola prueba dice poco. No hemos medido cuánto cambia la nota de un día para otro, así que no le des importancia a los cambios pequeños.',
     clear: 'Olvidar mi historial',
     clearConfirm: '¿Borrar todos tus resultados anteriores de este móvil?',
   },
@@ -506,12 +509,14 @@ const es: Strings = {
     summary: '¿Cuánto te puedes fiar? Los números, sin adornos',
     title: '¿Cómo de bien funciona?',
     short: (m, s, train, test) =>
-      `Entrenada con ${train} personas y comprobada con ${test} que nunca había visto (${m.patients} pacientes, ${m.healthy} sanas). Solo con la prueba corta, a Tinta se le escaparon ${m.missed} pacientes y dio ${m.false_alarms} falsas alarmas. Una regla de cronómetro falló con ${s.missed} y dio ${s.false_alarms}: en la tableta del estudio, el cronómetro es un poco mejor.`,
+      `Entrenada con ${train} personas y comprobada con ${test} que nunca había visto (${m.patients} pacientes, ${m.healthy} sanas). Solo con la prueba corta, a Tinta se le escaparon ${m.missed} pacientes y dio ${m.false_alarms} falsas alarmas. Una regla de cronómetro falló con ${s.missed} y dio ${s.false_alarms}: en la tableta del estudio, un cronómetro acierta más o menos lo mismo.`,
     closer: (a, test) =>
       `Cuando la prueba corta duda, Tinta pide tres tareas más y hace la media de tres modelos. Con esa segunda mirada (la necesitaron ${a.closer_look} de las ${test}), se le escaparon ${a.missed} pacientes, dio ${a.false_alarms} falsa${a.false_alarms === 1 ? '' : 's'} alarma${a.false_alarms === 1 ? '' : 's'} y siguió diciendo «no lo sé» en ${a.still_unsure}.`,
     device: (s, m) =>
-      `Pero un móvil no es esa tableta. Si un aparato hace a todo el mundo 1,5 veces más lento, el cronómetro da ${s.false_alarms} falsas alarmas entre ${s.healthy} personas sanas. Tinta sigue dando ${m.false_alarms}, porque te compara con tu propio calentamiento y no con un reloj.`,
-    limits: 'Límites: el estudio se hizo con lápiz sobre una tableta, en italiano, y no publica edad ni sexo, así que no podemos comprobar que Tinta funcione igual de bien en todos los grupos. No se ha probado con pacientes en un móvil. Toma el resultado como un motivo para hablar con un médico, nunca como una respuesta.',
+      `Pero un móvil no es esa tableta. Si un aparato hace a todo el mundo 1,5 veces más lento, el cronómetro da ${s.false_alarms} falsas alarmas entre ${s.healthy} personas sanas. Tinta sigue dando ${m.false_alarms}: sus dos medidas son una proporción y un recuento, así que la velocidad general no cuenta. Eso es aritmética, no un descubrimiento.`,
+    uneven: (pauses, screen) =>
+      `El riesgo de verdad es un aparato que cambie las pausas y los trazos en distinta medida. Si solo se duplicaran las pausas, Tinta marcaría por error a ${pauses.false_alarms} de ${pauses.healthy} personas sanas. Si solo los trazos tardaran el doble, se le escaparían ${screen.missed} de ${screen.patients} pacientes. Solo los datos de móviles de verdad pueden decir cuál ocurre.`,
+    limits: 'Límites: el estudio comparó a personas ya diagnosticadas con personas sanas, mitad y mitad, con lápiz sobre una tableta y en italiano. En la vida real hay muchas menos personas con la enfermedad, así que la mayoría de los «coméntalo» serían falsas alarmas. Tinta da más falsas alarmas a quien escribe despacio y se le escapan más pacientes entre quienes escriben rápido. El estudio no publica edad ni sexo, así que no podemos comprobar esos grupos. No se ha probado con pacientes en un móvil. Toma el resultado como un motivo para hablar con un médico, nunca como una respuesta.',
   },
   study: {
     title: 'Modo estudio',
@@ -531,8 +536,8 @@ const es: Strings = {
       {
         q: '¿Qué mides exactamente?',
         a: [
-          'Cuatro cosas sencillas en cada tarea: cuánto tiempo está tu dedo en la pantalla, cuánto está levantado entre trazo y trazo, cuánto dura la tarea entera y cuántas veces apoyas el dedo.',
-          'Nunca miro qué has escrito ni si queda bonito. Solo los tiempos.',
+          'Dos cosas en cada tarea: qué parte del tiempo está tu dedo sin tocar la pantalla y cuántas veces lo apoyas.',
+          'No mido lo rápido que eres, y nunca miro qué has escrito ni si queda bonito.',
         ],
       },
       {
@@ -573,14 +578,14 @@ const es: Strings = {
       {
         q: 'Me has dicho «coméntalo con tu médico». ¿Tengo alzhéimer?',
         a: [
-          'No, eso no puedo saberlo. Solo he visto que las tareas difíciles te frenaron más de lo habitual. El cansancio, los nervios, una pantalla pequeña, ver mal o tener las manos doloridas pueden hacer lo mismo.',
-          'De 17 personas sanas con las que me probaron, a unas pocas les di una falsa alarma. Tómalo como un empujón para comentarlo en tu próxima cita, y repítelo otro día.',
+          'No, eso no puedo saberlo. Solo he visto que tu dedo se paró o se levantó más de lo habitual. El cansancio, los nervios, una pantalla pequeña, ver mal o tener las manos doloridas pueden hacer lo mismo.',
+          'A una de cada cinco personas sanas le doy una falsa alarma. Tómalo como un empujón para comentarlo en tu próxima cita, y repítelo otro día.',
         ],
       },
       {
         q: '¿Cuántas veces aciertas?',
         a: [
-          'Unas 8 de cada 10 con personas que no había visto nunca, en los datos del estudio. O sea, me equivoco unas 2 de cada 10, en los dos sentidos.',
+          'Unas 3 de cada 4 con personas que no había visto nunca, en los datos del estudio. O sea, me equivoco 1 de cada 4, en los dos sentidos. Un simple cronómetro acierta un poco más en la tableta del estudio.',
           'Y ese estudio se hizo con lápiz y tableta. Nadie me ha probado todavía con pacientes en un móvil. Lo digo en cada resultado.',
         ],
       },
