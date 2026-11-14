@@ -566,6 +566,67 @@ textarea {
   margin-bottom: 0.8rem;
 }
 
+.link.left {
+  align-self: flex-start;
+  padding-left: 0;
+}
+
+.link.inline {
+  min-height: 0;
+  padding: 0 0.2rem;
+  font-size: 1.05rem;
+}
+
+.brandbar .link {
+  margin-left: auto;
+}
+
+.brandbar .tag + .link {
+  margin-left: 0.5rem;
+}
+
+.brandbar .tag {
+  margin-left: auto;
+}
+
+/* Ask Tinta: questions that unfold */
+.qa > summary {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.answer {
+  transform: none;
+}
+
+.sources {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.sources a {
+  color: var(--felt);
+}
+
+/* You against you */
+.history {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.history-label {
+  font-size: 11px;
+  fill: var(--soft);
+  font-family: inherit;
+}
+
 /* the object to name, pinned like a photo */
 .picture {
   align-self: center;

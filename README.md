@@ -29,6 +29,7 @@ Everything below is ours; we did not start from a suggested project.
 - **From 25 tasks to 5.** The original study needs 25 tasks on a professional tablet. We searched for the few that carry the signal.
 - **A model that survives a change of device.** Instead of timing people against a clock, Tinta times each task against the person's own warm-up pace.
 - **A test of that claim**, and of when it fails.
+- **Made for the people who would use it.** English and Spanish, a voice that reads every instruction, an animated replay of your "invisible ink", a private history on the phone ("you against you"), and "Ask Tinta": hand-checked answers about Alzheimer's and about what the app can and cannot tell you.
 - **An adaptive check.** Most people finish in five tasks; the unsure ones get three more and a second opinion from three models.
 
 ## How it works

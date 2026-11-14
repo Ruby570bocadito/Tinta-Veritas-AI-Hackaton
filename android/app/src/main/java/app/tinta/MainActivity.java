@@ -66,6 +66,13 @@ public class MainActivity extends Activity {
         public void speak(String text) {
             voice.speak(text, TextToSpeech.QUEUE_FLUSH, null, "tinta");
         }
+
+        /** Same, in the language of the screen (for example "es-ES"). */
+        @JavascriptInterface
+        public void speakIn(String text, String lang) {
+            voice.setLanguage(Locale.forLanguageTag(lang));
+            voice.speak(text, TextToSpeech.QUEUE_FLUSH, null, "tinta");
+        }
     }
 
     @Override

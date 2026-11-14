@@ -6,7 +6,7 @@ export type Guide = 'hline' | 'vline' | 'circle'
 type Props = {
   strokes: Stroke[]
   onChange?: (strokes: Stroke[]) => void // omit to make the canvas read-only
-  showInvisibleInk?: boolean
+  showInvisibleInk?: boolean // replay the writing and reveal the pauses in orange
   guide?: Guide
 }
 
@@ -14,8 +14,10 @@ const INK = '#1c2340'
 const AIR = '#e8622a'
 const GUIDE = '#d6c7a8'
 const CM = 37.8 // CSS pixels per centimetre
+const REPLAY_MS = [1400, 4200] // the replay is squeezed or stretched to last between these
 
-function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, guide?: Guide) {
+/** Draws the sheet. With `until`, only what had happened by that moment (used by the replay). */
+function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, guide?: Guide, until = Infinity) {
   const ctx = canvas.getContext('2d')!
   const ratio = window.devicePixelRatio || 1
   const { width, height } = canvas.getBoundingClientRect()
@@ -55,8 +57,9 @@ function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, 
   ctx.strokeStyle = INK
   ctx.fillStyle = INK
   ctx.lineWidth = 3
-  ctx.setLineDash([])
-  for (const s of strokes) {
+  for (const stroke of strokes) {
+    const s = until === Infinity ? stroke : stroke.filter((p) => p.t <= until)
+    if (s.length === 0) continue
     if (s.length === 1) {
       ctx.beginPath()
       ctx.arc(s[0].x, s[0].y, 1.5, 0, Math.PI * 2)
@@ -73,20 +76,23 @@ function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, 
   // A phone cannot see the finger in the air, so the path is a straight line (an honest guess);
   // the waiting time is measured, and sets the size of the circle.
   ctx.strokeStyle = AIR
+  ctx.fillStyle = AIR
   ctx.lineWidth = 2
   for (const g of gaps(strokes)) {
+    if (g.from.t > until) continue
+    const waited = Math.min(until, g.to.t) - g.from.t
+    ctx.globalAlpha = 0.25
+    ctx.beginPath()
+    ctx.arc(g.from.x, g.from.y, Math.min(40, 3 + Math.sqrt(waited) / 2.5), 0, Math.PI * 2)
+    ctx.fill()
+    ctx.globalAlpha = 1
+    if (until < g.to.t) continue
     ctx.setLineDash([5, 6])
     ctx.beginPath()
     ctx.moveTo(g.from.x, g.from.y)
     ctx.lineTo(g.to.x, g.to.y)
     ctx.stroke()
     ctx.setLineDash([])
-    ctx.globalAlpha = 0.25
-    ctx.fillStyle = AIR
-    ctx.beginPath()
-    ctx.arc(g.from.x, g.from.y, Math.min(40, 3 + Math.sqrt(g.ms) / 2.5), 0, Math.PI * 2)
-    ctx.fill()
-    ctx.globalAlpha = 1
   }
 }
 
@@ -98,10 +104,31 @@ export default function InkCanvas({ strokes, onChange, showInvisibleInk = false,
   useEffect(() => {
     live.current = strokes
     const canvas = ref.current!
-    const redraw = () => draw(canvas, live.current, showInvisibleInk, guide)
-    redraw()
-    window.addEventListener('resize', redraw)
-    return () => window.removeEventListener('resize', redraw)
+    const still = () => draw(canvas, live.current, showInvisibleInk, guide)
+    window.addEventListener('resize', still)
+
+    // Replay: the writing draws itself again and each pause swells in orange while it lasts.
+    const points = strokes.flat()
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let frame = 0
+    if (showInvisibleInk && points.length > 1 && !calm) {
+      const first = points[0].t
+      const total = points[points.length - 1].t - first
+      const length = Math.min(REPLAY_MS[1], Math.max(REPLAY_MS[0], total))
+      const started = performance.now()
+      const tick = (now: number) => {
+        const progress = Math.min(1, (now - started) / length)
+        draw(canvas, strokes, true, guide, first + progress * total)
+        if (progress < 1) frame = requestAnimationFrame(tick)
+      }
+      frame = requestAnimationFrame(tick)
+    } else {
+      still()
+    }
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', still)
+    }
   }, [strokes, showInvisibleInk, guide])
 
   const point = (e: React.PointerEvent) => {

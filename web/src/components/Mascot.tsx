@@ -19,6 +19,7 @@ export type Mood =
   | 'task-reverse'
   | 'task-copy'
   | 'closer-look'
+  | 'read'
 
 type Props = { mood?: Mood; size?: number; label?: string }
 
