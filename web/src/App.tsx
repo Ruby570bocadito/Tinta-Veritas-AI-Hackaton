@@ -49,7 +49,11 @@ const params = new URLSearchParams(location.search)
 const study = params.has('study')
 // For demos: ?closer always shows the closer look, whatever the first score is.
 const forceCloser = params.has('closer')
-const isWrong = (e: (typeof examples)[number]) => e.p >= 0.5 !== (e.label === 'patient')
+// A real case is judged by what the app would actually tell that person, not by a 50/50 cut.
+type Outcome = 'right' | 'wrong' | 'none'
+const outcome = (e: (typeof examples)[number]): Outcome =>
+  e.told === 'unsure' ? 'none' : (e.told === 'mention') === (e.label === 'patient') ? 'right' : 'wrong'
+const isWrong = (e: (typeof examples)[number]) => outcome(e) === 'wrong'
 
 type Screen =
   | { name: 'intro' }
@@ -439,18 +443,21 @@ export default function App() {
   const v = t.verdicts[kind]
   const score = Math.round(p * 100)
   const shown = second ? [...TASKS, ...EXTRA] : TASKS
-  const wrong = ex ? isWrong(ex) : false
+  const judged: Outcome | null = ex ? outcome(ex) : null
+  const wrong = judged === 'wrong'
   const nextWrong = () => {
     for (let k = 1; k <= examples.length; k++) {
       const i = ((example ?? -1) + k) % examples.length
       if (isWrong(examples[i])) return setExample(i)
     }
   }
-  const whyWrong = () => (ex!.label === 'patient' ? t.why.fastPatient : t.why.falseAlarm)
   // Averages over the three scored tasks, for the note in plain words.
   const scored = TASK_IDS.map((id) => byTask[id])
   const meanAir = Math.round((100 * scored.reduce((s, m) => s + airShare(m), 0)) / scored.length)
   const meanTouches = Math.round(scored.reduce((s, m) => s + m.num_of_pendown, 0) / scored.length)
+  const usual = [Math.round(100 * typical.air), Math.round(typical.touches)] as const
+  // Why a real case went wrong, from that person's own measures.
+  const whyWrong = () => (ex!.label === 'patient' ? t.why.missed : t.why.falseAlarm)(meanAir, usual[0], meanTouches, usual[1])
   const studyLine = JSON.stringify({ age, lang, score, tasks: byTask })
   const today = new Date().toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'long', year: 'numeric' })
   return (
@@ -463,7 +470,11 @@ export default function App() {
       </header>
       <h1 className={'verdict ' + kind}>{v.title}</h1>
       <p className="lead">{v.body}</p>
-      {ex && <p className={'badge ' + (wrong ? 'bad' : 'good')}>{wrong ? t.result.wrong : t.result.right}</p>}
+      {ex && (
+        <p className={'badge ' + (judged === 'wrong' ? 'bad' : judged === 'right' ? 'good' : 'none')}>
+          {judged === 'wrong' ? t.result.wrong : judged === 'right' ? t.result.right : t.result.noAnswer}
+        </p>
+      )}
       {ex && wrong && <p className="why">{whyWrong()}</p>}
       {second && (
         <div className="votes">
@@ -483,6 +494,7 @@ export default function App() {
         <div className="meter-pin" style={{ left: `${score}%` }} />
       </div>
       <p className="fine">{t.result.score(score)}</p>
+      <p className="fine caveat">{t.result.caveat}</p>
       {!ex && (
         <section className="honest steps">
           <h2>{t.result.whatNow}</h2>
@@ -548,7 +560,7 @@ export default function App() {
         <section className="honest note">
           <h2>{t.note.title}</h2>
           <p>{t.note.line(today, v.title.toLowerCase(), score, Boolean(second))}</p>
-          <p>{t.note.detail(meanAir, Math.round(100 * typical.air), meanTouches, Math.round(typical.touches))}</p>
+          <p>{t.note.detail(meanAir, usual[0], meanTouches, usual[1])}</p>
           <p>{t.note.about}</p>
           <button className="ghost noprint" onClick={() => window.print()}>
             {t.note.print}
@@ -582,6 +594,7 @@ export default function App() {
           <h2>{t.honest.title}</h2>
           <p>{t.honest.short(metrics['1.0'].model, metrics['1.0'].stopwatch, counts.train, counts.test)}</p>
           <p>{t.honest.closer(metrics.adaptive, counts.test)}</p>
+          <p>{t.honest.told(metrics.told.patients, metrics.told.healthy)}</p>
           <p>{t.honest.device(metrics['1.5'].stopwatch, metrics['1.5'].model)}</p>
           <p>{t.honest.uneven(metrics.pauses2, metrics.screen2)}</p>
           <p>{t.honest.limits}</p>

@@ -1,6 +1,7 @@
 stage 1 tasks: [16, 5, 9] | stage 2 adds: [6, 23, 22] | stopwatch tasks: [15, 23, 6]
 chosen settings: [{'logisticregression__C': 0.3}, {'svc__C': 10, 'svc__gamma': 0.01}, {'randomforestclassifier__max_depth': 5, 'randomforestclassifier__min_samples_leaf': 5}]
 largest difference between sklearn and the exported maths: 0.00000
+told (adaptive): {'patients': {'usual': 3, 'unsure': 1, 'mention': 14}, 'healthy': {'usual': 12, 'unsure': 2, 'mention': 3}} | short: {'patients': {'usual': 1, 'unsure': 7, 'mention': 10}, 'healthy': {'usual': 9, 'unsure': 7, 'mention': 1}}
 {
  "1.0": {
   "model": {
@@ -39,4 +40,4 @@ largest difference between sklearn and the exported maths: 0.00000
   "auc": 0.912
  }
 }
-wrote C:\Users\rby\Desktop\Veritas AI - Hackaton\tinta\web\src\model.json 122 KB
+wrote C:\Users\rby\Desktop\Veritas AI - Hackaton\tinta\web\src\model.json 123 KB

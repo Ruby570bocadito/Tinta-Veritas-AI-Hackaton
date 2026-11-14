@@ -329,6 +329,15 @@ select:focus-visible {
   background: var(--ok);
 }
 
+.badge.none {
+  background: var(--soft);
+}
+
+.caveat {
+  border-left: 4px solid var(--air);
+  padding-left: 0.6rem;
+}
+
 .badge.bad {
   background: var(--air-text);
 }

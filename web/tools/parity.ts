@@ -16,7 +16,7 @@ for (const e of examples) {
 console.log(`${examples.length} held-out people`)
 console.log(`short check: largest difference from Python ${worst1.toFixed(6)}`)
 console.log(`closer look: largest difference from Python ${worst2.toFixed(6)}`)
-if (worst1 > 1e-3 || worst2 > 1e-3) {
+if (worst1 > 1e-4 || worst2 > 1e-4) {
   console.error('The app does not reproduce the Python model.')
   process.exit(1)
 }

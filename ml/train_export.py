@@ -18,7 +18,7 @@ import pandas as pd
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold, train_test_split
 
-from adaptive import HI, LO, SPLIT, blend, disagreement, stage2
+from adaptive import HI, LO, SPLIT, blend, disagreement, stage2, told
 from ablation import reshape
 from device_shift import HARD, WARMUP, logit, pick, shape, slower
 from experiments import POOL, Stopwatch, stopwatch
@@ -132,11 +132,21 @@ def main():
         closer_look=int(grey.sum()),
         still_unsure=int((((final > LO) & (final < HI)) | (grey & (disagreement(members, X2) > SPLIT))).sum()))
     metrics["long"] = rates(y[te], p2)
+    # What the 35 held-out people are actually told by the app (three answers, not a 50/50 cut).
+    unsure = ((final > LO) & (final < HI)) | (grey & (disagreement(members, X2) > SPLIT))
+    said = told(final, unsure)
+    said_short = told(p1, grey)
+    metrics["told"] = {who: dict(zip(("usual", "unsure", "mention"), np.bincount(said[y[te] == label], minlength=3).tolist()))
+                       for label, who in ((1, "patients"), (0, "healthy"))}
+    metrics["told_short"] = {who: dict(zip(("usual", "unsure", "mention"), np.bincount(said_short[y[te] == label], minlength=3).tolist()))
+                             for label, who in ((1, "patients"), (0, "healthy"))}
+    print("told (adaptive):", metrics["told"], "| short:", metrics["told_short"])
     print(json.dumps({k: metrics[k] for k in ("1.0", "adaptive", "long")}, indent=1))
 
     needed = sorted(set(WARMUP + all_tasks))
     examples = [dict(id=str(dte.iloc[i]["ID"]), label="patient" if y[te][i] else "healthy",
                      p1=round(float(p1[i]), 4), p2=round(float(p2[i]), 4), p=round(float(final[i]), 4),
+                     told=("usual", "unsure", "mention")[int(said[i])],
                      measures={str(t): {m: float(dte.iloc[i][f"{m}{t}"]) for m in MEASURES} for t in needed})
                 for i in range(len(te))]
 

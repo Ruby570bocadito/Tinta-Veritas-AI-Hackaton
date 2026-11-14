@@ -47,6 +47,8 @@ export type Strings = {
     healthy: string
     right: string
     wrong: string
+    noAnswer: string
+    caveat: string
     score: (s: number) => string
     whatNow: string
     measurements: string
@@ -62,7 +64,7 @@ export type Strings = {
     restart: string
     home: string
   }
-  why: { fastPatient: string; falseAlarm: string }
+  why: { missed: (air: number, usualAir: number, touches: number, usualTouches: number) => string; falseAlarm: (air: number, usualAir: number, touches: number, usualTouches: number) => string }
   note: {
     title: string
     line: (date: string, verdict: string, score: number, closer: boolean) => string
@@ -82,6 +84,7 @@ export type Strings = {
     summary: string
     title: string
     short: (m: Record<string, number>, s: Record<string, number>, train: number, test: number) => string
+    told: (p: Record<string, number>, h: Record<string, number>) => string
     closer: (a: Record<string, number>, test: number) => string
     device: (s: Record<string, number>, m: Record<string, number>) => string
     uneven: (pauses: Record<string, number>, screen: Record<string, number>) => string
@@ -199,7 +202,7 @@ const en: Strings = {
     },
   },
   nextSteps: {
-    typical: ['This does not rule anything out: Tinta misses about three patients in ten.', 'If you are worried about someone, see a doctor anyway.', 'You can come back another day and compare with today.'],
+    typical: ['This does not rule anything out: about one patient in five gets this same answer.', 'If you are worried about someone, see a doctor anyway.', 'You can come back another day and compare with today.'],
     unsure: ['One unclear result means nothing on its own.', 'Try again another day, rested and without hurry.'],
     mention: [
       'Do not worry about a single result: tiredness or a new phone can cause it.',
@@ -214,6 +217,8 @@ const en: Strings = {
     healthy: 'healthy',
     right: 'Tinta gets this one right.',
     wrong: 'Tinta gets this one wrong.',
+    noAnswer: 'Tinta gives no answer for this one.',
+    caveat: 'Tinta has not been tested on phones yet, only on the tablet data she learned from.',
     score: (s) => `Score ${s}/100. Under 35: usual pattern. Over 65: worth mentioning. In between: I don't know.`,
     whatNow: 'What now?',
     measurements: 'See the measurements',
@@ -230,8 +235,10 @@ const en: Strings = {
     home: 'Back to the start',
   },
   why: {
-    fastPatient: 'This patient wrote these tasks fluently, with few lifts and short pauses, just like a healthy person. Timing cannot see everything: other tasks of the full study might have shown it.',
-    falseAlarm: 'This healthy person lifted the pen often and paused for a long time. A hesitation, a distraction, or simply a careful way of writing looks the same as a cognitive pause to Tinta.',
+    missed: (air, usualAir, touches, usualTouches) =>
+      `This patient's pen was in the air ${air}% of the time and touched down ${touches} times per task. Typical for healthy people in the study: ${usualAir}% and ${usualTouches}. On these three tasks the writing looks healthy, and Tinta cannot see anything else.`,
+    falseAlarm: (air, usualAir, touches, usualTouches) =>
+      `This healthy person's pen was in the air ${air}% of the time and touched down ${touches} times per task. Typical for healthy people in the study: ${usualAir}% and ${usualTouches}. A careful or hesitant way of writing looks the same as a cognitive pause to Tinta.`,
   },
   note: {
     title: 'Note for the doctor',
@@ -254,13 +261,15 @@ const en: Strings = {
     summary: 'How sure can you be? The honest numbers',
     title: 'How well does it work?',
     short: (m, s, train, test) =>
-      `Trained on ${train} people, checked on ${test} it never saw (${m.patients} patients, ${m.healthy} healthy). With the short check alone, Tinta missed ${m.missed} patients and raised ${m.false_alarms} false alarms. A plain stopwatch rule missed ${s.missed} and raised ${s.false_alarms}: on the study's own tablet, a stopwatch is about as good.`,
+      `Trained on ${train} people and checked on ${test} others (${m.patients} patients, ${m.healthy} healthy) that were held out of training, though I did look at them while designing the app. Cutting the score at 50, the short check missed ${m.missed} patients and raised ${m.false_alarms} false alarms. A plain stopwatch rule missed ${s.missed} and raised ${s.false_alarms}: on the study's own tablet, a stopwatch is about as good.`,
+    told: (p, h) =>
+      `What those people would actually be told by the app: of the ${p.usual + p.unsure + p.mention} patients, ${p.mention} "worth mentioning", ${p.unsure} "I can't tell" and ${p.usual} "usual pattern" (those ${p.usual} are the dangerous misses). Of the ${h.usual + h.unsure + h.mention} healthy people, ${h.usual} "usual pattern", ${h.unsure} "I can't tell" and ${h.mention} "worth mentioning" (false alarms).`,
     closer: (a, test) =>
       `When the short check is unsure, Tinta asks for three more tasks and averages three models. With that closer look (${a.closer_look} of the ${test} needed it), she missed ${a.missed} patients and raised ${a.false_alarms} false alarm${a.false_alarms === 1 ? '' : 's'}, and still said "I can't tell" for ${a.still_unsure}.`,
     device: (s, m) =>
       `But a phone is not that tablet. If a device makes everyone 1.5 times slower, the stopwatch raises ${s.false_alarms} false alarms out of ${s.healthy} healthy people. Tinta still raises ${m.false_alarms}: her two measures are a share and a count, so overall speed cancels out. That is arithmetic, not a discovery.`,
     uneven: (pauses, screen) =>
-      `The real risk is a device that changes pauses and strokes by different amounts. If only the pauses doubled, Tinta would wrongly flag ${pauses.false_alarms} of ${pauses.healthy} healthy people. If only the strokes took twice as long, she would miss ${screen.missed} of ${screen.patients} patients. Only data from real phones can tell which happens.`,
+      `The real risk is a device that changes pauses and strokes by different amounts. If only the pauses doubled, Tinta would wrongly flag ${pauses.false_alarms} of ${pauses.healthy} healthy people. If only the strokes took twice as long, she would miss ${screen.missed} of ${screen.patients} patients. This simulation also keeps the number of touches fixed, and a finger may lift more or less than a pen. Only data from real phones can tell.`,
     limits: 'Limits: the study compared people already diagnosed with healthy people, half and half, using a pen on a tablet, in Italian. In real life far fewer people have the disease, so most "worth mentioning" results would be false alarms. Tinta raises more false alarms for slow writers and misses more patients among fast ones. The study does not publish age or sex, so we cannot check those groups. It has not been tested with patients on a phone. Treat a result as a reason to talk to a doctor, never as an answer.',
   },
   study: {
@@ -289,7 +298,7 @@ const en: Strings = {
         q: "Why would handwriting change with Alzheimer's?",
         a: [
           'Writing looks easy but uses a lot of the brain at once: memory, planning, attention and fine movement.',
-          'When that gets harder, people hesitate more between strokes. In the study I learned from, people with Alzheimer\'s spent clearly longer with the pen in the air, especially in tasks that need memory, like writing a number they had just heard.',
+          'When that gets harder, people hesitate more between strokes. In the study I learned from, people with Alzheimer\'s spent a larger share of each task with the pen in the air, and lifted it more often.',
         ],
       },
       {
@@ -331,7 +340,7 @@ const en: Strings = {
         q: 'How often are you right?',
         a: [
           'About 3 times out of 4 on people I had never seen, in the study data. So I am wrong about 1 time in 4, in both directions. A simple stopwatch does a little better on the study\'s own tablet.',
-          'And that study used a pen on a tablet. Nobody has tested me yet with patients on a phone. I say so on every result.',
+          'And that study used a pen on a tablet. Nobody has tested me yet on a phone. I say so on every result.',
         ],
       },
       {
@@ -454,7 +463,7 @@ const es: Strings = {
     },
   },
   nextSteps: {
-    typical: ['Esto no descarta nada: a Tinta se le escapan unos tres pacientes de cada diez.', 'Si alguien te preocupa, ve al médico igualmente.', 'Puedes volver otro día y comparar con hoy.'],
+    typical: ['Esto no descarta nada: a uno de cada cinco pacientes le sale esta misma respuesta.', 'Si alguien te preocupa, ve al médico igualmente.', 'Puedes volver otro día y comparar con hoy.'],
     unsure: ['Un resultado dudoso, él solo, no significa nada.', 'Prueba otro día, con calma y sin prisa.'],
     mention: [
       'No te preocupes por un solo resultado: el cansancio o un móvil nuevo pueden causarlo.',
@@ -469,6 +478,8 @@ const es: Strings = {
     healthy: 'sana',
     right: 'Tinta acierta en este.',
     wrong: 'Tinta se equivoca en este.',
+    noAnswer: 'En este, Tinta no da respuesta.',
+    caveat: 'Tinta todavía no se ha probado en móviles, solo con los datos de tableta con los que aprendió.',
     score: (s) => `Nota ${s}/100. Menos de 35: lo habitual. Más de 65: coméntalo. En medio: no lo sé.`,
     whatNow: '¿Y ahora qué?',
     measurements: 'Ver las medidas',
@@ -485,8 +496,10 @@ const es: Strings = {
     home: 'Volver al principio',
   },
   why: {
-    fastPatient: 'Este paciente escribió estas tareas con soltura, levantando poco el lápiz y con pausas cortas, igual que una persona sana. El tiempo no lo ve todo: otras tareas del estudio completo quizá lo habrían mostrado.',
-    falseAlarm: 'Esta persona sana levantó mucho el lápiz e hizo pausas largas. Una duda, un despiste o simplemente una forma cuidadosa de escribir se parecen, para Tinta, a una pausa cognitiva.',
+    missed: (air, usualAir, touches, usualTouches) =>
+      `El lápiz de este paciente estuvo en el aire el ${air} % del tiempo y se apoyó ${touches} veces por tarea. Lo típico en las personas sanas del estudio: ${usualAir} % y ${usualTouches}. En estas tres tareas su escritura parece sana, y Tinta no puede ver nada más.`,
+    falseAlarm: (air, usualAir, touches, usualTouches) =>
+      `El lápiz de esta persona sana estuvo en el aire el ${air} % del tiempo y se apoyó ${touches} veces por tarea. Lo típico en las personas sanas del estudio: ${usualAir} % y ${usualTouches}. Una forma de escribir cuidadosa o con dudas se parece, para Tinta, a una pausa cognitiva.`,
   },
   note: {
     title: 'Nota para el médico',
@@ -509,13 +522,15 @@ const es: Strings = {
     summary: '¿Cuánto te puedes fiar? Los números, sin adornos',
     title: '¿Cómo de bien funciona?',
     short: (m, s, train, test) =>
-      `Entrenada con ${train} personas y comprobada con ${test} que nunca había visto (${m.patients} pacientes, ${m.healthy} sanas). Solo con la prueba corta, a Tinta se le escaparon ${m.missed} pacientes y dio ${m.false_alarms} falsas alarmas. Una regla de cronómetro falló con ${s.missed} y dio ${s.false_alarms}: en la tableta del estudio, un cronómetro acierta más o menos lo mismo.`,
+      `Entrenada con ${train} personas y comprobada con otras ${test} (${m.patients} pacientes, ${m.healthy} sanas) que no entraron en el entrenamiento, aunque sí las miré mientras diseñaba la app. Cortando la nota en 50, a la prueba corta se le escaparon ${m.missed} pacientes y dio ${m.false_alarms} falsas alarmas. Una regla de cronómetro falló con ${s.missed} y dio ${s.false_alarms}: en la tableta del estudio, un cronómetro acierta más o menos lo mismo.`,
+    told: (p, h) =>
+      `Lo que la app les diría de verdad a esas personas: de los ${p.usual + p.unsure + p.mention} pacientes, a ${p.mention} «coméntalo», a ${p.unsure} «no lo sé» y a ${p.usual} «dentro de lo habitual» (esos ${p.usual} son los fallos peligrosos). De las ${h.usual + h.unsure + h.mention} personas sanas, a ${h.usual} «dentro de lo habitual», a ${h.unsure} «no lo sé» y a ${h.mention} «coméntalo» (falsas alarmas).`,
     closer: (a, test) =>
       `Cuando la prueba corta duda, Tinta pide tres tareas más y hace la media de tres modelos. Con esa segunda mirada (la necesitaron ${a.closer_look} de las ${test}), se le escaparon ${a.missed} pacientes, dio ${a.false_alarms} falsa${a.false_alarms === 1 ? '' : 's'} alarma${a.false_alarms === 1 ? '' : 's'} y siguió diciendo «no lo sé» en ${a.still_unsure}.`,
     device: (s, m) =>
       `Pero un móvil no es esa tableta. Si un aparato hace a todo el mundo 1,5 veces más lento, el cronómetro da ${s.false_alarms} falsas alarmas entre ${s.healthy} personas sanas. Tinta sigue dando ${m.false_alarms}: sus dos medidas son una proporción y un recuento, así que la velocidad general no cuenta. Eso es aritmética, no un descubrimiento.`,
     uneven: (pauses, screen) =>
-      `El riesgo de verdad es un aparato que cambie las pausas y los trazos en distinta medida. Si solo se duplicaran las pausas, Tinta marcaría por error a ${pauses.false_alarms} de ${pauses.healthy} personas sanas. Si solo los trazos tardaran el doble, se le escaparían ${screen.missed} de ${screen.patients} pacientes. Solo los datos de móviles de verdad pueden decir cuál ocurre.`,
+      `El riesgo de verdad es un aparato que cambie las pausas y los trazos en distinta medida. Si solo se duplicaran las pausas, Tinta marcaría por error a ${pauses.false_alarms} de ${pauses.healthy} personas sanas. Si solo los trazos tardaran el doble, se le escaparían ${screen.missed} de ${screen.patients} pacientes. Esta simulación, además, deja fijo el número de toques, y un dedo puede levantarse más o menos que un lápiz. Solo los datos de móviles de verdad pueden decirlo.`,
     limits: 'Límites: el estudio comparó a personas ya diagnosticadas con personas sanas, mitad y mitad, con lápiz sobre una tableta y en italiano. En la vida real hay muchas menos personas con la enfermedad, así que la mayoría de los «coméntalo» serían falsas alarmas. Tinta da más falsas alarmas a quien escribe despacio y se le escapan más pacientes entre quienes escriben rápido. El estudio no publica edad ni sexo, así que no podemos comprobar esos grupos. No se ha probado con pacientes en un móvil. Toma el resultado como un motivo para hablar con un médico, nunca como una respuesta.',
   },
   study: {
@@ -544,7 +559,7 @@ const es: Strings = {
         q: '¿Por qué cambia la escritura con el alzhéimer?',
         a: [
           'Escribir parece fácil, pero usa mucho cerebro a la vez: memoria, planificación, atención y movimiento fino.',
-          'Cuando eso cuesta más, la persona duda más entre trazo y trazo. En el estudio del que aprendí, las personas con alzhéimer pasaban claramente más tiempo con el lápiz en el aire, sobre todo en tareas que piden memoria, como escribir un número que acaban de oír.',
+          'Cuando eso cuesta más, la persona duda más entre trazo y trazo. En el estudio del que aprendí, las personas con alzhéimer pasaban una parte mayor de cada tarea con el lápiz en el aire y lo levantaban más veces.',
         ],
       },
       {
@@ -586,7 +601,7 @@ const es: Strings = {
         q: '¿Cuántas veces aciertas?',
         a: [
           'Unas 3 de cada 4 con personas que no había visto nunca, en los datos del estudio. O sea, me equivoco 1 de cada 4, en los dos sentidos. Un simple cronómetro acierta un poco más en la tableta del estudio.',
-          'Y ese estudio se hizo con lápiz y tableta. Nadie me ha probado todavía con pacientes en un móvil. Lo digo en cada resultado.',
+          'Y ese estudio se hizo con lápiz y tableta. Nadie me ha probado todavía en un móvil. Lo digo en cada resultado.',
         ],
       },
       {

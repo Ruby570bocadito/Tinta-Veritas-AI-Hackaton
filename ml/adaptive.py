@@ -77,12 +77,19 @@ def disagreement(models, X):
     return votes.max(axis=0) - votes.min(axis=0)
 
 
+def told(final, unsure):
+    """What the person is told: 0 usual pattern, 1 I can't tell, 2 worth mentioning."""
+    return np.where(unsure, 1, np.where(final >= HI, 2, 0))
+
+
 def main():
     df = pd.read_csv(DATA)
     y = (df["class"] == "P").astype(int).values
     outer = RepeatedStratifiedKFold(n_splits=5, n_repeats=4, random_state=11)
     rows = {"short only (3 tasks)": [], "long only (6 tasks, blend)": [], "adaptive": []}
-    escalated, still_unsure, decided_acc = [], [], []
+    escalated, still_unsure, decided_acc, split_fired = [], [], [], []
+    table = np.zeros((2, 3))  # rows: healthy, patient; columns: usual, can't tell, worth mentioning
+    short_table = np.zeros((2, 3))
 
     for fold, (tr, te) in enumerate(outer.split(df, y), 1):
         dtr, dte = df.iloc[tr], df.iloc[te]
@@ -98,7 +105,13 @@ def main():
                                roc_auc_score(y[te], p)))
         escalated.append(grey.mean())
         # Unsure if the final score is in the grey zone, or if the three models pull far apart.
-        unsure = ((final > LO) & (final < HI)) | (grey & (disagreement(members, shape(dte, order)) > SPLIT))
+        split = grey & (disagreement(members, shape(dte, order)) > SPLIT)
+        split_fired.append(split.mean())
+        unsure = ((final > LO) & (final < HI)) | split
+        for label in (0, 1):
+            who = y[te] == label
+            table[label] += np.bincount(told(final, unsure)[who], minlength=3)
+            short_table[label] += np.bincount(told(p1, grey)[who], minlength=3)
         still_unsure.append(unsure.mean())
         decided_acc.append((((final >= 0.5).astype(int) == y[te])[~unsure]).mean())
         print(f"fold {fold}/20 done", flush=True)
@@ -112,6 +125,13 @@ def main():
     print(f"Average number of scored tasks: {3 + 3 * np.mean(escalated):.2f}")
     print(f"Still 'I can't tell' after the closer look: {np.mean(still_unsure):.1%}")
     print(f"Accuracy among the people who get a clear answer: {np.mean(decided_acc):.3f}")
+    print(f"The three models disagree by more than {SPLIT:.0%}: {np.mean(split_fired):.1%} of people")
+    for name, t in (("short check only", short_table), ("adaptive check (what the app does)", table)):
+        print(f"\nWhat people are told, {name} (share of each group):")
+        print(f"{'':<10}{'usual pattern':>15}{'I cannot tell':>15}{'worth mentioning':>18}")
+        for label, who in ((1, "patients"), (0, "healthy")):
+            r = t[label] / t[label].sum()
+            print(f"{who:<10}{r[0]:>15.0%}{r[1]:>15.0%}{r[2]:>18.0%}")
 
 
 if __name__ == "__main__":

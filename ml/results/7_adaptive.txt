@@ -29,3 +29,14 @@ People sent to the closer look: 31.7%
 Average number of scored tasks: 3.95
 Still 'I can't tell' after the closer look: 14.1%
 Accuracy among the people who get a clear answer: 0.810
+The three models disagree by more than 50%: 0.3% of people
+
+What people are told, short check only (share of each group):
+            usual pattern  I cannot tell  worth mentioning
+patients              16%            30%               54%
+healthy               57%            33%               10%
+
+What people are told, adaptive check (what the app does) (share of each group):
+            usual pattern  I cannot tell  worth mentioning
+patients              19%            15%               65%
+healthy               74%            13%               14%
