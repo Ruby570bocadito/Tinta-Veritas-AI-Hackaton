@@ -359,6 +359,19 @@ select:focus-visible {
   box-shadow: var(--lift);
 }
 
+/* What was missing from the tasks, when there is no score to give. */
+.issues {
+  margin: 0;
+  padding: 0 0 0 1.2rem;
+  display: grid;
+  gap: 0.45rem;
+  line-height: 1.45;
+}
+
+.honest[hidden] {
+  display: none;
+}
+
 /* Score: three strips of coloured paper and a navy pin. */
 .meter {
   position: relative;
@@ -544,6 +557,23 @@ textarea.words {
   position: sticky;
   bottom: 0.75rem;
   z-index: 2;
+}
+
+/* Whatever is behind the pinned buttons fades into the paper, so no words are left half-hidden under them. */
+div.sticky::before {
+  content: '';
+  position: absolute;
+  inset: -1.2rem -1rem -0.75rem;
+  z-index: -1;
+  background: linear-gradient(to bottom, transparent, var(--paper) 45%);
+  pointer-events: none;
+}
+
+/* Each screen puts the focus on its first words, for screen readers; that is not something to draw a ring around. */
+h1:focus,
+h2:focus,
+.cheer:focus {
+  outline: none;
 }
 
 .quit {

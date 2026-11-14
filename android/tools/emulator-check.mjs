@@ -7,6 +7,7 @@
 //   SHOTS=folder node android/tools/emulator-check.mjs     also saves a picture of every screen
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
+import { perform } from '../../web/tools/shapes.mjs'
 
 const ADB = process.env.ADB ?? `${process.env.LOCALAPPDATA}/Android/Sdk/platform-tools/adb.exe`
 const adb = (...args) => execFileSync(ADB, args, { encoding: 'utf8', env: { ...process.env, MSYS_NO_PATHCONV: '1' } })
@@ -64,15 +65,14 @@ async function stroke(points) {
   adb('shell', 'input', 'motionevent', 'UP', ...at(points.at(-1)))
 }
 
-const circle = Array.from({ length: 17 }, (_, i) => [0.5 + 0.2 * Math.cos((i / 4) * Math.PI), 0.5 + 0.2 * Math.sin((i / 4) * Math.PI)])
-const digit = (x) => [[x, 0.4], [x + 0.04, 0.5], [x, 0.6]]
-const PLANS = [
-  [[[0.18, 0.5], [0.82, 0.5], [0.18, 0.5], [0.82, 0.5], [0.18, 0.5]]],
-  [[[0.5, 0.18], [0.5, 0.82], [0.5, 0.18], [0.5, 0.82], [0.5, 0.18]]],
-  [circle],
-  [[[0.1, 0.55], [0.18, 0.35], [0.22, 0.55], [0.3, 0.5], [0.38, 0.35], [0.42, 0.55], [0.5, 0.5], [0.58, 0.35], [0.62, 0.55], [0.7, 0.5], [0.78, 0.35], [0.82, 0.55]]],
-  [0.08, 0.17, 0.26, 0.35, 0.44, 0.53, 0.62, 0.71, 0.8, 0.89].map(digit),
-]
+// Each task written as asked (the shapes of web/tools/shapes.mjs), thinned out because every point is one adb call.
+const thin = (pts) => pts.filter((_, i) => i % 3 === 0 || i === pts.length - 1)
+const plan = (id, how) => perform(id, how).map((s) => thin(s.pts))
+const PLANS = [plan(2), plan(3), plan(5), plan(9, { lifts: 3 }), plan(16)]
+// After "I'm done" Tinta must have nothing to object to: these tasks were done as asked.
+const mustBeFine = async () => {
+  if (await js(`Boolean(${button('Try again')})`)) throw new Error('Tinta objected to a task done as asked: ' + (await js(`document.querySelector('.cheer').innerText`)))
+}
 
 // With SHOTS=folder, a picture of each screen is saved there (taken from the page itself).
 const shots = process.env.SHOTS
@@ -103,6 +103,7 @@ for (const [i, plan] of PLANS.entries()) {
   }
   if (i === 2) await shot('task-circle')
   await tap(button("I'm done"))
+  await mustBeFine()
   if (i === 4) {
     await sleep(4500) // wait for the replay to finish, so the invisible ink is complete
     await shot('invisible-ink')
@@ -115,12 +116,13 @@ if (await js(`Boolean(${button('Three more')})`)) {
   console.log('short check unsure -> closer look')
   await shot('closer-look')
   await tap(button('Three more'))
-  for (const plan of [[0.1, 0.25, 0.4, 0.55, 0.7, 0.85].map(digit), [0.2, 0.35, 0.5, 0.65, 0.8].map(digit), PLANS[4]]) {
-    for (const s of plan) {
+  for (const strokes of [plan(6), plan(22), plan(23)]) {
+    for (const s of strokes) {
       await stroke(s)
       await sleep(300)
     }
     await tap(button("I'm done"))
+    await mustBeFine()
     await tap((await js(`Boolean(${button('See the result')})`)) ? button('See the result') : button('Next'))
   }
 }

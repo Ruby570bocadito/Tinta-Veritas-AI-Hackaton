@@ -1,0 +1,139 @@
+What Tinta tells made-up people who do the check in different ways
+
+Does every task as asked
+    along the way: nothing
+    at the end:    usual pattern (18/100)
+    model alone:   usual pattern (18/100)
+
+Three laps of the circle instead of four (lost count)
+    along the way: nothing
+    at the end:    usual pattern (18/100)
+    model alone:   usual pattern (18/100)
+
+Six laps of the circle
+    along the way: nothing
+    at the end:    usual pattern (18/100)
+    model alone:   usual pattern (18/100)
+
+Draws the four circles in a corner, not over the printed one
+    along the way: nothing
+    at the end:    usual pattern (18/100)
+    model alone:   usual pattern (18/100)
+
+Writes "le" three times instead of four
+    along the way: nothing
+    at the end:    usual pattern (18/100)
+    model alone:   usual pattern (18/100)
+
+Shaky hand, every task done
+    along the way: nothing
+    at the end:    usual pattern (18/100)
+    model alone:   usual pattern (18/100)
+
+Writes everything very small
+    along the way: nothing
+    at the end:    usual pattern (18/100)
+    model alone:   usual pattern (18/100)
+
+Lifts once in the middle of each practice line and of the circle
+    along the way: nothing
+    at the end:    usual pattern (24/100)
+    model alone:   usual pattern (24/100)
+
+Hesitant: every task done, 1.5 s in the air at each lift, lifts between each "le"
+    along the way: nothing
+    at the end:    I can't tell (46/100, after the closer look)
+    model alone:   I can't tell (46/100)
+
+Lifts the finger 12 times in every scored task (what many patients do)
+    along the way: nothing
+    at the end:    worth mentioning (96/100)
+    model alone:   worth mentioning (96/100)
+
+The first tester's try: 9 touches on the first line, one lap, scribbles; keeps everything
+    along the way: asks about tasks 2, 5, 9, 16 (the person keeps them)
+    at the end:    no result: backwards not finished, circle not finished, loops not finished
+    model alone:   usual pattern (6/100)
+
+The same person, but tries again each time Tinta asks
+    along the way: asks about tasks 2, 5, 9, 16 (the person tries again)
+    at the end:    usual pattern (18/100)
+    model alone:   usual pattern (18/100)
+
+One lap of the circle, everything else as asked
+    along the way: asks about task 5 (the person keeps them)
+    at the end:    no result: circle not finished
+    model alone:   usual pattern (18/100)
+
+Two laps of the circle, everything else as asked
+    along the way: asks about task 5 (the person keeps them)
+    at the end:    no result: circle not finished
+    model alone:   usual pattern (18/100)
+
+Writes "le" twice instead of four times
+    along the way: asks about task 9 (the person keeps them)
+    at the end:    no result: loops not finished
+    model alone:   usual pattern (18/100)
+
+Copies two of the five letters of the word
+    along the way: asks about task 16 (the person keeps them)
+    at the end:    no result: backwards not finished
+    model alone:   usual pattern (13/100)
+
+A zigzag instead of the loops
+    along the way: asks about task 9 (the person keeps them)
+    at the end:    no result: loops not finished
+    model alone:   usual pattern (18/100)
+
+Taps thirty times on every task
+    along the way: asks about tasks 2, 3, 5, 9, 16 (the person keeps them)
+    at the end:    no result: backwards hardly written, circle hardly written, loops hardly written
+    model alone:   worth mentioning (100/100)
+
+One short dash on every task
+    along the way: asks about tasks 2, 3, 5, 9, 16 (the person keeps them)
+    at the end:    no result: backwards not finished, circle not finished, loops not finished
+    model alone:   usual pattern (6/100)
+
+Does every task and never lifts the finger, the word too (3 of our first 8 phone volunteers)
+    along the way: asks about task 16 (the person keeps them)
+    at the end:    no result: backwards written with no pause to time
+    model alone:   usual pattern (6/100)
+
+The same, but writes the word again letter by letter when Tinta asks
+    along the way: asks about task 16 (the person tries again)
+    at the end:    usual pattern (18/100)
+    model alone:   usual pattern (18/100)
+
+Lifts ten times in the loops but writes the word in a single drag
+    along the way: asks about task 16 (the person keeps them)
+    at the end:    no result: backwards written with no pause to time
+    model alone:   usual pattern (22/100)
+
+Holds the finger down for a minute on each task, never lifting
+    along the way: asks about task 16 (the person keeps them)
+    at the end:    no result: backwards written with no pause to time
+    model alone:   usual pattern (6/100)
+
+STILL OPEN. Does lines and circle, then scribbles a long zigzag with a few lifts instead of writing
+    along the way: nothing
+    at the end:    usual pattern (21/100)
+    model alone:   usual pattern (21/100)
+
+STILL OPEN. Does every task but lifts the finger 15 times in each, on purpose
+    along the way: asks about tasks 2, 3 (the person keeps them)
+    at the end:    worth mentioning (97/100)
+    model alone:   worth mentioning (97/100)
+
+STILL OPEN. Writes very slowly with long stops, finger down, lifting only between letters
+    along the way: nothing
+    at the end:    usual pattern (8/100)
+    model alone:   usual pattern (8/100)
+
+ok  people who do the tasks are left alone: Tinta asks nothing and gives a result
+ok  lifting the finger a lot in a scored task is never treated as "not done"
+ok  a scored task that was not done, or has no pause to time, means no result, whatever the models say
+ok  doing it again as asked gives a result
+ok  nobody is ever given "usual pattern" or "worth mentioning" with a task that cannot be compared
+
+5 rules hold for 26 made-up people. These are drawings made by a formula, not people.

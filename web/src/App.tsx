@@ -4,23 +4,10 @@ import Crowd from './components/Crowd'
 import InkCanvas, { type Guide, type Size } from './components/InkCanvas'
 import Mascot, { type Mood } from './components/Mascot'
 import { addToHistory, clearHistory, loadHistory, loadPeople, savePeople, type Entry } from './lib/history'
-import { measure, seconds, type Measures, type Stroke } from './lib/ink'
-import {
-  counts,
-  examples,
-  isGrey,
-  crowd,
-  metrics,
-  predict,
-  predictCloser,
-  airShare,
-  typical,
-  verdict,
-  EXTRA_IDS,
-  TASK_IDS,
-  WARMUP_IDS,
-  type Verdict,
-} from './lib/model'
+import { check, laps, les, turns } from './lib/check'
+import { measure, seconds, stillTime, type Measures, type Stroke } from './lib/ink'
+import { judge, score as scoreOf, wantsCloser, type Answer } from './lib/judge'
+import { counts, examples, isGrey, crowd, metrics, airShare, typical, EXTRA_IDS, TASK_IDS, WARMUP_IDS, type Verdict } from './lib/model'
 import { initialLang, SOURCES, STRINGS, type Lang } from './lib/strings'
 import { canSpeak, say } from './lib/voice'
 
@@ -74,6 +61,7 @@ export default function App() {
   const [sheets, setSheets] = useState<Record<number, Size>>({}) // size of the sheet each task was written on
   const [example, setExample] = useState<number | null>(null)
   const [closer, setCloser] = useState(false) // true once the person accepts the three extra tasks
+  const [tries, setTries] = useState<Record<number, number>>({}) // how many times each task was done again
   const [history, setHistory] = useState<Entry[]>(loadHistory)
   const [replay, setReplay] = useState(0)
   const [age, setAge] = useState('')
@@ -94,8 +82,20 @@ export default function App() {
     }
   }, [lang])
 
+  // Each new screen starts from its first words: for someone using a screen reader or a keyboard, focus goes
+  // to what Tinta says (or to the heading), instead of being lost when the button they pressed disappears.
+  const review = screen.name === 'task' && screen.review
+  const step = screen.name === 'task' ? screen.index : screen.name === 'guide' ? screen.step : 0
+  useEffect(() => {
+    const first = document.querySelector<HTMLElement>('main .cheer, main h1, main h2')
+    if (!first) return
+    first.tabIndex = -1
+    first.focus({ preventScroll: true })
+  }, [screen.name, step, review, example])
+
   const restart = () => {
     setInk({})
+    setTries({})
     setExample(null)
     setCopied(false)
     setJustSaved(false)
@@ -110,26 +110,11 @@ export default function App() {
     </button>
   )
 
-  /** Everything measured so far, by task number. */
-  const measured = () => {
-    const byTask: Record<number, Measures> = {}
-    for (const id of [...WARMUP_IDS, ...TASK_IDS, ...EXTRA_IDS]) byTask[id] = measure(ink[id] ?? [])
-    return byTask
-  }
-
-  /** The person's own answer: stage 1, or the closer look if it was needed and done. */
-  const ownAnswer = (withCloser: boolean) => {
-    const byTask = measured()
-    const first = predict(byTask)
-    const hasExtra = withCloser && EXTRA_IDS.every((id) => (ink[id] ?? []).length > 0)
-    const second = (isGrey(first) || forceCloser) && hasExtra ? predictCloser(byTask) : null
-    return { byTask, first, second, p: second ? second.p : first }
-  }
-
   /** Finish the check: remember the score on this phone and show the result. */
   const finish = (withCloser: boolean) => {
-    const { p, second } = ownAnswer(withCloser)
-    setHistory(addToHistory({ t: Date.now(), score: Math.round(p * 100), verdict: second?.split ? 'unsure' : verdict(p), closer: Boolean(second) }))
+    const a = judge(ink, sheets, withCloser, forceCloser)
+    // A check with no result has no number, so it does not go on the "you against you" line.
+    if (!a.noResult.length) setHistory(addToHistory({ t: Date.now(), score: Math.round(a.p * 100), verdict: a.kind, closer: Boolean(a.second) }))
     setScreen({ name: 'result' })
   }
 
@@ -150,6 +135,9 @@ export default function App() {
         <button className="primary" onClick={() => setScreen({ name: 'guide', step: 0 })}>
           {t.home.start}
         </button>
+        <p className="fine">
+          {t.disclaimer} {t.private}
+        </p>
         <div className="row">
           <button
             className="ghost"
@@ -183,9 +171,6 @@ export default function App() {
             ))}
           </ol>
         </section>
-        <p className="fine">
-          {t.disclaimer} {t.private}
-        </p>
       </main>
     )
   }
@@ -321,13 +306,21 @@ export default function App() {
     // After the fifth task Tinta already has a first answer. If it is unsure, she asks for a closer look.
     const afterLast = () => {
       if (closer) return finish(true)
-      if (forceCloser || isGrey(predict(measured()))) return setScreen({ name: 'closer' })
+      if (wantsCloser(ink, sheets, forceCloser)) return setScreen({ name: 'closer' })
       finish(false)
+    }
+    const goOn = () => (last ? afterLast() : setScreen({ name: 'task', index: screen.index + 1, review: false }))
+    // Was the task done as asked? If clearly not, Tinta says what she saw and offers another go.
+    const issue = screen.review ? check(task.id, strokes, sheets[task.id] ?? { w: 360, h: 340 }) : null
+    const tryAgain = () => {
+      setInk({ ...ink, [task.id]: [] })
+      setTries({ ...tries, [task.id]: (tries[task.id] ?? 0) + 1 })
+      setScreen({ ...screen, review: false })
     }
     return (
       <main className="page" key={'task' + screen.index + screen.review}>
         <header className="taskbar">
-          <Mascot mood={screen.review ? 'writing' : task.pose} size={96} />
+          <Mascot mood={screen.review ? (issue ? 'unsure' : 'writing') : task.pose} size={96} />
           <div>
             <ol className="dots" aria-hidden="true">
               {list.map((item, i) => (
@@ -340,8 +333,13 @@ export default function App() {
             {t.task.quit}
           </button>
         </header>
-        {screen.review && <p className="bubble cheer">{t.task.cheers[screen.index]}</p>}
-        <h2>{screen.review ? t.task.inkTitle : text.instruction}</h2>
+        {screen.review && (
+          <p className="bubble cheer">
+            {issue ? `${t.check.text(issue)} ${WARMUP_IDS.includes(task.id) ? t.check.practice : t.check.scored}` : t.task.cheers[screen.index]}
+          </p>
+        )}
+        {/* When Tinta has something to say about the task, her words are the heading. */}
+        {!issue && <h2>{screen.review ? t.task.inkTitle : text.instruction}</h2>}
         {!screen.review && canSpeak && !text.speak && (
           <button className="link left" onClick={() => say(text.instruction, t.voice)}>
             ▶ {t.task.read}
@@ -387,26 +385,36 @@ export default function App() {
                 ↻ {t.task.again}
               </button>
             </p>
-            <dl className="stats">
-              <div>
-                <dt>{t.task.air}</dt>
-                <dd>{seconds(m.air_time)}</dd>
+            {!issue && (
+              <dl className="stats">
+                <div>
+                  <dt>{t.task.air}</dt>
+                  <dd>{seconds(m.air_time)}</dd>
+                </div>
+                <div>
+                  <dt>{t.task.screen}</dt>
+                  <dd>{seconds(m.paper_time)}</dd>
+                </div>
+                <div>
+                  <dt>{t.task.touches}</dt>
+                  <dd>{m.num_of_pendown}</dd>
+                </div>
+              </dl>
+            )}
+            {issue ? (
+              <div className="row sticky">
+                <button className="ghost" onClick={goOn}>
+                  {t.check.keep}
+                </button>
+                <button className="primary" onClick={tryAgain}>
+                  {t.check.again}
+                </button>
               </div>
-              <div>
-                <dt>{t.task.screen}</dt>
-                <dd>{seconds(m.paper_time)}</dd>
-              </div>
-              <div>
-                <dt>{t.task.touches}</dt>
-                <dd>{m.num_of_pendown}</dd>
-              </div>
-            </dl>
-            <button
-              className="primary sticky"
-              onClick={() => (last ? afterLast() : setScreen({ name: 'task', index: screen.index + 1, review: false }))}
-            >
-              {last ? t.task.seeResult : t.task.next}
-            </button>
+            ) : (
+              <button className="primary sticky" onClick={goOn}>
+                {last ? t.task.seeResult : t.task.next}
+              </button>
+            )}
           </>
         ) : (
           <div className="row sticky">
@@ -460,19 +468,18 @@ export default function App() {
 
   // Result: either the person's own writing or a held-out case from the study.
   const ex = example === null ? null : examples[example]
-  let byTask: Record<number, Measures>
-  let first: number
-  let second: ReturnType<typeof predictCloser> | null
+  let answer: Answer
   if (ex) {
-    byTask = {}
-    for (const id of [...WARMUP_IDS, ...TASK_IDS, ...EXTRA_IDS]) byTask[id] = (ex.measures as Record<string, Measures>)[String(id)]
-    first = predict(byTask)
-    second = isGrey(first) ? predictCloser(byTask) : null
+    const fromStudy: Record<number, Measures> = {}
+    for (const id of [...WARMUP_IDS, ...TASK_IDS, ...EXTRA_IDS]) fromStudy[id] = (ex.measures as Record<string, Measures>)[String(id)]
+    answer = { ...scoreOf(fromStudy, true), noResult: [] }
   } else {
-    ;({ byTask, first, second } = ownAnswer(closer))
+    answer = judge(ink, sheets, closer, forceCloser)
   }
-  const p = second ? second.p : first
-  const kind: Verdict = second?.split ? 'unsure' : verdict(p)
+  const { byTask, first, second, p, kind } = answer
+  // A scored task that cannot be compared with the study (not done, or no pause to time): no result is shown.
+  const invalid = answer.noResult.length > 0
+  const why = answer.noResult.map(({ id, issue }) => `${t.tasks[id].title}: ${t.check.text(issue)}`).join(' ')
   const v = t.verdicts[kind]
   const score = Math.round(p * 100)
   const shown = second ? [...TASKS, ...EXTRA] : TASKS
@@ -491,14 +498,26 @@ export default function App() {
   const usual = [Math.round(100 * typical.air), Math.round(typical.touches)] as const
   // Why a real case went wrong, from that person's own measures.
   const whyWrong = () => (ex!.label === 'patient' ? t.why.missed : t.why.falseAlarm)(meanAir, usual[0], meanTouches, usual[1])
-  const studyLine = JSON.stringify({ age, lang, score, tasks: byTask })
+  // Saved next to the timings, to learn how people really do the tasks on a phone: laps round the circle,
+  // how many "le", turns in the word, tasks done again, tasks with no result, and how long the finger
+  // rested on the glass without moving (a pause a phone cannot see as time in the air).
+  const sheetOf = (id: number) => sheets[id] ?? { w: 360, h: 340 }
+  const followed = {
+    laps: Number(laps(ink[5] ?? []).toFixed(1)),
+    les: Number(les(ink[9] ?? [], sheetOf(9)).toFixed(1)),
+    turns: turns(ink[16] ?? [], sheetOf(16)),
+    still: Object.fromEntries(TASK_IDS.map((id) => [id, stillTime(ink[id] ?? [])])),
+    tries,
+    noResult: answer.noResult.map((n) => `${n.id}:${n.issue.kind}`),
+  }
+  const studyLine = JSON.stringify({ age, lang, score, ...followed, tasks: byTask })
   // What an invited tester sends: a few readable lines, then the same timings as study mode. No drawing.
   const friendMessage = [
     t.friends.header,
     `${t.friends.nameLabel}: ${who.trim() || '-'}`,
-    `${t.friends.result}: ${v.title} (${score}/100)`,
+    `${t.friends.result}: ${v.title}${invalid ? '' : ` (${score}/100)`}`,
     `${t.friends.notesLabel}: ${notes.trim() || '-'}`,
-    JSON.stringify({ age, lang, score, verdict: kind, closer: Boolean(second), screen: [window.innerWidth, window.innerHeight], tasks: byTask }),
+    JSON.stringify({ age, lang, score, verdict: kind, closer: Boolean(second), ...followed, screen: [window.innerWidth, window.innerHeight], tasks: byTask }),
   ].join('\n')
   const sendToFriend = async () => {
     try {
@@ -512,8 +531,6 @@ export default function App() {
     await navigator.clipboard.writeText(friendMessage)
     setSent('copied')
   }
-  // Found in our own phone data: some people never lift the finger, and then there is no pause to measure.
-  const noLift = !ex && scored.every((m) => m.air_time === 0 && m.num_of_pendown <= 1)
   const today = new Date().toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'long', year: 'numeric' })
   return (
     <main className="page" key="result">
@@ -530,16 +547,37 @@ export default function App() {
           {ex ? t.result.realCase(example! + 1, examples.length, ex.label === 'patient' ? t.result.patient : t.result.healthy) : t.result.yours}
         </p>
       </header>
-      <h1 className={'verdict ' + kind}>{v.title}</h1>
-      <p className="lead">{v.body}</p>
-      {noLift && <p className="why">{t.result.noLift}</p>}
+      <h1 className={'verdict ' + kind}>{invalid ? t.result.noResultTitle : v.title}</h1>
+      {invalid ? (
+        <>
+          <p className="lead">{t.result.noResult(answer.noResult.length)}</p>
+          <ul className="issues">
+            {answer.noResult.map(({ id, issue }) => (
+              <li key={id}>
+                <b>{t.tasks[id].title}.</b> {t.check.text(issue)}
+              </li>
+            ))}
+          </ul>
+          {answer.noResult.some((n) => n.issue.kind === 'joined') && <p className="why">{t.result.joinedWhy}</p>}
+          {answer.noResult.some((n) => n.issue.kind !== 'joined') && <p className="why">{t.result.notAskedHard}</p>}
+          <button className="primary" onClick={restart}>
+            {t.result.restart}
+          </button>
+        </>
+      ) : (
+        <>
+          <p className="lead">{v.body}</p>
+          {/* The person's own two measures next to the healthy group's, so the answer is not just a sentence. */}
+          {!ex && <p className="fine">{t.note.detail(meanAir, usual[0], meanTouches, usual[1])}</p>}
+        </>
+      )}
       {ex && (
         <p className={'badge ' + (judged === 'wrong' ? 'bad' : judged === 'right' ? 'good' : 'none')}>
           {judged === 'wrong' ? t.result.wrong : judged === 'right' ? t.result.right : t.result.noAnswer}
         </p>
       )}
       {ex && wrong && <p className="why">{whyWrong()}</p>}
-      {second && (
+      {second && !invalid && (
         <div className="votes">
           <p className="fine">{isGrey(first) ? t.result.votesUnsure(Math.round(first * 100)) : t.result.votesDemo(Math.round(first * 100))}</p>
           <ul>
@@ -553,10 +591,14 @@ export default function App() {
           {second.split && <p className="why">{t.result.split}</p>}
         </div>
       )}
-      <div className="meter" role="img" aria-label={`${score}/100`}>
-        <div className="meter-pin" key={score} style={{ left: `${score}%`, '--to': `${score}%` } as CSSProperties} />
-      </div>
-      <p className="fine">{t.result.score(score)}</p>
+      {!invalid && (
+        <>
+          <div className="meter" role="img" aria-label={`${score}/100`}>
+            <div className="meter-pin" key={score} style={{ left: `${score}%`, '--to': `${score}%` } as CSSProperties} />
+          </div>
+          <p className="fine">{t.result.score(score)}</p>
+        </>
+      )}
       <p className="fine caveat">{t.result.caveat}</p>
       {friends && !ex && (
         <section className="honest noprint">
@@ -591,7 +633,7 @@ export default function App() {
           {sent === 'copied' && <p className="fine">{t.friends.copied}</p>}
         </section>
       )}
-      <section className="honest">
+      <section className="honest" hidden={invalid}>
         <h2>{ex ? t.crowd.caseTitle : t.crowd.title}</h2>
         <Crowd
           healthy={crowd.healthy}
@@ -602,7 +644,7 @@ export default function App() {
         />
         <p>{t.crowd.explain(crowd.healthy.length, crowd.patients.length)}</p>
       </section>
-      {!ex && (
+      {!ex && !invalid && (
         <section className="honest steps">
           <h2>{t.result.whatNow}</h2>
           <ol>
@@ -612,7 +654,7 @@ export default function App() {
           </ol>
         </section>
       )}
-      {!ex && history.length > 0 && (
+      {!ex && !invalid && history.length > 0 && (
         <section className="honest">
           <h2>{t.history.title}</h2>
           <History entries={history} locale={LOCALE[lang]} />
@@ -666,8 +708,8 @@ export default function App() {
       {!ex && (
         <section className="honest note">
           <h2>{t.note.title}</h2>
-          <p>{t.note.line(today, v.title.toLowerCase(), score, Boolean(second))}</p>
-          <p>{t.note.detail(meanAir, usual[0], meanTouches, usual[1])}</p>
+          <p>{invalid ? t.note.noResult(today, why) : t.note.line(today, v.title.toLowerCase(), score, Boolean(second))}</p>
+          {!invalid && <p>{t.note.detail(meanAir, usual[0], meanTouches, usual[1])}</p>}
           <p>{t.note.about}</p>
           <button className="ghost noprint" onClick={() => window.print()}>
             {t.note.print}

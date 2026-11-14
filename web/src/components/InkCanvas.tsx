@@ -95,7 +95,7 @@ function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, 
   for (const g of gaps(strokes)) {
     if (g.from.t > until) continue
     const waited = Math.min(until, g.to.t) - g.from.t
-    ctx.globalAlpha = 0.25
+    ctx.globalAlpha = 0.4
     ctx.beginPath()
     ctx.arc(g.from.x, g.from.y, Math.min(40, 3 + Math.sqrt(waited) / 2.5), 0, Math.PI * 2)
     ctx.fill()

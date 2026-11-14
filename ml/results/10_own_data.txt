@@ -30,6 +30,15 @@ The model's two measures, per scored task: healthy people in the study (pen) vs 
   3 of 8 volunteers never lifted the finger during the three scored tasks.
   A person who never lifts gets 6/100, the lowest score the model can give for one touch per task.
 
+What a phone cannot see: time in the air of people in the study who did a task in ONE stroke (all of it is the pen hovering)
+  task 16:  13 of 174 people in the study did it in one stroke; their median share of time in the air was 22%. With exactly zero time in the air: study 0 of 174, our volunteers 3 of 8
+  task  5: 101 of 174 people in the study did it in one stroke; their median share of time in the air was  5%. With exactly zero time in the air: study 0 of 174, our volunteers 8 of 8
+  task  9:  90 of 174 people in the study did it in one stroke; their median share of time in the air was 12%. With exactly zero time in the air: study 0 of 174, our volunteers 5 of 8
+  Zero time in the air never happens in the study and is common on a phone: for the model it is a value it never saw.
+  The app now gives no result when the word (the task whose time in the air weighs most) has no pause at all,
+  and asks for it letter by letter. The first eight volunteers did the check before that rule existed:
+  3 of 8 wrote the word in a single drag and were told 'usual pattern' with the lowest score; today they would get no result.
+
 Tinta's score by age band (healthy volunteers):
           count  median   max
 age                          

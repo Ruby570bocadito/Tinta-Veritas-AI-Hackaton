@@ -9,6 +9,7 @@ Questions:
   2. How different is a finger on a phone from a pen on the study's tablet?
      (Until now we only simulated this as "everything uniformly slower".)
   3. Do the two measures the model uses (share of time in the air, number of touches) look the same?
+  4. What can a pen tablet see that a phone cannot? (The pen hovering: see the last section.)
 
 Run:  python ml/own_data.py
 """
@@ -104,6 +105,24 @@ def main():
     print(f"  {never} of {n} volunteers never lifted the finger during the three scored tasks.")
     low = float(np.round(100 * (1 / (1 + np.exp(-((shape(pd.DataFrame([{f'{m}{t}': v for t in tasks for m, v in (('air_time', 0), ('total_time', 1000), ('num_of_pendown', 1))}]), tasks) - np.array(model['mean'])) / np.array(model['std'])) @ np.array(model['coef']) - model['intercept'])))[0]))
     print(f"  A person who never lifts gets {low:.0f}/100, the lowest score the model can give for one touch per task.\n")
+
+    # 5. What a phone cannot see. A pen tablet also records the pen while it hovers over the paper, before the
+    # first stroke and after the last one. A phone only knows about a finger while it touches. So in the study
+    # "time in the air" is never zero, even for people who wrote a task in a single stroke.
+    print("What a phone cannot see: time in the air of people in the study who did a task in ONE stroke (all of it is the pen hovering)")
+    for t in tasks:
+        one = darwin[darwin[f"num_of_pendown{t}"] <= 1]
+        share = one[f"air_time{t}"] / one[f"total_time{t}"].clip(lower=1)
+        zero = int((darwin[f"air_time{t}"] == 0).sum())
+        ours = int(((own[f"num_of_pendown{t}"] <= 1) & (own[f"air_time{t}"] == 0)).sum())
+        print(f"  task {t:>2}: {len(one):>3} of {len(darwin)} people in the study did it in one stroke; their median share of time in the air was "
+              f"{100 * share.median():2.0f}%. With exactly zero time in the air: study {zero} of {len(darwin)}, our volunteers {ours} of {n}")
+    print("  Zero time in the air never happens in the study and is common on a phone: for the model it is a value it never saw.")
+    print("  The app now gives no result when the word (the task whose time in the air weighs most) has no pause at all,")
+    print("  and asks for it letter by letter. The first eight volunteers did the check before that rule existed:")
+    word = tasks[0]
+    drag = int((own[f"air_time{word}"] == 0).sum())
+    print(f"  {drag} of {n} wrote the word in a single drag and were told 'usual pattern' with the lowest score; today they would get no result.\n")
 
     by_age = own.assign(p=p).groupby("age")["p"].agg(["count", "median", "max"]).round(2)
     print("Tinta's score by age band (healthy volunteers):")

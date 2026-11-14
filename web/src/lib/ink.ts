@@ -37,4 +37,15 @@ export function measure(strokes: Stroke[]): Measures {
   }
 }
 
+/**
+ * Milliseconds the finger rested on the screen without moving (stops of a quarter of a second or more).
+ * The model does not use it. It is saved in study mode, because on glass a pause may be a finger that
+ * stops rather than one that lifts, and a phone can only see the second kind as time in the air.
+ */
+export function stillTime(strokes: Stroke[], least = 250): number {
+  let sum = 0
+  for (const s of strokes) for (let i = 1; i < s.length; i++) if (s[i].t - s[i - 1].t >= least) sum += s[i].t - s[i - 1].t
+  return Math.round(sum)
+}
+
 export const seconds = (ms: number) => (ms / 1000).toFixed(1) + ' s'

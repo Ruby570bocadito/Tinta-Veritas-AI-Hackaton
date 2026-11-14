@@ -7,6 +7,7 @@ import { spawn } from 'node:child_process'
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { perform } from './shapes.mjs'
 
 const out = process.argv[2] ?? 'screens'
 const url = process.argv[3] ?? 'http://localhost:5173/?closer'
@@ -45,7 +46,7 @@ await sleep(2500)
 
 // Helpers that live in the page: press a button by its text, and write a stroke on the sheet.
 await js(`
-  window.press = (label) => [...document.querySelectorAll('button')].find(b => b.textContent.trim().includes(label)).click()
+  window.press = (label) => { const b = [...document.querySelectorAll('button')].find(b => b.textContent.trim().includes(label) && !b.disabled); b?.click(); return Boolean(b) }
   window.stroke = async (pts, ms) => {
     const c = document.querySelector('canvas'), r = c.getBoundingClientRect()
     const ev = (type, p) => c.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 1, pointerType: 'touch', clientX: r.left + p[0] * r.width, clientY: r.top + p[1] * r.height }))
@@ -68,17 +69,19 @@ async function shot(name) {
   })()`)
   console.log("saved", name, sticking)
 }
-const press = async (label) => (await js(`press(${JSON.stringify(label)})`), await sleep(500))
-const write = async (strokes, ms = 700, pause = 500) => {
-  for (const s of strokes) {
-    await js(`stroke(${JSON.stringify(s)}, ${ms})`)
-    await sleep(pause)
+// A missing button stops the run: the walk through the app is also a test of its flow.
+const press = async (label) => {
+  if (!(await js(`press(${JSON.stringify(label)})`))) throw new Error(`no button "${label}" on this screen: ${await js('document.body.innerText.slice(0, 200)')}`)
+  await sleep(500)
+}
+// One task, written the way shapes.mjs describes it (quicker than a person, to keep the run short).
+const task = async (id, how = {}) => {
+  for (const { pts, ms, gap } of perform(id, how)) {
+    await js(`stroke(${JSON.stringify(pts)}, ${Math.round(ms)})`)
+    await sleep(gap + 120)
   }
 }
-
-const loops = [[0.1, 0.55], [0.16, 0.4], [0.2, 0.3], [0.17, 0.5], [0.22, 0.56], [0.3, 0.5], [0.36, 0.4], [0.4, 0.3], [0.37, 0.5], [0.42, 0.56], [0.5, 0.5], [0.56, 0.4], [0.6, 0.3], [0.57, 0.5], [0.62, 0.56], [0.7, 0.5], [0.76, 0.4], [0.8, 0.3], [0.77, 0.5], [0.82, 0.56]]
-const circle = Array.from({ length: 33 }, (_, i) => [0.5 + 0.17 * Math.cos((i / 8) * Math.PI), 0.5 + 0.2 * Math.sin((i / 8) * Math.PI)])
-const letters = (xs) => xs.map((x) => [[x, 0.38], [x + 0.03, 0.5], [x - 0.02, 0.6], [x + 0.04, 0.62]])
+const says = () => js(`document.querySelector('.cheer')?.textContent ?? ''`)
 
 await shot('home')
 await press('Start')
@@ -87,32 +90,43 @@ await press('Skip')
 await shot('ready')
 await press('Begin')
 await shot('practice')
-await write([[[0.18, 0.5], [0.82, 0.5], [0.18, 0.5], [0.82, 0.5]]])
+// Practice done badly first: Tinta says what she saw and offers another go.
+await task(2, { lifts: 5, seconds: 1.6, pause: 0.15 })
+await press("I'm done")
+await shot('practice-not-as-asked')
+console.log('practice, lifting 5 times ->', await says())
+await press('Try again')
+await task(2, { seconds: 1.6 })
 await press("I'm done")
 await press('Next')
-await write([[[0.5, 0.18], [0.5, 0.82], [0.5, 0.18], [0.5, 0.82]]])
+await task(3, { seconds: 1.4 })
 await press("I'm done")
 await press('Next')
-await write([circle], 1500)
+// One lap of the circle instead of four.
+await task(5, { amount: 0.25, seconds: 0.8 })
+await press("I'm done")
+await shot('circle-not-as-asked')
+console.log('one lap of the circle ->', await says())
+await press('Try again')
+await task(5, { seconds: 3 })
 await shot('circle')
 await press("I'm done")
 await press('Next')
-await write([loops.slice(0, 10), loops.slice(10)], 900, 900)
+await task(9, { lifts: 3, seconds: 3, pause: 0.7 })
 await shot('loops')
 await press("I'm done")
 await sleep(1200)
 await shot('invisible-ink')
 await press('Next')
-await write(letters([0.2, 0.33, 0.46, 0.59, 0.72]), 350, 600)
+await task(16, { seconds: 2 })
 await press("I'm done")
 await press('See the result')
 await shot('closer-look')
 await press('Three more')
-for (const xs of [[0.25, 0.5, 0.75], [0.12, 0.22, 0.32, 0.46, 0.56, 0.66, 0.8, 0.9], [0.12, 0.22, 0.32, 0.46, 0.56, 0.66, 0.8, 0.9]]) {
-  await write(letters(xs), 300, 450)
+for (const id of [6, 22, 23]) {
+  await task(id, { seconds: 2 })
   await press("I'm done")
-  await js(`press(document.body.innerText.includes('See the result') ? 'See the result' : 'Next')`)
-  await sleep(500)
+  await press(id === 23 ? 'See the result' : 'Next')
 }
 await shot('result')
 await js(`document.querySelector('.history')?.scrollIntoView({ block: 'center' })`)
@@ -137,6 +151,33 @@ if (url.includes('study')) {
   console.log('study: people saved on this phone =', await js(`JSON.parse(localStorage.getItem('tinta-study')).length`), '| copy-all button:', await js(`[...document.querySelectorAll('button')].some(b => b.textContent.includes('Copy all 1'))`))
   await js(`localStorage.removeItem('tinta-study')`)
 }
+await press('Start again')
+// A second, quick run where the circle is left at one lap: there must be no score at the end.
+await press('Start')
+await press('Skip')
+await press('Begin')
+for (const id of [2, 3]) {
+  await task(id, { seconds: 1.2 })
+  await press("I'm done")
+  await press('Next')
+}
+await task(5, { amount: 0.25, seconds: 0.8 })
+await press("I'm done")
+await press('Keep it')
+await task(9, { seconds: 2 })
+await press("I'm done")
+await press('Next')
+// The word in a single drag: on a phone that leaves no pause to time, and Tinta asks for it letter by letter.
+await task(16, { lifts: 0, seconds: 2 })
+await press("I'm done")
+await shot('word-no-pause')
+console.log('word in a single drag ->', await says())
+await press('Try again')
+await task(16, { seconds: 2 })
+await press("I'm done")
+await press('See the result')
+await shot('no-result')
+console.log('circle left at one lap ->', await js(`document.querySelector('h1').textContent + ' | ' + document.querySelector('.issues').textContent + ' | number shown: ' + Boolean(document.querySelector('.meter'))`))
 await press('Start again')
 await press('See real cases')
 await press('Show a mistake')
