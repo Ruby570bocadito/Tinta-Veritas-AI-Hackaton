@@ -5,6 +5,7 @@
 //   npm run dev                                   (in another terminal)
 //   npx vite-node tools/screens.mjs <folder> [url]
 //   SIZE=360x640 TINTA_LANG=es npx vite-node tools/screens.mjs <folder> [url]
+//   RELOADS=all npx vite-node tools/screens.mjs <folder> [url]      reloads the page after every step of the check
 import { spawn } from 'node:child_process'
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -105,10 +106,20 @@ async function shot(name) {
   if (wide) problems.push(`${name}: sticks out sideways: ${wide}`)
   console.log(`saved ${name} (page ${await js('document.documentElement.scrollHeight')} px tall)`)
 }
+// With RELOADS=all the page is reloaded after every step of the check (each task started, finished, kept or done
+// again, the closer look, the result). The app keeps the check through a reload, so the walk must go on as if
+// nothing had happened and end with the same answers.
+const everywhere = process.env.RELOADS === 'all'
+const STEPS = new Set([t.ready.begin, t.task.done, t.task.next, t.task.seeResult, t.check.again, t.check.keep, t.closer.more, t.closer.stop, t.result.redo(1)])
+let reloads = 0
 // A missing button stops the run: the walk through the app is also a test of its flow.
 const press = async (label) => {
   if (!(await js(`press(${JSON.stringify(label)})`))) throw new Error(`no button "${label}" on this screen: ${await js('document.body.innerText.slice(0, 200)')}`)
   await sleep(500)
+  if (everywhere && STEPS.has(label)) {
+    await reload()
+    reloads++
+  }
 }
 const has = (label) => js(`[...document.querySelectorAll('button')].some(b => b.textContent.trim().includes(${JSON.stringify(label)}))`)
 // One task, written the way shapes.mjs describes it (quicker than a person, to keep the run short).
@@ -208,7 +219,7 @@ expect('reloaded on the replay of a task: same step, same numbers, and Tinta say
   (await text('.step')) === t.task.step(4, 5, t.tasks[9].title) && (await flat('.stats')) === measured && (await text('main')).includes(t.task.back))
 await shot('back-after-reload')
 await press(t.task.next)
-expect('one step later Tinta no longer says "welcome back"', !(await text('main')).includes(t.task.back))
+if (!everywhere) expect('one step later Tinta no longer says "welcome back"', !(await text('main')).includes(t.task.back))
 await task(16, { amount: 0.4, seconds: 1 })
 await reload()
 expect('reloaded while writing a task: that task starts again on an empty sheet',
@@ -307,7 +318,7 @@ writeFileSync(join(out, `${String(++n).padStart(2, '0')}-ask-tinta.png`), Buffer
 
 // Chrome refuses to vibrate, and to ask "leave the page?", for touches that no finger made: that is this test, not the app.
 for (const e of errors) if (!String(e).includes('navigator.vibrate') && !String(e).includes("'beforeunload'")) problems.push('error in the page: ' + String(e).slice(0, 160))
-console.log(problems.length ? `\n${problems.length} PROBLEM(S):\n  ` + problems.join('\n  ') : `\nThe whole walk went through in ${lang} at ${W}x${H}: no missing button, nothing sticking out, no error in the page.`)
+console.log(problems.length ? `\n${problems.length} PROBLEM(S):\n  ` + problems.join('\n  ') : `\nThe whole walk went through in ${lang} at ${W}x${H}${everywhere ? `, with the page reloaded ${reloads} times on the way` : ''}: no missing button, nothing sticking out, no error in the page.`)
 ws.close()
 chrome.kill()
 process.exit(problems.length ? 1 : 0)
