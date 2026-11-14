@@ -68,6 +68,9 @@ def main():
         stopwatch=dict(tasks=sw_tasks, mean=sw.mu.tolist(), std=sw.sd.tolist(),
                        coef=float(sw.m.coef_[0][0]), intercept=float(sw.m.intercept_[0])),
         metrics=metrics, train_n=int(len(tr)), test_n=int(len(te)), examples=examples,
+        # Typical warm-up time of a healthy training person (geometric mean of the two warm-ups, median).
+        healthy_warmup_ms=float(np.median(np.exp(np.log(
+            dtr[y[tr] == 0][[f"total_time{t}" for t in WARMUP]].values.astype(float)).mean(1)))),
         note="DARWIN times are assumed to be milliseconds (the source does not state units).",
     ), indent=1), encoding="utf-8")
     print("wrote", OUT)

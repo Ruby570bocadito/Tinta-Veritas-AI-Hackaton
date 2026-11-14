@@ -11,6 +11,7 @@ export const TASK_IDS: number[] = data.tasks
 export const metrics = data.metrics
 export const examples = data.examples
 export const counts = { train: data.train_n, test: data.test_n }
+export const reference = { healthyWarmupMs: data.healthy_warmup_ms }
 
 const sigmoid = (z: number) => 1 / (1 + Math.exp(-z))
 

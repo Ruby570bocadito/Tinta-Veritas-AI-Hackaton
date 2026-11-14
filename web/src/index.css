@@ -1,12 +1,17 @@
+/* Tinta: paper, ink and one warm accent. Big type and strong contrast, because many users are older. */
 :root {
   --paper: #f6f1e7;
   --card: #fffdf8;
   --ink: #1d2433;
-  --soft: #5b6475;
+  --squid: #2b3654;
+  --soft: #4d5669;
   --air: #e4572e;
-  --ok: #2f7d5b;
-  --line: #ded6c6;
+  --air-text: #b83a14;
+  --ok: #24694b;
+  --line: #ddd4c2;
+  --display: 'Fraunces', Georgia, 'Times New Roman', serif;
   font-family: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 112.5%;
   color: var(--ink);
   background: var(--paper);
 }
@@ -18,60 +23,131 @@
 body {
   margin: 0;
   background: var(--paper);
+  /* faint ruled paper */
+  background-image: linear-gradient(transparent 31px, rgba(43, 54, 84, 0.05) 32px);
+  background-size: 100% 32px;
   -webkit-tap-highlight-color: transparent;
 }
 
 .page {
-  max-width: 34rem;
+  max-width: 32rem;
+  min-height: 100dvh;
   margin: 0 auto;
-  padding: 1.25rem 1rem 3rem;
+  padding: 1rem 1rem 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 0.85rem;
+}
+
+.brandbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .brand {
-  font-size: 1.1rem;
+  font-family: var(--display);
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  margin: 0.5rem 0 0;
 }
 
-h1 {
-  font-size: 1.9rem;
-  line-height: 1.15;
+.tag {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1.5px solid var(--ink);
+  border-radius: 2rem;
+  padding: 0.15rem 0.6rem;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.bubble {
+  position: relative;
+  margin: 0;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 1.1rem 1.1rem 1.1rem 0.25rem;
+  padding: 0.7rem 0.9rem;
+  font-size: 1rem;
+  line-height: 1.35;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+h1,
+h2 {
+  font-family: var(--display);
   margin: 0;
   text-wrap: balance;
 }
 
+h1 {
+  font-size: 1.85rem;
+  line-height: 1.12;
+}
+
 h2 {
   font-size: 1.25rem;
-  line-height: 1.3;
-  margin: 0;
+  line-height: 1.25;
 }
 
 .lead {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.5;
   margin: 0;
   color: var(--soft);
 }
 
+.taskbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .step {
-  margin: 0.5rem 0 0;
-  font-size: 0.95rem;
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
   color: var(--soft);
+}
+
+.dots {
+  display: flex;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dots li {
+  width: 1.6rem;
+  height: 0.45rem;
+  border-radius: 1rem;
+  background: var(--line);
+}
+
+.dots .done {
+  background: var(--squid);
+}
+
+.dots .now {
+  background: var(--air);
 }
 
 .prompt {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-family: var(--display);
+  font-size: 2.2rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .fine {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--soft);
   margin: 0;
   line-height: 1.4;
@@ -79,13 +155,30 @@ h2 {
 
 button {
   font: inherit;
-  font-size: 1.1rem;
   font-weight: 700;
-  min-height: 3.25rem;
-  padding: 0.6rem 1.2rem;
+  min-height: 3.1rem;
+  padding: 0.55rem 1.1rem;
   border-radius: 0.9rem;
   border: 2px solid var(--ink);
   cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.primary {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 4px 0 #000;
+}
+
+.ghost {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 4px 0 var(--line);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #000;
 }
 
 button:disabled {
@@ -93,17 +186,8 @@ button:disabled {
   cursor: default;
 }
 
-.primary {
-  background: var(--ink);
-  color: var(--paper);
-}
-
-.ghost {
-  background: transparent;
-  color: var(--ink);
-}
-
-button:focus-visible {
+button:focus-visible,
+select:focus-visible {
   outline: 3px solid var(--air);
   outline-offset: 2px;
 }
@@ -119,12 +203,13 @@ button:focus-visible {
 
 .ink {
   width: 100%;
-  height: min(46vh, 22rem);
+  height: min(44dvh, 21rem);
   background: var(--card);
-  border: 2px solid var(--line);
+  border: 2px solid var(--ink);
   border-radius: 1rem;
   touch-action: none;
   display: block;
+  box-shadow: 4px 4px 0 var(--line);
 }
 
 .ink-readonly {
@@ -133,14 +218,14 @@ button:focus-visible {
 
 .legend {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--soft);
 }
 
 .dot {
   display: inline-block;
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 0.7rem;
+  height: 0.7rem;
   border-radius: 50%;
   margin-right: 0.3rem;
 }
@@ -158,19 +243,20 @@ button:focus-visible {
 
 .stats div {
   background: var(--card);
-  border: 1px solid var(--line);
+  border: 1.5px solid var(--line);
   border-radius: 0.8rem;
-  padding: 0.6rem;
+  padding: 0.55rem;
 }
 
 .stats dt {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--soft);
 }
 
 .stats dd {
-  margin: 0.15rem 0 0;
-  font-size: 1.35rem;
+  margin: 0.1rem 0 0;
+  font-family: var(--display);
+  font-size: 1.4rem;
   font-weight: 700;
 }
 
@@ -179,43 +265,79 @@ button:focus-visible {
 }
 
 .verdict.mention {
-  color: var(--air);
+  color: var(--air-text);
 }
 
+.badge {
+  align-self: flex-start;
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 2rem;
+  padding: 0.25rem 0.75rem;
+  border: 2px solid currentColor;
+}
+
+.badge.good {
+  color: var(--ok);
+}
+
+.badge.bad {
+  color: var(--air-text);
+}
+
+.why {
+  margin: 0;
+  background: var(--card);
+  border-left: 5px solid var(--air);
+  border-radius: 0.5rem;
+  padding: 0.7rem 0.8rem;
+  line-height: 1.45;
+  font-size: 0.95rem;
+}
+
+/* Score line: green end, grey "I don't know" middle, orange end. */
 .meter {
-  height: 0.9rem;
-  background: var(--line);
+  position: relative;
+  height: 1rem;
   border-radius: 1rem;
-  overflow: hidden;
+  background: linear-gradient(90deg, var(--ok) 0 35%, var(--line) 35% 65%, var(--air) 65% 100%);
+  margin-top: 0.4rem;
 }
 
-.meter-fill {
-  height: 100%;
+.meter-pin {
+  position: absolute;
+  top: -0.35rem;
+  width: 0.5rem;
+  height: 1.7rem;
+  margin-left: -0.25rem;
   background: var(--ink);
+  border: 2px solid var(--paper);
+  border-radius: 0.3rem;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .table th,
 .table td {
   text-align: left;
-  padding: 0.5rem 0.25rem;
+  padding: 0.45rem 0.2rem;
   border-bottom: 1px solid var(--line);
 }
 
 .table th {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--soft);
   font-weight: 400;
 }
 
 .honest {
   background: var(--card);
-  border: 1px solid var(--line);
+  border: 2px solid var(--ink);
   border-radius: 1rem;
   padding: 1rem;
   display: flex;
@@ -226,4 +348,83 @@ button:focus-visible {
 .honest p {
   margin: 0;
   line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+select,
+textarea {
+  font: inherit;
+  padding: 0.5rem;
+  border: 2px solid var(--ink);
+  border-radius: 0.6rem;
+  background: var(--paper);
+  color: var(--ink);
+  width: 100%;
+}
+
+textarea {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+/* Mascot: she bobs and blinks, unless the person asked for less motion. */
+.mascot {
+  flex: none;
+  overflow: visible;
+}
+
+.mascot-bob {
+  animation: bob 3.2s ease-in-out infinite;
+  transform-origin: 60px 70px;
+}
+
+.mascot-eyes {
+  animation: blink 4.5s infinite;
+  transform-origin: 60px 56px;
+}
+
+.mascot-hello .mascot-arm {
+  animation: wave 1.6s ease-in-out infinite;
+  transform-origin: 84px 88px;
+}
+
+@keyframes bob {
+  50% {
+    transform: translateY(-4px) rotate(-1.5deg);
+  }
+}
+
+@keyframes blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes wave {
+  50% {
+    transform: rotate(-9deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-bob,
+  .mascot-eyes,
+  .mascot-hello .mascot-arm {
+    animation: none;
+  }
+  button {
+    transition: none;
+  }
 }

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import InkCanvas, { type Guide } from './components/InkCanvas'
+import Mascot, { type Mood } from './components/Mascot'
 import { measure, seconds, type Measures, type Stroke } from './lib/ink'
-import { counts, examples, metrics, predict, slowdown, verdict, TASK_IDS, WARMUP_IDS, type Verdict } from './lib/model'
+import { counts, examples, metrics, predict, reference, slowdown, verdict, TASK_IDS, WARMUP_IDS, type Verdict } from './lib/model'
 
 type Task = { id: number; title: string; instruction: string; prompt?: string; speak?: string; guide?: Guide }
 
@@ -10,14 +11,14 @@ type Task = { id: number; title: string; instruction: string; prompt?: string; s
 const TASKS: Task[] = [
   {
     id: 2,
-    title: 'Warm-up: side to side',
+    title: 'Warm-up',
     instruction: 'Join the two dots with a line, back and forth four times, without lifting your finger.',
     guide: 'hline',
   },
   {
     id: 3,
-    title: 'Warm-up: up and down',
-    instruction: 'Join the two dots with a line, up and down four times, without lifting your finger.',
+    title: 'Warm-up',
+    instruction: 'Now up and down: join the two dots four times, without lifting your finger.',
     guide: 'vline',
   },
   {
@@ -40,19 +41,33 @@ const TASKS: Task[] = [
   },
 ]
 
-const VERDICTS: Record<Verdict, { title: string; body: string }> = {
+const VERDICTS: Record<Verdict, { title: string; body: string; mood: Mood }> = {
   typical: {
     title: 'Within the usual pattern',
     body: 'Compared with your own warm-up pace, the harder tasks slowed you down about as much as the healthy group in the study.',
+    mood: 'happy',
   },
   unsure: {
     title: "I can't tell from this",
-    body: 'The pattern sits between the two groups. Try again another day, in a calm moment.',
+    body: 'Your pattern sits between the two groups, so I would rather not guess. Try again another day, in a calm moment.',
+    mood: 'unsure',
   },
   mention: {
     title: 'Worth mentioning to a doctor',
     body: 'Compared with your own warm-up pace, the harder tasks slowed you down more like the patient group in the study. This is not a diagnosis.',
+    mood: 'caring',
   },
+}
+
+/** Why Tinta got a real case wrong, in plain words. Based on the measures, not on a guess. */
+function whyWrong(label: string, byTask: Record<number, Measures>): string {
+  const warm = Math.exp(WARMUP_IDS.reduce((s, t) => s + Math.log(byTask[t].total_time), 0) / WARMUP_IDS.length)
+  if (label === 'patient') {
+    return warm > 1.5 * reference.healthyWarmupMs
+      ? `This patient was slow on the warm-ups too (${seconds(warm)} against ${seconds(reference.healthyWarmupMs)} for a typical healthy person). Tinta compares people with their own pace, so someone who is slow at everything looks "consistent". That is the price of not depending on the device.`
+      : 'This patient wrote the three scored tasks at a healthy pace. Timing cannot see everything: other tasks of the full study might have shown it.'
+  }
+  return 'This healthy person slowed down a lot on the harder tasks, more than most healthy people. A hesitation, a distraction or an unfamiliar task looks the same as a cognitive pause to Tinta.'
 }
 
 function say(text: string) {
@@ -63,27 +78,40 @@ function say(text: string) {
   speechSynthesis.speak(u)
 }
 
+const study = new URLSearchParams(location.search).has('study')
+const isWrong = (e: (typeof examples)[number]) => e.p >= 0.5 !== (e.label === 'patient')
+
 type Screen = { name: 'intro' } | { name: 'task'; index: number; review: boolean } | { name: 'result' }
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'intro' })
   const [ink, setInk] = useState<Record<number, Stroke[]>>({})
   const [example, setExample] = useState<number | null>(null)
+  const [age, setAge] = useState('')
+  const [copied, setCopied] = useState(false)
 
   const restart = () => {
     setInk({})
     setExample(null)
+    setCopied(false)
     setScreen({ name: 'intro' })
   }
 
   if (screen.name === 'intro') {
     return (
-      <main className="page">
-        <p className="brand">Tinta</p>
+      <main className="page intro">
+        <header className="brandbar">
+          <span className="brand">Tinta</span>
+          <span className="tag">prototype</span>
+        </header>
+        <div className="hero">
+          <Mascot mood="hello" size={150} label="Tinta, a small squid holding a pen" />
+          <p className="bubble">Hi, I'm Tinta. Lend me your finger for two minutes?</p>
+        </div>
         <h1>How you write says more than what you write.</h1>
         <p className="lead">
-          Five short writing tasks, about two minutes. Tinta times the pauses your eye can't see and compares them with
-          data from 174 people, 89 of them living with Alzheimer's.
+          Five short writing tasks. I time the pauses your eye can't see and compare them with data from 174 people, 89
+          of them living with Alzheimer's.
         </p>
         <button className="primary" onClick={() => setScreen({ name: 'task', index: 0, review: false })}>
           Start the check
@@ -95,9 +123,11 @@ export default function App() {
             setScreen({ name: 'result' })
           }}
         >
-          See a real case from the study
+          See real cases from the study
         </button>
-        <p className="fine">This project is a prototype and is not medical advice. Nothing you write leaves this device.</p>
+        <p className="fine">
+          This project is a prototype and is not medical advice. Nothing you write leaves this device.
+        </p>
       </main>
     )
   }
@@ -109,10 +139,20 @@ export default function App() {
     const last = screen.index === TASKS.length - 1
     return (
       <main className="page">
-        <p className="step">
-          Task {screen.index + 1} of {TASKS.length} · {task.title}
-        </p>
-        <h2>{screen.review ? 'Your invisible ink' : task.instruction}</h2>
+        <header className="taskbar">
+          <Mascot mood={screen.review ? 'happy' : 'watching'} size={52} />
+          <div>
+            <ol className="dots" aria-label={`Task ${screen.index + 1} of ${TASKS.length}`}>
+              {TASKS.map((t, i) => (
+                <li key={t.id} className={i < screen.index ? 'done' : i === screen.index ? 'now' : ''} />
+              ))}
+            </ol>
+            <p className="step">
+              {screen.index + 1} of {TASKS.length} · {task.title}
+            </p>
+          </div>
+        </header>
+        <h2>{screen.review ? 'Here is your invisible ink' : task.instruction}</h2>
         {task.prompt && !screen.review && <p className="prompt">{task.prompt}</p>}
         {task.speak && !screen.review && (
           <button className="ghost" onClick={() => say(task.speak!)}>
@@ -129,8 +169,8 @@ export default function App() {
         {screen.review ? (
           <>
             <p className="legend">
-              <span className="dot air" /> Orange shows where your finger was off the screen. Bigger circles mean
-              longer pauses.
+              <span className="dot air" /> Orange is where your finger was off the screen. Bigger circles are longer
+              pauses.
             </p>
             <dl className="stats">
               <div>
@@ -183,20 +223,42 @@ export default function App() {
   const v = VERDICTS[verdict(p)]
   const same = metrics['1.0']
   const slow = metrics['1.5']
+  const wrong = ex ? isWrong(ex) : false
+  const nextWrong = () => {
+    for (let k = 1; k <= examples.length; k++) {
+      const i = ((example ?? -1) + k) % examples.length
+      if (isWrong(examples[i])) return setExample(i)
+    }
+  }
+  const studyLine = JSON.stringify({ age, score: Math.round(p * 100), tasks: byTask })
   return (
     <main className="page">
-      <p className="step">{ex ? `Real case from the study · actually ${ex.label}` : 'Your result'}</p>
+      <header className="taskbar">
+        <Mascot mood={v.mood} size={72} />
+        <p className="step">
+          {ex ? `Real case ${example! + 1} of ${examples.length} · this person is actually ${ex.label}` : 'Your result'}
+        </p>
+      </header>
       <h1 className={'verdict ' + verdict(p)}>{v.title}</h1>
       <p className="lead">{v.body}</p>
+      {ex && (
+        <p className={'badge ' + (wrong ? 'bad' : 'good')}>
+          {wrong ? 'Tinta gets this one wrong.' : 'Tinta gets this one right.'}
+        </p>
+      )}
+      {ex && wrong && <p className="why">{whyWrong(ex.label, byTask)}</p>}
       <div className="meter" role="img" aria-label={`Model score ${Math.round(p * 100)} out of 100`}>
-        <div className="meter-fill" style={{ width: `${Math.round(p * 100)}%` }} />
+        <div className="meter-zone" />
+        <div className="meter-pin" style={{ left: `${Math.round(p * 100)}%` }} />
       </div>
-      <p className="fine">Model score {Math.round(p * 100)}/100. Below 35 is the usual pattern, above 65 is worth mentioning.</p>
+      <p className="fine">
+        Score {Math.round(p * 100)}/100. Under 35: usual pattern. Over 65: worth mentioning. In between: I don't know.
+      </p>
       <table className="table">
         <thead>
           <tr>
             <th>Task</th>
-            <th>Slower than your warm-up</th>
+            <th>Slower than own warm-up</th>
             <th>In the air</th>
             <th>Touches</th>
           </tr>
@@ -213,9 +275,36 @@ export default function App() {
         </tbody>
       </table>
       {ex && (
-        <button className="ghost" onClick={() => setExample((example! + 1) % examples.length)}>
-          Next real case ({example! + 1} of {examples.length})
-        </button>
+        <div className="row">
+          <button className="ghost" onClick={() => setExample((example! + 1) % examples.length)}>
+            Next case
+          </button>
+          <button className="ghost" onClick={nextWrong}>
+            Show a mistake
+          </button>
+        </div>
+      )}
+      {study && !ex && (
+        <section className="honest">
+          <h2>Study mode</h2>
+          <p>Only timings are saved: no name, no drawing. Ask the person first.</p>
+          <label className="field">
+            Age band
+            <select value={age} onChange={(e) => setAge(e.target.value)}>
+              <option value="">Choose…</option>
+              <option>under 30</option>
+              <option>30 to 59</option>
+              <option>60 or over</option>
+            </select>
+          </label>
+          <textarea readOnly value={studyLine} rows={4} aria-label="Anonymous timings" />
+          <button
+            className="ghost"
+            onClick={() => navigator.clipboard.writeText(studyLine).then(() => setCopied(true))}
+          >
+            {copied ? 'Copied' : 'Copy timings'}
+          </button>
+        </section>
       )}
       <section className="honest">
         <h2>How well does it work?</h2>
@@ -226,13 +315,14 @@ export default function App() {
           on the study's own tablet, the stopwatch is slightly better.
         </p>
         <p>
-          But a phone is not that tablet. If the device makes everyone 1.5 times slower, the stopwatch raises{' '}
+          But a phone is not that tablet. If a device makes everyone 1.5 times slower, the stopwatch raises{' '}
           {slow.stopwatch.false_alarms} false alarms out of {slow.stopwatch.healthy} healthy people. Tinta still raises{' '}
           {slow.model.false_alarms}, because it compares you with your own warm-up, not with a clock.
         </p>
         <p>
-          The study used a pen on a tablet, in Italian. Tinta uses a finger on a phone. We have not tested it with
-          patients on a phone, so treat a result as a reason to talk to a doctor, never as an answer.
+          Limits: the study used a pen on a tablet, in Italian, and does not publish age or sex, so we cannot check
+          that Tinta works equally well across groups. We have not tested it with patients on a phone. Treat a result
+          as a reason to talk to a doctor, never as an answer.
         </p>
       </section>
       <button className="primary" onClick={restart}>
