@@ -840,15 +840,238 @@ textarea.words {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .mascot,
-  .page,
-  .finger,
-  .here {
-    animation: none;
+/* ---- Life: small movements that make the paper world feel handled, not printed. ---- */
+
+/* Each thing on a screen lands a moment after the one above it. */
+.page > * {
+  animation: land 0.42s cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+}
+.page > :nth-child(2) { animation-delay: 0.05s; }
+.page > :nth-child(3) { animation-delay: 0.1s; }
+.page > :nth-child(4) { animation-delay: 0.15s; }
+.page > :nth-child(5) { animation-delay: 0.2s; }
+.page > :nth-child(6) { animation-delay: 0.25s; }
+.page > :nth-child(7) { animation-delay: 0.3s; }
+.page > :nth-child(n + 8) { animation-delay: 0.35s; }
+
+@keyframes land {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
-  button {
-    transition: none;
+}
+
+/* Tinta pops in, then floats. Tap her and she wiggles. */
+.mascot {
+  animation: pop 0.55s cubic-bezier(0.3, 1.7, 0.5, 1) backwards, bob 3.4s ease-in-out 0.55s infinite;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mascot-happy {
+  animation: pop 0.55s cubic-bezier(0.3, 1.7, 0.5, 1) backwards, hop 1.2s ease-in-out 0.55s infinite;
+}
+.mascot.poked {
+  animation: wiggle 0.7s ease-in-out;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.55) rotate(-8deg);
+  }
+}
+
+@keyframes wiggle {
+  20% { transform: rotate(-11deg) scale(1.08); }
+  45% { transform: rotate(9deg) scale(1.08); }
+  70% { transform: rotate(-6deg) scale(1.04); }
+}
+
+/* Her speech bubble follows her. */
+.bubble,
+.cheer {
+  animation: say 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) 0.4s backwards;
+  transform-origin: left bottom;
+}
+
+@keyframes say {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-6deg);
+  }
+}
+
+/* The way in breathes a little, so the eye finds it. */
+.intro > .primary {
+  animation: land 0.42s cubic-bezier(0.2, 0.9, 0.3, 1) 0.15s backwards, nudge 2.6s ease-in-out 1.6s infinite;
+}
+
+@keyframes nudge {
+  50% {
+    transform: scale(1.025);
+  }
+}
+
+/* The step you are on beats softly. */
+.dots .now {
+  animation: beat 1.6s ease-in-out infinite;
+}
+
+@keyframes beat {
+  50% {
+    transform: scale(1.4);
+  }
+}
+
+/* The three measures of a task land one by one. */
+.stats div {
+  animation: land 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+}
+.stats div:nth-child(2) { animation-delay: 0.12s; }
+.stats div:nth-child(3) { animation-delay: 0.24s; }
+
+/* The score pin travels from zero to the score. */
+.meter-pin {
+  animation: travel 1.3s cubic-bezier(0.2, 0.8, 0.2, 1) 0.45s backwards;
+}
+
+@keyframes travel {
+  from {
+    left: 0;
+  }
+}
+
+/* The three model cards turn over one by one. */
+.votes li {
+  animation: land 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+}
+.votes li:nth-child(1) { animation-delay: 0.5s; }
+.votes li:nth-child(2) { animation-delay: 0.7s; }
+.votes li:nth-child(3) { animation-delay: 0.9s; }
+
+/* The people of the study appear column by column, then your line is drawn. */
+.crowd circle {
+  animation: appear 0.35s ease-out backwards;
+}
+.crowd line {
+  stroke-dasharray: 400;
+  animation: drawline 0.8s ease-out 1.1s backwards;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes drawline {
+  from {
+    stroke-dashoffset: 400;
+  }
+}
+
+/* Paper confetti when the answer is "usual pattern". It falls once and is gone. */
+.taskbar {
+  position: relative;
+}
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.confetti i {
+  position: absolute;
+  top: 0;
+  left: calc(var(--i) * 5.6%);
+  width: 0.55rem;
+  height: 0.8rem;
+  border-radius: 2px;
+  background: var(--air);
+  opacity: 0;
+  animation: fall 1.9s cubic-bezier(0.3, 0.6, 0.6, 1) forwards;
+  animation-delay: calc(0.5s + var(--i) * 45ms);
+}
+.confetti i:nth-child(3n) { background: var(--ok); width: 0.7rem; height: 0.5rem; }
+.confetti i:nth-child(3n + 1) { background: var(--felt); }
+.confetti i:nth-child(4n) { background: #e9b949; }
+.confetti i:nth-child(1) { --i: 0; } .confetti i:nth-child(2) { --i: 9; } .confetti i:nth-child(3) { --i: 3; }
+.confetti i:nth-child(4) { --i: 14; } .confetti i:nth-child(5) { --i: 6; } .confetti i:nth-child(6) { --i: 11; }
+.confetti i:nth-child(7) { --i: 1; } .confetti i:nth-child(8) { --i: 16; } .confetti i:nth-child(9) { --i: 8; }
+.confetti i:nth-child(10) { --i: 4; } .confetti i:nth-child(11) { --i: 13; } .confetti i:nth-child(12) { --i: 2; }
+.confetti i:nth-child(13) { --i: 17; } .confetti i:nth-child(14) { --i: 7; } .confetti i:nth-child(15) { --i: 12; }
+.confetti i:nth-child(16) { --i: 5; } .confetti i:nth-child(17) { --i: 15; } .confetti i:nth-child(18) { --i: 10; }
+
+@keyframes fall {
+  0% {
+    opacity: 1;
+    transform: translateY(-2rem) rotate(0turn);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(15rem) rotate(1.6turn);
+  }
+}
+
+/* "How it goes": three small pictures on the first screen. */
+.how h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+.how ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+.how li {
+  background: var(--card) var(--grain);
+  border-radius: 0.8rem 1rem 0.7rem 0.9rem;
+  box-shadow: var(--lift);
+  padding: 0.5rem 0.4rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.25;
+  animation: land 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+}
+.how li:nth-child(1) { transform: rotate(-1.2deg); animation-delay: 0.45s; }
+.how li:nth-child(2) { animation-delay: 0.6s; }
+.how li:nth-child(3) { transform: rotate(1.2deg); animation-delay: 0.75s; }
+.how li .mascot {
+  width: 4.2rem;
+  height: 4.2rem;
+}
+.how b {
+  display: inline-grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  margin-right: 0.3rem;
+  border-radius: 50%;
+  background: var(--air-text);
+  color: #fffaf0;
+  font-size: 0.8rem;
+}
+
+/* Anyone who asked their phone for less motion gets a still app. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .confetti {
+    display: none;
   }
 }
 

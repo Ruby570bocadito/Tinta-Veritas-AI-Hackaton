@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import History from './components/History'
 import Crowd from './components/Crowd'
 import InkCanvas, { type Guide, type Size } from './components/InkCanvas'
@@ -169,6 +169,20 @@ export default function App() {
             <li key={chip}>{chip}</li>
           ))}
         </ul>
+        <section className="how" aria-label={t.home.how}>
+          <h2>{t.home.how}</h2>
+          <ol>
+            {t.home.steps.map((step, i) => (
+              <li key={step}>
+                <Mascot mood={(['task-loops', 'writing', 'closer-look'] as const)[i]} size={84} />
+                <span>
+                  <b>{i + 1}</b>
+                  {step}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
         <p className="fine">
           {t.disclaimer} {t.private}
         </p>
@@ -504,7 +518,14 @@ export default function App() {
   return (
     <main className="page" key="result">
       <header className="taskbar">
-        <Mascot mood={VERDICT_MOOD[kind]} size={110} />
+        <Mascot mood={VERDICT_MOOD[kind]} size={130} />
+        {!ex && kind === 'typical' && (
+          <div className="confetti" aria-hidden="true">
+            {Array.from({ length: 18 }, (_, i) => (
+              <i key={i} />
+            ))}
+          </div>
+        )}
         <p className="step">
           {ex ? t.result.realCase(example! + 1, examples.length, ex.label === 'patient' ? t.result.patient : t.result.healthy) : t.result.yours}
         </p>
@@ -533,7 +554,7 @@ export default function App() {
         </div>
       )}
       <div className="meter" role="img" aria-label={`${score}/100`}>
-        <div className="meter-pin" style={{ left: `${score}%` }} />
+        <div className="meter-pin" key={score} style={{ left: `${score}%`, '--to': `${score}%` } as CSSProperties} />
       </div>
       <p className="fine">{t.result.score(score)}</p>
       <p className="fine caveat">{t.result.caveat}</p>

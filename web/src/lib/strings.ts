@@ -13,7 +13,7 @@ export type Strings = {
   prototype: string
   disclaimer: string
   private: string
-  home: { bubble: string; title: string; lead: string; start: string; cases: string; ask: string; chips: string[] }
+  home: { bubble: string; title: string; lead: string; start: string; cases: string; ask: string; chips: string[]; how: string; steps: string[] }
   guide: { skip: string; back: string; next: string; gotIt: string; cards: { title: string; body: string }[] }
   ready: { title: string; tips: string[]; lead: string; begin: string }
   tasks: Record<number, TaskText>
@@ -111,6 +111,8 @@ const en: Strings = {
     cases: 'See real cases from the study',
     ask: 'Ask Tinta',
     chips: ['5 short tasks', 'About 2 minutes', 'Works offline'],
+    how: 'How it goes',
+    steps: ['Write with your finger', 'See your invisible ink', 'Get an honest answer'],
   },
   guide: {
     skip: 'Skip',
@@ -221,8 +223,8 @@ const en: Strings = {
     right: 'Tinta gets this one right.',
     wrong: 'Tinta gets this one wrong.',
     noAnswer: 'Tinta gives no answer for this one.',
-    noLift: 'You wrote every task without lifting your finger. Three of my seven phone volunteers did the same. With nothing in the air to time, my score comes out as low as it can go, so today I can tell you less than usual.',
-    caveat: 'Tinta learned from pen-on-tablet data. On phones, only 7 healthy volunteers have tried her, and no patient has.',
+    noLift: 'You wrote every task without lifting your finger. Three of my eight phone volunteers did the same. With nothing in the air to time, my score comes out as low as it can go, so today I can tell you less than usual.',
+    caveat: 'Tinta learned from pen-on-tablet data. On phones, only 8 healthy volunteers have tried her, and no patient has.',
     score: (s) => `Score ${s}/100. Under 35: usual pattern. Over 65: worth mentioning. In between: I don't know.`,
     whatNow: 'What now?',
     measurements: 'See the measurements',
@@ -372,7 +374,7 @@ const en: Strings = {
         q: 'How often are you right?',
         a: [
           'About 3 times out of 4 on people I had never seen, in the study data. So I am wrong about 1 time in 4, in both directions. A simple stopwatch does a little better on the study\'s own tablet.',
-          'And that study used a pen on a tablet. On phones, only seven healthy volunteers have tried me. Several lifted the finger far less than people lifted the pen in the study, so my scores may run low on a phone. No patient has tried me on one. I say so on every result.',
+          'And that study used a pen on a tablet. On phones, only eight healthy volunteers have tried me. Several lifted the finger far less than people lifted the pen in the study, so my scores may run low on a phone. No patient has tried me on one. I say so on every result.',
         ],
       },
       {
@@ -401,6 +403,8 @@ const es: Strings = {
     cases: 'Ver casos reales del estudio',
     ask: 'Pregunta a Tinta',
     chips: ['5 tareas cortas', 'Unos 2 minutos', 'Funciona sin internet'],
+    how: 'Cómo va',
+    steps: ['Escribe con el dedo', 'Mira tu tinta invisible', 'Recibe una respuesta honesta'],
   },
   guide: {
     skip: 'Saltar',
@@ -511,8 +515,8 @@ const es: Strings = {
     right: 'Tinta acierta en este.',
     wrong: 'Tinta se equivoca en este.',
     noAnswer: 'En este, Tinta no da respuesta.',
-    noLift: 'Has escrito todas las tareas sin levantar el dedo. A tres de mis siete voluntarios con móvil les pasó lo mismo. Sin nada en el aire que cronometrar, mi nota sale lo más baja posible, así que hoy puedo decirte menos de lo normal.',
-    caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 7 voluntarios sanos, y ningún paciente.',
+    noLift: 'Has escrito todas las tareas sin levantar el dedo. A tres de mis ocho voluntarios con móvil les pasó lo mismo. Sin nada en el aire que cronometrar, mi nota sale lo más baja posible, así que hoy puedo decirte menos de lo normal.',
+    caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 8 voluntarios sanos, y ningún paciente.',
     score: (s) => `Nota ${s}/100. Menos de 35: lo habitual. Más de 65: coméntalo. En medio: no lo sé.`,
     whatNow: '¿Y ahora qué?',
     measurements: 'Ver las medidas',
@@ -662,7 +666,7 @@ const es: Strings = {
         q: '¿Cuántas veces aciertas?',
         a: [
           'Unas 3 de cada 4 con personas que no había visto nunca, en los datos del estudio. O sea, me equivoco 1 de cada 4, en los dos sentidos. Un simple cronómetro acierta un poco más en la tableta del estudio.',
-          'Y ese estudio se hizo con lápiz y tableta. En móviles solo me han probado siete voluntarios sanos. Varios levantaron el dedo mucho menos de lo que la gente levantaba el lápiz en el estudio, así que en un móvil mis notas pueden salir bajas. Ningún paciente me ha probado en uno. Lo digo en cada resultado.',
+          'Y ese estudio se hizo con lápiz y tableta. En móviles solo me han probado ocho voluntarios sanos. Varios levantaron el dedo mucho menos de lo que la gente levantaba el lápiz en el estudio, así que en un móvil mis notas pueden salir bajas. Ningún paciente me ha probado en uno. Lo digo en cada resultado.',
         ],
       },
       {
