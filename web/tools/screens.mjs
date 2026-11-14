@@ -110,7 +110,7 @@ async function shot(name) {
 // again, the closer look, the result). The app keeps the check through a reload, so the walk must go on as if
 // nothing had happened and end with the same answers.
 const everywhere = process.env.RELOADS === 'all'
-const STEPS = new Set([t.ready.begin, t.task.done, t.task.next, t.task.seeResult, t.check.again, t.check.keep, t.closer.more, t.closer.stop, t.result.redo(1)])
+const STEPS = new Set([t.ready.begin, t.task.done, t.task.next, t.task.seeResult, t.check.again, t.check.keep, t.check.leave, t.closer.more, t.closer.stop, t.result.redo(1)])
 let reloads = 0
 // A missing button stops the run: the walk through the app is also a test of its flow.
 const press = async (label) => {
@@ -256,7 +256,7 @@ if (url.includes('friends')) {
   await sleep(300)
   await press(t.friends.send)
   const sent = (await js('window.shared')) ?? ''
-  expect('friends mode: the message has the name, the result and the timings', sent.includes('Test person') && sent.includes('"tasks"') && sent.includes('"laps"'))
+  expect('friends mode: the message has the name, the result, the timings and which version of the app wrote it', sent.includes('Test person') && sent.includes('"tasks"') && sent.includes('"laps"') && sent.includes('"v":"20'))
 }
 if (url.includes('study')) {
   // Study mode: saving the volunteer keeps one line of timings on the phone.
@@ -279,7 +279,10 @@ for (const taskId of [2, 3]) {
 }
 await task(5, { amount: 0.25, seconds: 0.8 })
 await press(t.task.done)
-await press(t.check.keep)
+// A task that counts: doing it again is the big button; leaving it is a smaller one that says what it costs.
+expect('a scored task not done as asked: "try again" is the big button and the way out says there will be no result',
+  (await js(`document.querySelector('main button.primary')?.textContent.trim()`)) === t.check.again && (await has(t.check.leave)) && !(await js(`[...document.querySelectorAll('button')].some(b => b.textContent.trim() === ${JSON.stringify(t.check.keep)})`)))
+await press(t.check.leave)
 await task(9, { seconds: 2 })
 await press(t.task.done)
 await press(t.task.next)

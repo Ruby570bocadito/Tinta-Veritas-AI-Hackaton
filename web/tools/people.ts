@@ -67,12 +67,16 @@ export function play(person: Person): Played {
       lines.push(`   Measured: ${t.task.air} ${seconds(m.air_time)}, ${t.task.screen} ${seconds(m.paper_time)}, ${t.task.touches} ${m.num_of_pendown}${seen}`)
       return check(id, ink[id], SHEET)
     }
-    const tinta = (issue: Issue) => `${t.check.text(issue)} ${practice ? t.check.practice : t.check.scored}`
+    // As in App.tsx: after a practice task, two buttons side by side; after a task that counts, doing it again is
+    // the big button and leaving it is a smaller one that says there will be no result.
+    const tinta = (issue: Issue) => `${t.check.text(issue)}${practice ? ' ' + t.check.practice : ''}`
+    const keep = practice ? t.check.keep : t.check.leave
+    const buttons = practice ? `[${t.check.keep}] [${t.check.again}]` : `[${t.check.again}]  (${t.check.leave})`
     let issue = attempt(how)
     if (!issue) return lines.push(`   Tinta: "${t.task.cheers[index]}"   [${index + 1 === of ? t.task.seeResult : t.task.next}]`)
     warned.push(id)
-    lines.push(`   Tinta: "${tinta(issue)}"   [${t.check.keep}] [${t.check.again}]`)
-    if ((person.onWarning ?? 'keep') === 'keep') return lines.push(`   Person presses: ${t.check.keep}`)
+    lines.push(`   Tinta: "${tinta(issue)}"   ${buttons}`)
+    if ((person.onWarning ?? 'keep') === 'keep') return lines.push(`   Person presses: ${keep}`)
     retried.push(id)
     lines.push(`   Person presses: ${t.check.again}`)
     // The second time the person does the whole task where it is asked, with the same hand. Told that there
@@ -81,7 +85,7 @@ export function play(person: Person): Played {
     if (issue.kind === 'lifted') again.lifts = 0
     if (issue.kind === 'joined') delete again.lifts
     issue = attempt(again)
-    lines.push(issue ? `   Tinta: "${tinta(issue)}"   Person presses: ${t.check.keep}` : `   Tinta: "${t.task.cheers[index]}"`)
+    lines.push(issue ? `   Tinta: "${tinta(issue)}"   Person presses: ${keep}` : `   Tinta: "${t.task.cheers[index]}"`)
   }
 
   TASK_ORDER.forEach((id, i) => doTask(id, i, TASK_ORDER.length))

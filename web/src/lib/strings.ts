@@ -42,7 +42,8 @@ export type Strings = {
   }
   closer: { title: string; body: string; demo: string; stop: string; more: string }
   // What Tinta says when a task was clearly not done as asked.
-  check: { text: (issue: Issue) => string; practice: string; scored: string; again: string; keep: string; redone: string; redoing: (title: string) => string }
+  // `keep` is the second button after a practice task; `leave` is the smaller way out of a task that counts, and says what it costs.
+  check: { text: (issue: Issue) => string; practice: string; again: string; keep: string; leave: string; redone: string; redoing: (title: string) => string }
   verdicts: Record<Verdict, { title: string; body: string }>
   nextSteps: Record<Verdict, string[]>
   result: {
@@ -163,14 +164,17 @@ const en: Strings = {
   tasks: {
     2: { title: 'Practice', instruction: 'Join the two dots with a line, back and forth four times, without lifting your finger.' },
     3: { title: 'Practice', instruction: 'Now up and down: join the two dots four times, without lifting your finger.' },
-    16: { title: 'Backwards', instruction: 'Copy this word backwards, starting from its last letter.', prompt: 'house' },
-    6: { title: 'Letters', instruction: 'Copy these three letters.', prompt: 'l  m  p' },
+    // The four tasks before this one all say "without lifting your finger", and people carried on that way here:
+    // 7 of our first 15 volunteers wrote the word in a single drag, which leaves a phone no pause to time.
+    // In the study the usual way was one pen-down per letter (a median of 4 for the 4 letters of "casa").
+    16: { title: 'Backwards', instruction: 'Copy this word backwards: start from its last letter, and lift your finger after each letter.', prompt: 'house' },
+    6: { title: 'Letters', instruction: 'Copy these three letters, one at a time.', prompt: 'l  m  p' },
     5: { title: 'Circle', instruction: 'Trace over the circle four times in a row, without lifting your finger.' },
     9: { title: 'Loops', instruction: 'Write "le" four times in joined-up writing, in one smooth movement.', prompt: 'le le le le' },
-    23: { title: 'Phone number', instruction: 'Tap "Listen", then write the phone number you hear.', speak: '3 4 7. 5 9 2. 0 1 6 8' },
+    23: { title: 'Phone number', instruction: 'Tap "Listen", then write the phone number you hear, one digit at a time.', speak: '3 4 7. 5 9 2. 0 1 6 8' },
     15: { title: 'Backwards', instruction: 'Copy this word backwards, starting from its last letter.', prompt: 'bottle' },
     18: { title: 'Name it', instruction: 'Write the name of the object in the picture.' },
-    22: { title: 'Copy a number', instruction: 'Copy this phone number.', prompt: '091 748 2356' },
+    22: { title: 'Copy a number', instruction: 'Copy this phone number, one digit at a time.', prompt: '091 748 2356' },
   },
   task: {
     step: (i, n, title) => `Step ${i} of ${n} · ${title}`,
@@ -220,13 +224,13 @@ const en: Strings = {
         case 'little':
           return 'I can hardly see any writing. Did you finish it?'
         case 'joined':
-          return `${i.lifted ? 'You wrote it almost without lifting your finger, so there is too little pause for me to time.' : 'You wrote it without lifting your finger, so there is no pause for me to time.'} Could you write it again, one ${i.digits ? 'number' : 'letter'} at a time, as you would with a pen?`
+          return `${i.lifted ? 'You hardly lifted your finger, so there is too little pause for me to time.' : 'You did not lift your finger, so there is no pause for me to time.'} Please write it again one ${i.digits ? 'digit' : 'letter'} at a time, as with a pen.`
       }
     },
     practice: 'It is only practice, so nothing is scored yet.',
-    scored: 'If you keep it, there will be no result at the end.',
     again: 'Try again',
     keep: 'Keep it',
+    leave: 'Leave it as it is (no result)',
     redone: 'Thank you. That one is done now.',
     redoing: (title) => `Once more · ${title}`,
   },
@@ -274,7 +278,7 @@ const en: Strings = {
     redo: (n) => (n === 1 ? 'Do that task again' : 'Do those tasks again'),
     notAskedHard: 'If you were doing your best and a task was hard to finish, tell a doctor about that and show them this screen. It is useful for them to know.',
     joinedWhy: 'About writing with hardly a lift: in the study people used a pen, and the tablet could also see the pen hovering over the paper, so everybody had some time in the air (on the word, never under an eighth of the task). A phone cannot see a finger in the air. Three of my first eight phone volunteers wrote a word in a single drag too.',
-    caveat: 'Tinta learned from pen-on-tablet data. On phones, only 9 healthy volunteers have tried her, and no patient has.',
+    caveat: 'Tinta learned from pen-on-tablet data. On phones, only 15 healthy volunteers have tried her, all under 60, and no patient has.',
     score: (s) => `${s} out of 100 on my scale. 35 or under: usual pattern. 65 or over: worth mentioning. In between: I don't know. A higher number is not better, and it is not a percentage of risk.`,
     whatNow: 'What now?',
     measurements: 'See the measurements',
@@ -448,7 +452,7 @@ const en: Strings = {
         q: 'How often are you right?',
         a: [
           'About 3 times out of 4, tested on people in the study that the model had not been trained on. So I am wrong about 1 time in 4, in both directions. A simple stopwatch does a little better on the study\'s own tablet.',
-          'And that study used a pen on a tablet, which can also see the pen hovering over the paper. A phone cannot see your finger in the air, so on a phone my numbers run low. Only nine healthy volunteers have tried me on phones, and no patient has. I say so on every result.',
+          'And that study used a pen on a tablet, which can also see the pen hovering over the paper. A phone cannot see your finger in the air, so on a phone my numbers run low. Only fifteen healthy volunteers, all under 60, have tried me on phones, and no patient has. I say so on every result.',
         ],
       },
       {
@@ -515,14 +519,14 @@ const es: Strings = {
   tasks: {
     2: { title: 'Práctica', instruction: 'Une los dos puntos con una línea, ida y vuelta cuatro veces, sin levantar el dedo.' },
     3: { title: 'Práctica', instruction: 'Ahora de arriba abajo: une los dos puntos cuatro veces, sin levantar el dedo.' },
-    16: { title: 'Al revés', instruction: 'Copia esta palabra al revés, empezando por la última letra.', prompt: 'casa' },
-    6: { title: 'Letras', instruction: 'Copia estas tres letras.', prompt: 'l  m  p' },
+    16: { title: 'Al revés', instruction: 'Copia esta palabra al revés: empieza por la última letra y levanta el dedo después de cada letra.', prompt: 'casa' },
+    6: { title: 'Letras', instruction: 'Copia estas tres letras, una a una.', prompt: 'l  m  p' },
     5: { title: 'Círculo', instruction: 'Repasa el círculo cuatro veces seguidas, sin levantar el dedo.' },
     9: { title: 'Bucles', instruction: 'Escribe «le» cuatro veces seguidas, con letra ligada y sin levantar el dedo.', prompt: 'le le le le' },
-    23: { title: 'Teléfono', instruction: 'Pulsa «Escuchar» y escribe el número de teléfono que oigas.', speak: '3, 4, 7. 5, 9, 2. 0, 1, 6, 8' },
+    23: { title: 'Teléfono', instruction: 'Pulsa «Escuchar» y escribe el número de teléfono que oigas, cifra a cifra.', speak: '3, 4, 7. 5, 9, 2. 0, 1, 6, 8' },
     15: { title: 'Al revés', instruction: 'Copia esta palabra al revés, empezando por la última letra.', prompt: 'botella' },
     18: { title: '¿Qué es?', instruction: 'Escribe el nombre del objeto del dibujo.' },
-    22: { title: 'Copia un número', instruction: 'Copia este número de teléfono.', prompt: '091 748 2356' },
+    22: { title: 'Copia un número', instruction: 'Copia este número de teléfono, cifra a cifra.', prompt: '091 748 2356' },
   },
   task: {
     step: (i, n, title) => `Paso ${i} de ${n} · ${title}`,
@@ -572,13 +576,13 @@ const es: Strings = {
         case 'little':
           return 'Casi no veo nada escrito. ¿La has terminado?'
         case 'joined':
-          return `${i.lifted ? 'Lo has escrito casi sin levantar el dedo, así que apenas hay pausas que cronometrar.' : 'Lo has escrito sin levantar el dedo, así que no tengo ninguna pausa que cronometrar.'} ¿Lo escribes otra vez, ${i.digits ? 'número a número' : 'letra a letra'}, como con un boli?`
+          return `${i.lifted ? 'Casi no has levantado el dedo, así que apenas hay pausas que cronometrar.' : 'No has levantado el dedo, así que no tengo ninguna pausa que cronometrar.'} Vuelve a escribir ${i.digits ? 'cifra a cifra' : 'letra a letra'}, como con un boli.`
       }
     },
     practice: 'Es solo práctica: todavía no puntúa nada.',
-    scored: 'Si la dejas así, al final no habrá resultado.',
     again: 'Repetirla',
     keep: 'Dejarla así',
+    leave: 'Dejarla así (sin resultado)',
     redone: 'Gracias. Esa ya está.',
     redoing: (title) => `Otra vez · ${title}`,
   },
@@ -626,7 +630,7 @@ const es: Strings = {
     redo: (n) => (n === 1 ? 'Repetir esa tarea' : 'Repetir esas tareas'),
     notAskedHard: 'Si lo estabas haciendo lo mejor que podías y alguna tarea te costó terminarla, cuéntaselo a un médico y enséñale esta pantalla. Le sirve saberlo.',
     joinedWhy: 'Sobre escribir casi sin levantar el dedo: en el estudio se escribía con lápiz, y la tableta veía también el lápiz flotando sobre el papel, así que todo el mundo tenía algo de tiempo en el aire (en la palabra, nunca menos de una octava parte de la tarea). Un móvil no ve el dedo en el aire. Tres de mis ocho primeros voluntarios con móvil también escribieron una palabra de un solo trazo.',
-    caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 9 voluntarios sanos, y ningún paciente.',
+    caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 15 voluntarios sanos, todos de menos de 60 años, y ningún paciente.',
     score: (s) => `${s} sobre 100 en mi escala. 35 o menos: dentro de lo habitual. 65 o más: coméntalo. En medio: no lo sé. Un número más alto no es mejor, y tampoco es un porcentaje de riesgo.`,
     whatNow: '¿Y ahora qué?',
     measurements: 'Ver las medidas',
@@ -800,7 +804,7 @@ const es: Strings = {
         q: '¿Cuántas veces aciertas?',
         a: [
           'Unas 3 de cada 4, probando con personas del estudio con las que el modelo no se había entrenado. O sea, me equivoco 1 de cada 4, en los dos sentidos. Un simple cronómetro acierta un poco más en la tableta del estudio.',
-          'Y ese estudio se hizo con lápiz y una tableta que ve también el lápiz flotando sobre el papel. Un móvil no ve tu dedo en el aire, así que en un móvil mis números salen bajos. En móviles solo me han probado nueve voluntarios sanos, y ningún paciente. Lo digo en cada resultado.',
+          'Y ese estudio se hizo con lápiz y una tableta que ve también el lápiz flotando sobre el papel. Un móvil no ve tu dedo en el aire, así que en un móvil mis números salen bajos. En móviles solo me han probado quince voluntarios sanos, todos de menos de 60 años, y ningún paciente. Lo digo en cada resultado.',
         ],
       },
       {

@@ -175,6 +175,19 @@ h2 {
   color: var(--felt);
 }
 
+/* The word or number to copy, with "read it to me" beside it (below it when there is no room). */
+.asked {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.2rem 0.75rem;
+}
+
+.asked .link:only-child {
+  padding-left: 0;
+}
+
 .fine {
   font-size: 0.85rem;
   color: var(--soft);
@@ -645,6 +658,18 @@ textarea.words {
   position: sticky;
   bottom: 0.75rem;
   z-index: 2;
+}
+
+/* One big button and a smaller way out under it (a task that counts and cannot be compared). */
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2rem;
+}
+
+.stack .link {
+  align-self: center;
 }
 
 /* Whatever is behind the pinned buttons fades into the paper, so no words are left half-hidden under them. */

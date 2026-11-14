@@ -40,6 +40,8 @@ const GUIDE_POSES: Mood[] = ['onb-pauses', 'onb-yourself', 'onb-private']
 const VERDICT_MOOD: Record<Verdict, Mood> = { typical: 'jump', unsure: 'unsure', mention: 'caring' }
 const LOCALE: Record<Lang, string> = { en: 'en-GB', es: 'es-ES' }
 
+declare const __BUILD__: string // set by vite.config.ts: the minute this copy was built (UTC)
+
 const params = new URLSearchParams(location.search)
 const study = params.has('study')
 const friends = params.has('friends') // invited testers: at the end they can send their result and opinion themselves
@@ -463,6 +465,7 @@ export default function App() {
     // Was the task done as asked? If clearly not, Tinta says what she saw and offers another go.
     const sheet = sheets[task.id] ?? { w: 360, h: 340 }
     const issue = screen.review ? check(task.id, strokes, sheet) : null
+    const practice = WARMUP_IDS.includes(task.id)
     const tryAgain = () => doAgain(task.id)
     return (
       <main className="page" key={'task' + screen.index + screen.review}>
@@ -489,7 +492,7 @@ export default function App() {
         {screen.review && (
           <p className="bubble cheer">
             {issue
-              ? `${t.check.text(issue)} ${WARMUP_IDS.includes(task.id) ? t.check.practice : t.check.scored}`
+              ? `${t.check.text(issue)}${practice ? ' ' + t.check.practice : ''}`
               : redoing
                 ? t.check.redone
                 : t.task.cheers[screen.index]}
@@ -497,12 +500,17 @@ export default function App() {
         )}
         {/* When Tinta has something to say about the task, her words are the heading. */}
         {!issue && <h2>{screen.review ? t.task.inkTitle : text.instruction}</h2>}
-        {!screen.review && canSpeak && !text.speak && (
-          <button className="link left" onClick={() => say(text.instruction, t.voice)}>
-            ▶ {t.task.read}
-          </button>
+        {/* What to copy and "read it to me" share one line: on a small phone every line saved goes to the sheet. */}
+        {!screen.review && (text.prompt || (canSpeak && !text.speak)) && (
+          <div className="asked">
+            {text.prompt && <p className="prompt">{text.prompt}</p>}
+            {canSpeak && !text.speak && (
+              <button className="link" onClick={() => say(text.instruction, t.voice)}>
+                ▶ {t.task.read}
+              </button>
+            )}
+          </div>
         )}
-        {text.prompt && !screen.review && <p className="prompt">{text.prompt}</p>}
         {task.picture && !screen.review && (
           <img className="picture" src={`${import.meta.env.BASE_URL}img/tinta-${task.picture}.webp`} alt="" width={150} height={150} />
         )}
@@ -565,13 +573,25 @@ export default function App() {
                 </div>
               </dl>
             )}
-            {issue ? (
+            {issue && practice ? (
               <div className="row sticky">
                 <button className="ghost" onClick={goOn}>
                   {t.check.keep}
                 </button>
                 <button className="primary" onClick={tryAgain}>
                   {t.check.again}
+                </button>
+              </div>
+            ) : issue ? (
+              // A task that counts. Four of the first four people who were asked to write the word again pressed
+              // "keep it" and left with no result, so doing it again is now the one big button, and leaving it is
+              // a smaller choice that says what it costs.
+              <div className="sticky stack">
+                <button className="primary" onClick={tryAgain}>
+                  {t.check.again}
+                </button>
+                <button className="link" onClick={goOn}>
+                  {t.check.leave}
                 </button>
               </div>
             ) : (
@@ -684,14 +704,15 @@ export default function App() {
     tries,
     noResult: answer.noResult.map((n) => `${n.id}:${n.issue.kind}`),
   }
-  const studyLine = JSON.stringify({ age, lang, score, ...followed, tasks: byTask })
+  // `v` is when this copy of the app was built, so that a line received days later says which version wrote it.
+  const studyLine = JSON.stringify({ v: __BUILD__, age, lang, score, ...followed, tasks: byTask })
   // What an invited tester sends: a few readable lines, then the same timings as study mode. No drawing.
   const friendMessage = [
     t.friends.header,
     `${t.friends.nameLabel}: ${who.trim() || '-'}`,
-    `${t.friends.result}: ${v.title}${invalid ? '' : ` (${score}/100)`}`,
+    `${t.friends.result}: ${invalid ? t.result.noResultTitle : `${v.title} (${score}/100)`}`,
     `${t.friends.notesLabel}: ${notes.trim() || '-'}`,
-    JSON.stringify({ age, lang, score, verdict: kind, closer: Boolean(second), ...followed, screen: [window.innerWidth, window.innerHeight], tasks: byTask }),
+    JSON.stringify({ v: __BUILD__, age, lang, score, verdict: kind, closer: Boolean(second), ...followed, screen: [window.innerWidth, window.innerHeight], tasks: byTask }),
   ].join('\n')
   const sendToFriend = async () => {
     try {

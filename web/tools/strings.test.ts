@@ -122,4 +122,16 @@ test('buttons that sit side by side are short enough for a small phone', () => {
   }
 })
 
+// Four tasks in a row say "without lifting your finger". On real phones, 7 of our first 15 volunteers then wrote
+// the backwards word in a single drag, which leaves no pause to time. So the word must say, up front, to lift.
+test('the backwards word asks, from the start, to lift the finger after each letter', () => {
+  assert.match(en.tasks[16].instruction, /lift your finger after each letter/)
+  assert.match(es.tasks[16].instruction, /levanta el dedo después de cada letra/)
+  for (const t of [en, es]) for (const id of [2, 3, 5]) assert.match(t.tasks[id].instruction, /without lifting|sin levantar/, `task ${id}`)
+})
+test('leaving a scored task as it is says what it costs, on the button itself', () => {
+  assert.match(en.check.leave, /no result/)
+  assert.match(es.check.leave, /sin resultado/)
+})
+
 console.log(`\n${passed} checks of the texts passed.`)
