@@ -117,7 +117,9 @@ const helpers = `
 await cdp('Runtime.enable')
 await cdp('Log.enable')
 await cdp('Page.enable')
-await cdp('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 2, mobile: true })
+// A phone has a finger and no mouse: without this, the styles meant for a computer would show at phone size.
+await cdp('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 2, mobile: W < 900 })
+if (W < 900) await cdp('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
 await cdp('Page.navigate', { url: base + (plan.params ?? '') })
 await sleep(2000)
 await js(`localStorage.setItem('tinta-lang', '${lang}'); location.reload()`)

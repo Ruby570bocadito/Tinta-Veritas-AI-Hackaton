@@ -14,7 +14,7 @@ export type Strings = {
   prototype: string
   disclaimer: string
   private: string
-  home: { bubble: string; title: string; lead: string; start: string; cases: string; ask: string; chips: string[]; how: string; steps: string[] }
+  home: { bubble: string; title: string; lead: string; start: string; cases: string; ask: string; chips: string[]; how: string; steps: string[]; handoff: { title: string; body: string; alt: string } }
   guide: { skip: string; back: string; next: string; gotIt: string; cards: { title: string; body: string }[] }
   ready: { title: string; tips: string[]; lead: string; begin: string }
   tasks: Record<number, TaskText>
@@ -22,6 +22,7 @@ export type Strings = {
     step: (i: number, n: number, title: string) => string
     quit: string
     quitConfirm: string
+    back: string // said once when the page was reloaded in the middle of the check and the writing was kept
     read: string
     listen: string
     noVoice: (n: string) => string
@@ -126,6 +127,7 @@ const en: Strings = {
     chips: ['5 short tasks', 'About 2 minutes', 'Works offline'],
     how: 'How it goes',
     steps: ['Write with your finger', 'See your invisible ink', 'Get an honest answer'],
+    handoff: { title: 'On a computer?', body: "I was made for a finger. Point your phone's camera at this code and I will open there. A mouse works too.", alt: 'QR code that opens Tinta on a phone' },
   },
   guide: {
     skip: 'Skip',
@@ -174,6 +176,7 @@ const en: Strings = {
     step: (i, n, title) => `Step ${i} of ${n} · ${title}`,
     quit: 'Quit',
     quitConfirm: 'Stop the check and go back to the start?',
+    back: 'Welcome back. Your finished tasks are safe.',
     read: 'Read it to me',
     listen: 'Listen',
     noVoice: (n) => `This device has no voice. Ask someone to read this number aloud to you: ${n}`,
@@ -450,7 +453,7 @@ const en: Strings = {
       },
       {
         q: 'Does anything I write leave my phone?',
-        a: ['No. All the maths runs here, on this phone. There is no account and no server. Your past results are kept only on this phone, and you can delete them whenever you want.'],
+        a: ['No. All the maths runs here, on this phone. There is no account and no server. Your past results are kept only on this phone, and you can delete them whenever you want. A check you have started is kept here too, only until you close the page or start again, so that a reload does not lose it.'],
       },
       {
         q: 'Who made you?',
@@ -476,6 +479,7 @@ const es: Strings = {
     chips: ['5 tareas cortas', 'Unos 2 minutos', 'Funciona sin internet'],
     how: 'Cómo va',
     steps: ['Escribe con el dedo', 'Mira tu tinta invisible', 'Recibe una respuesta honesta'],
+    handoff: { title: '¿Estás en un ordenador?', body: 'Estoy hecha para un dedo. Apunta a este código con la cámara del móvil y me abro allí. Con el ratón también funciona.', alt: 'Código QR que abre Tinta en un móvil' },
   },
   guide: {
     skip: 'Saltar',
@@ -524,6 +528,7 @@ const es: Strings = {
     step: (i, n, title) => `Paso ${i} de ${n} · ${title}`,
     quit: 'Salir',
     quitConfirm: '¿Dejar la prueba y volver al principio?',
+    back: 'Hola otra vez. Lo que hiciste sigue aquí.',
     read: 'Léemelo',
     listen: 'Escuchar',
     noVoice: (n) => `Este móvil no tiene voz. Pide a alguien que te lea este número en voz alta: ${n}`,
@@ -800,7 +805,7 @@ const es: Strings = {
       },
       {
         q: '¿Sale de mi móvil algo de lo que escribo?',
-        a: ['No. Todas las cuentas se hacen aquí, en este móvil. No hay cuenta ni servidor. Tus resultados anteriores se guardan solo en este móvil y puedes borrarlos cuando quieras.'],
+        a: ['No. Todas las cuentas se hacen aquí, en este móvil. No hay cuenta ni servidor. Tus resultados anteriores se guardan solo en este móvil y puedes borrarlos cuando quieras. Una prueba empezada también se guarda aquí, solo hasta que cierres la página o empieces otra, para no perderla si la página se recarga.'],
       },
       {
         q: '¿Quién te ha hecho?',

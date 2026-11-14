@@ -9,6 +9,7 @@ import { check, laps, les, turns } from './lib/check'
 import { measure, seconds, stillTime, type Measures, type Stroke } from './lib/ink'
 import { judge, score as scoreOf, wantsCloser, type Answer } from './lib/judge'
 import { counts, examples, isGrey, crowd, metrics, airShare, onScale, typical, EXTRA_IDS, TASK_IDS, WARMUP_IDS, type Verdict } from './lib/model'
+import { clearProgress, loadProgress, saveProgress } from './lib/resume'
 import { initialLang, SOURCES, STRINGS, type Lang } from './lib/strings'
 import { canSpeak, say } from './lib/voice'
 
@@ -30,6 +31,10 @@ const EXTRA: Task[] = [
   { id: 22, pose: 'watching' },
   { id: 23, pose: 'task-phone' },
 ]
+
+// A check that was under way when the page was reloaded (a call, a pull on the screen, a tab thrown away by the
+// browser): it comes back at the same step. Read once, before the first screen. See lib/resume.ts.
+const kept = loadProgress([...TASKS, ...EXTRA].map((task) => task.id))
 
 const GUIDE_POSES: Mood[] = ['onb-pauses', 'onb-yourself', 'onb-private']
 const VERDICT_MOOD: Record<Verdict, Mood> = { typical: 'jump', unsure: 'unsure', mention: 'caring' }
@@ -58,14 +63,14 @@ type Screen =
 
 export default function App() {
   const [lang, setLang] = useState<Lang>(initialLang)
-  const [screen, setScreen] = useState<Screen>({ name: 'intro' })
-  const [ink, setInk] = useState<Record<number, Stroke[]>>({})
-  const [sheets, setSheets] = useState<Record<number, Size>>({}) // size of the sheet each task was written on
+  const [screen, setScreen] = useState<Screen>(kept?.place ?? { name: 'intro' })
+  const [ink, setInk] = useState<Record<number, Stroke[]>>(kept?.ink ?? {})
+  const [sheets, setSheets] = useState<Record<number, Size>>(kept?.sheets ?? {}) // size of the sheet each task was written on
   const [example, setExample] = useState<number | null>(null)
-  const [closer, setCloser] = useState(false) // true once the person accepts the three extra tasks
-  const [tries, setTries] = useState<Record<number, number>>({}) // how many times each task was done again
-  const [warned, setWarned] = useState<Record<number, string>>({}) // tasks where Tinta said something was missing, and what
-  const [redo, setRedo] = useState<number[]>([]) // tasks being done again from the result screen, in order
+  const [closer, setCloser] = useState(kept?.closer ?? false) // true once the person accepts the three extra tasks
+  const [tries, setTries] = useState<Record<number, number>>(kept?.tries ?? {}) // how many times each task was done again
+  const [warned, setWarned] = useState<Record<number, string>>(kept?.warned ?? {}) // tasks where Tinta said something was missing, and what
+  const [redo, setRedo] = useState<number[]>(kept?.redo ?? []) // tasks being done again from the result screen, in order
   const [doodle, setDoodle] = useState<Stroke[]>([]) // the free sheet: never scored, never saved
   const [doodleSheet, setDoodleSheet] = useState<Size>({ w: 360, h: 340 })
   const [history, setHistory] = useState<Entry[]>(loadHistory)
@@ -108,6 +113,17 @@ export default function App() {
     window.addEventListener('beforeunload', ask)
     return () => window.removeEventListener('beforeunload', ask)
   }, [busy])
+
+  // The check is kept through a reload: saved when a task is finished and when the next one starts, not at
+  // every stroke. While a task is being written nothing is saved, so a half-written task starts again.
+  useEffect(() => {
+    if (example !== null || (screen.name !== 'task' && screen.name !== 'closer' && screen.name !== 'result')) return clearProgress()
+    const writing = screen.name === 'task' && !screen.review ? [...TASKS, ...EXTRA][screen.index].id : null
+    if (writing !== null && (ink[writing] ?? []).length) return
+    saveProgress({ place: screen, ink, sheets, closer, tries, warned, redo })
+  }, [screen, ink, sheets, closer, tries, warned, redo, example])
+  // True only until the first step forward: the screen the person came back to after a reload.
+  const cameBack = kept !== null && screen === kept.place
 
   /** Go back to one task and do it again, keeping everything else that was written. */
   const doAgain = (id: number) => {
@@ -181,6 +197,16 @@ export default function App() {
         <p className="fine">
           {t.disclaimer} {t.private}
         </p>
+        {/* Only shown by the styles to someone with a mouse: the fastest way from a computer to a phone.
+            The code holds the address of the published app (made once with the qrcode package; make it again if the address changes). */}
+        {!('TintaNative' in window) && (
+          <aside className="handoff">
+            <img src={`${import.meta.env.BASE_URL}img/qr.svg`} alt={t.home.handoff.alt} width={112} height={112} loading="lazy" />
+            <p>
+              <b>{t.home.handoff.title}</b> {t.home.handoff.body}
+            </p>
+          </aside>
+        )}
         <ul className="chips">
           {t.home.chips.map((chip) => (
             <li key={chip}>{chip}</li>
@@ -449,6 +475,12 @@ export default function App() {
               ))}
             </ol>
             <p className="step">{redoing ? t.check.redoing(text.title) : t.task.step(screen.index + 1, list.length, text.title)}</p>
+            {/* After a reload in the middle of the check. Next to the step, where it takes no room from the sheet. */}
+            {cameBack && (
+              <p className="step back" role="status">
+                {t.task.back}
+              </p>
+            )}
           </div>
           <button className="link quit" onClick={() => window.confirm(t.task.quitConfirm) && restart()}>
             {t.task.quit}
@@ -583,6 +615,11 @@ export default function App() {
           <Mascot mood="closer-look" size={220} />
         </div>
         <h1>{t.closer.title}</h1>
+        {cameBack && (
+          <p className="why" role="status">
+            {t.task.back}
+          </p>
+        )}
         <p className="lead">{forceCloser && !isGrey(judge(ink, sheets, false).first) ? t.closer.demo : t.closer.body}</p>
         <div className="row push sticky">
           <button className="ghost" onClick={() => finish(false)}>

@@ -40,6 +40,8 @@ ws.onmessage = (m) => {
   const d = JSON.parse(m.data)
   if (d.method === 'Runtime.exceptionThrown') errors.push(d.params.exceptionDetails.exception?.description ?? d.params.exceptionDetails.text)
   if (d.method === 'Log.entryAdded' && d.params.entry.level === 'error') errors.push(d.params.entry.text)
+  // "Leave the page?" when reloading in the middle of the check: this walk reloads on purpose.
+  if (d.method === 'Page.javascriptDialogOpening') cdp('Page.handleJavaScriptDialog', { accept: true })
   waiting.get(d.id)?.(d.result)
 }
 const cdp = (method, params = {}) => new Promise((res) => (waiting.set(++id, res), ws.send(JSON.stringify({ id, method, params }))))
@@ -47,14 +49,20 @@ const js = async (expression) => (await cdp('Runtime.evaluate', { expression, re
 
 await cdp('Runtime.enable')
 await cdp('Log.enable')
-await cdp('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 2, mobile: true })
+await cdp('Page.enable')
+// A phone has a finger and no mouse. Without this, a headless Chrome at phone size still says "I have a mouse",
+// and the styles meant for a computer (the card with the QR code) would show in the phone pictures.
+const phone = W < 900
+await cdp('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 2, mobile: phone })
+if (phone) await cdp('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
 await cdp('Page.navigate', { url })
 await sleep(2500)
 await js(`localStorage.setItem('tinta-lang', '${lang}'); localStorage.removeItem('tinta-history'); localStorage.removeItem('tinta-study'); location.reload()`)
 await sleep(2500)
 
 // Helpers that live in the page: press a button by its text, write a stroke on the sheet, move a slider.
-await js(`
+// They are put back after every reload.
+const HELPERS = `
   window.press = (label) => {
     const all = [...document.querySelectorAll('button')].filter(b => !b.disabled)
     const b = all.find(b => b.textContent.trim() === label) ?? all.find(b => b.textContent.trim().includes(label))
@@ -77,7 +85,13 @@ await js(`
     const el = document.querySelector(selector)
     Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value').set.call(el, value)
     el.dispatchEvent(new Event('input', { bubbles: true }))
-  }`)
+  }`
+await js(HELPERS)
+const reload = async () => {
+  await js('location.reload()')
+  await sleep(2200)
+  await js(HELPERS)
+}
 
 let n = 0
 const problems = []
@@ -112,6 +126,15 @@ const expect = (what, ok) => {
 }
 
 await shot('home')
+// The card that sends someone from a computer to their phone: only for a mouse, and never cut by the window.
+const card = await js(`(() => {
+  const e = document.querySelector('.handoff')
+  if (!e) return 'missing'
+  if (getComputedStyle(e).display === 'none') return 'hidden'
+  const r = e.getBoundingClientRect()
+  return r.width > 0 && r.left >= 0 && r.right <= innerWidth && e.querySelector('img').naturalWidth > 0 ? 'shown' : 'cut'
+})()`)
+expect(phone ? 'at phone size, with a finger: no card about computers' : 'with a mouse: the card with the QR code is there, whole, with its picture', card === (phone ? 'hidden' : 'shown'))
 
 // ---- the free sheet: write anything, the three numbers move, the invisible ink shows
 await press(t.play.open)
@@ -177,7 +200,19 @@ await shot('loops')
 await press(t.task.done)
 await sleep(1200)
 await shot('invisible-ink')
+// ---- a reload in the middle of the check (a call, a pull on the screen): back at the same step, writing kept
+const flat = async (selector) => (await text(selector)).replace(/\s+/g, ' ')
+const measured = await flat('.stats')
+await reload()
+expect('reloaded on the replay of a task: same step, same numbers, and Tinta says she kept the writing',
+  (await text('.step')) === t.task.step(4, 5, t.tasks[9].title) && (await flat('.stats')) === measured && (await text('main')).includes(t.task.back))
+await shot('back-after-reload')
 await press(t.task.next)
+expect('one step later Tinta no longer says "welcome back"', !(await text('main')).includes(t.task.back))
+await task(16, { amount: 0.4, seconds: 1 })
+await reload()
+expect('reloaded while writing a task: that task starts again on an empty sheet',
+  (await text('.step')) === t.task.step(5, 5, t.tasks[16].title) && (await js(`document.querySelector('main button.primary').disabled`)) === true && (await text('main')).includes(t.task.back))
 await task(16, { seconds: 2 })
 await press(t.task.done)
 await press(t.task.seeResult)
@@ -190,6 +225,10 @@ for (const taskId of [6, 22, 23]) {
 }
 await shot('result')
 expect('a check done as asked ends with a number on the scale', await js(`Boolean(document.querySelector('.meter'))`))
+const number = await text('.meter + .fine')
+const votes = await flat('.votes')
+await reload()
+expect('reloaded on the result: the same result is still there, closer look and all', Boolean(number) && (await text('.meter + .fine')) === number && (await flat('.votes')) === votes)
 // What comes out of the printer: the result and the note for the doctor, nothing else.
 await cdp('Emulation.setEmulatedMedia', { media: 'print' })
 await shot('printed-note')
@@ -217,6 +256,8 @@ if (url.includes('study')) {
 
 // ---- a second, quick run where things are left undone
 await press(t.result.restart)
+await reload()
+expect('after "start again", a reload shows the first screen and not the old check', (await text('h1')) === t.home.title)
 await press(t.home.start)
 await press(t.guide.skip)
 await press(t.ready.begin)
@@ -264,8 +305,8 @@ await js(`document.querySelectorAll('details')[3].scrollIntoView({ block: 'start
 await sleep(400)
 writeFileSync(join(out, `${String(++n).padStart(2, '0')}-ask-tinta.png`), Buffer.from((await cdp('Page.captureScreenshot', { format: 'png' })).data, 'base64'))
 
-// Chrome refuses to vibrate for clicks that no finger made: that is this test, not the app.
-for (const e of errors) if (!String(e).includes('navigator.vibrate')) problems.push('error in the page: ' + String(e).slice(0, 160))
+// Chrome refuses to vibrate, and to ask "leave the page?", for touches that no finger made: that is this test, not the app.
+for (const e of errors) if (!String(e).includes('navigator.vibrate') && !String(e).includes("'beforeunload'")) problems.push('error in the page: ' + String(e).slice(0, 160))
 console.log(problems.length ? `\n${problems.length} PROBLEM(S):\n  ` + problems.join('\n  ') : `\nThe whole walk went through in ${lang} at ${W}x${H}: no missing button, nothing sticking out, no error in the page.`)
 ws.close()
 chrome.kill()

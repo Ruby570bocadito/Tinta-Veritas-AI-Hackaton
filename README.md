@@ -2,7 +2,9 @@
 
 **Track:** AI + Health · **Team:** solo · **Starting point:** my own idea
 
-**[Try it in your browser](https://ruby570bocadito.github.io/Tinta-Veritas-AI-Hackaton/)** (best on a phone; English and Spanish; works offline after the first visit)
+<img src="docs/qr.png" width="104" align="right" alt="QR code that opens the app on a phone">
+
+**[Try it in your browser](https://ruby570bocadito.github.io/Tinta-Veritas-AI-Hackaton/)** (best on a phone: scan the code; English and Spanish; works offline after the first visit)
 
 > This project is a prototype and is not medical advice.
 

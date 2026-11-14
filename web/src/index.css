@@ -32,6 +32,12 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Pulling the page down must not reload it in the middle of the check (Chrome on Android does that). */
+html,
+body {
+  overscroll-behavior-y: contain;
+}
+
 .page {
   max-width: 32rem;
   min-height: 100dvh;
@@ -122,6 +128,14 @@ h2 {
   margin: 0.25rem 0 0;
   font-size: 0.9rem;
   color: var(--soft);
+}
+
+/* "Welcome back" after a reload in the middle of the check */
+.step.back {
+  color: var(--air-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 /* progress: paper buttons on a thread */
@@ -1226,5 +1240,64 @@ h2:focus,
   }
   h2 {
     font-size: 1.1rem;
+  }
+}
+
+/* From a computer to a phone. The card with the QR code is only for someone using a mouse:
+   a phone or a tablet never shows it. */
+.handoff {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .handoff {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: var(--card) var(--grain);
+    border-radius: 0.5rem 0.8rem 0.6rem 0.9rem;
+    box-shadow: var(--lift);
+    padding: 0.7rem 0.9rem;
+  }
+  .handoff img {
+    flex: none;
+    width: 5.6rem;
+    height: 5.6rem;
+    border-radius: 0.3rem;
+  }
+  .handoff p {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    color: var(--soft);
+  }
+  .handoff b {
+    display: block;
+    font-family: var(--hand);
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--ink);
+  }
+}
+
+/* With room at the side, the card sits next to the page like a note pinned beside it, in view from the start.
+   (The page is 32rem of 18px wide; the card needs about 250px beside it.) */
+@media (hover: hover) and (pointer: fine) and (min-width: 70rem) {
+  .page.intro {
+    position: relative;
+  }
+  .handoff {
+    position: absolute;
+    left: calc(100% + 1.25rem);
+    top: 6.5rem;
+    width: 11.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    transform: rotate(1.6deg);
+  }
+  .handoff img {
+    width: 100%;
+    height: auto;
   }
 }
