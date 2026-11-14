@@ -24,8 +24,9 @@ dependencies {
     implementation("androidx.webkit:webkit:1.12.1")
 }
 
-// The web app is the app: copy the built site into the APK so it works offline.
-val copyWeb by tasks.registering(Copy::class) {
+// The web app is the app: the built site goes into the APK so it works offline.
+// Sync, not Copy: files of earlier builds are removed, so the APK only carries the current one.
+val copyWeb by tasks.registering(Sync::class) {
     from(rootProject.file("../web/dist"))
     into(layout.projectDirectory.dir("src/main/assets"))
 }

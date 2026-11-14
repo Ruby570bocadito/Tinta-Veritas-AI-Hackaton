@@ -10,11 +10,25 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { perform } from '../../web/tools/shapes.mjs'
 
 const ADB = process.env.ADB ?? `${process.env.LOCALAPPDATA}/Android/Sdk/platform-tools/adb.exe`
-const adb = (...args) => execFileSync(ADB, args, { encoding: 'utf8', env: { ...process.env, MSYS_NO_PATHCONV: '1' } })
+// A device that stops answering makes this fail with a message, instead of waiting for ever.
+const adb = (...args) => execFileSync(ADB, args, { encoding: 'utf8', timeout: 30000, env: { ...process.env, MSYS_NO_PATHCONV: '1' } })
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-const pid = adb('shell', 'pidof', 'app.tinta').trim()
-if (!pid) throw new Error('Tinta is not running on the device')
+// Start the app afresh. A check left half way by an earlier run would otherwise come back (the app keeps
+// a check through a reload on purpose), and this walk expects the first screen.
+adb('shell', 'am', 'force-stop', 'app.tinta')
+adb('shell', 'am', 'start', '-n', 'app.tinta/.MainActivity')
+let pid = ''
+for (let i = 0; i < 40 && !pid; i++) {
+  await sleep(500)
+  try {
+    pid = adb('shell', 'pidof', 'app.tinta').trim()
+  } catch {
+    // not started yet
+  }
+}
+if (!pid) throw new Error('Tinta did not start on the device. Is the debug build installed?')
+await sleep(4000) // the page needs a moment before it can be inspected
 adb('forward', 'tcp:9222', `localabstract:webview_devtools_remote_${pid}`)
 const [page] = await (await fetch('http://localhost:9222/json')).json()
 const ws = new WebSocket(page.webSocketDebuggerUrl)
@@ -30,8 +44,11 @@ const cdp = (method, params = {}) =>
     pending.set(++nextId, resolve)
     ws.send(JSON.stringify({ id: nextId, method, params }))
   })
-const js = async (expression) =>
-  (await cdp('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result.value
+const js = async (expression) => {
+  const answer = await Promise.race([cdp('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }), sleep(20000).then(() => null)])
+  if (!answer) throw new Error('the page did not answer in 20 s (is the emulator still drawing?): ' + expression.slice(0, 70))
+  return answer.result.value
+}
 
 // Where the web page sits on the physical screen.
 try {
@@ -86,8 +103,6 @@ async function shot(name) {
   writeFileSync(`${shots}/${String(++shotNo).padStart(2, '0')}-${name}.png`, Buffer.from(png.data, 'base64'))
 }
 
-await js(`location.reload()`)
-await sleep(2500)
 console.log('page:', await js('document.title'), '| native voice bridge:', await js('Boolean(window.TintaNative)'))
 await shot('home')
 await tap(button('Start'))
