@@ -1,7 +1,7 @@
 // Checks that the app measures writing correctly and that the model behaves as described.
 // No test framework: plain assertions, run with `npm test`.
 import assert from 'node:assert/strict'
-import { SKIP_MS, gaps, joinSkips, measure, type Stroke } from '../src/lib/ink'
+import { SKIP_MS, gaps, joinSkips, measure, stillTime, type Stroke } from '../src/lib/ink'
 import { EXTRA_IDS, GREY_HI, GREY_LO, TASK_IDS, WARMUP_IDS, airShare, examples, isGrey, predict, predictCloser, verdict } from '../src/lib/model'
 import type { Measures } from '../src/lib/ink'
 
@@ -112,6 +112,26 @@ test('four skips while tracing give the same measures as tracing in one go', () 
   const oneGo = measure([stroke(0, 5000)])
   const skipping = measure([stroke(0, 1000), stroke(1100, 900), stroke(2100, 900), stroke(3100, 900), stroke(4100, 900)])
   assert.deepEqual(skipping, oneGo)
+})
+
+// A finger resting on the glass: the phone's version of a pen hovering (saved for study, not used by the model).
+test('a finger that moves steadily is never resting', () => {
+  assert.equal(stillTime([stroke(0, 2000)]), 0) // one pixel every 10 ms
+})
+test('a finger that stops for 0.6 s and trembles by a pixel is resting for those 0.6 s', () => {
+  const moving = stroke(0, 300) // ends at x = 30
+  const trembling: Stroke = Array.from({ length: 60 }, (_, i) => ({ x: 30 + (i % 2), y: i % 3 === 0 ? 1 : 0, t: 310 + i * 10 }))
+  const on = Array.from({ length: 30 }, (_, i) => ({ x: 34 + i * 4, y: 0, t: 910 + i * 10 }))
+  const rested = stillTime([[...moving, ...trembling, ...on]])
+  assert.ok(rested >= 550 && rested <= 650, `counted ${rested} ms`)
+})
+test('no touch event at all for 0.4 s, then a move, is also a rest', () => {
+  assert.equal(stillTime([[{ x: 0, y: 0, t: 0 }, { x: 10, y: 0, t: 100 }, { x: 60, y: 0, t: 500 }, { x: 70, y: 0, t: 510 }]]), 400)
+})
+test('a stop shorter than a quarter of a second is not a rest, and lifting is not resting', () => {
+  const brief: Stroke = [{ x: 0, y: 0, t: 0 }, { x: 1, y: 0, t: 100 }, { x: 0, y: 0, t: 200 }, { x: 20, y: 0, t: 220 }, { x: 40, y: 0, t: 240 }]
+  assert.equal(stillTime([brief]), 0)
+  assert.equal(stillTime([stroke(0, 300), stroke(1300, 300)]), 0) // one second in the air between two strokes
 })
 
 console.log(`\n${passed} checks passed`)

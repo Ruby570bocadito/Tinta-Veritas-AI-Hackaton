@@ -60,10 +60,28 @@ export function measure(strokes: Stroke[]): Measures {
  * Milliseconds the finger rested on the screen without moving (stops of a quarter of a second or more).
  * The model does not use it. It is saved in study mode, because on glass a pause may be a finger that
  * stops rather than one that lifts, and a phone can only see the second kind as time in the air.
+ *
+ * A finger that rests still trembles, and the phone keeps sending tiny moves. The first version only counted
+ * a quarter of a second with no touch event at all, and found nothing in eight real runs: it was probably
+ * blind. A rest is now a finger that stays within `within` pixels for that long, events or no events.
  */
-export function stillTime(strokes: Stroke[], least = 250): number {
+export function stillTime(strokes: Stroke[], least = 250, within = 3): number {
   let sum = 0
-  for (const s of strokes) for (let i = 1; i < s.length; i++) if (s[i].t - s[i - 1].t >= least) sum += s[i].t - s[i - 1].t
+  for (const s of strokes) {
+    let i = 0
+    while (i < s.length - 1) {
+      let j = i
+      while (j + 1 < s.length && Math.hypot(s[j + 1].x - s[i].x, s[j + 1].y - s[i].y) <= within) j++
+      if (s[j].t - s[i].t >= least) {
+        sum += s[j].t - s[i].t
+        i = j
+        continue
+      }
+      // No event at all for that long, then a move: the finger was resting where it was.
+      if (s[i + 1].t - s[i].t >= least) sum += s[i + 1].t - s[i].t
+      i++
+    }
+  }
   return Math.round(sum)
 }
 
