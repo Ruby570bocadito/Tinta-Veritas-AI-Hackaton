@@ -36,7 +36,7 @@ Saved outputs are in `ml/results/`, in the order the work happened:
 
 Files 2, 3, 4 and 6 belong to the first design, which also measured each task against the person's own warm-up pace. `ablation.py` showed that measure adds almost nothing, so the shipped model dropped it. They are kept because they are how the decision was reached.
 
-`figures.py` redraws the charts in `docs/`. `own_data.py` analyses volunteers recorded with the app's study mode.
+`figures.py` redraws the charts in `docs/`. `own_data.py` analyses volunteers recorded on real phones with the app's study mode (`results/10_own_data.txt`: five healthy people, who lift a finger far less than the study's participants lifted the pen).
 
 ## The Android app
 

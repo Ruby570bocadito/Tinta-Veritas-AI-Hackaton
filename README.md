@@ -18,7 +18,7 @@ A web app (also an offline Android app). Carmen does two practice tasks and thre
 
 ## What I added
 
-The public study needs 25 tasks on a professional tablet. I cut it to tasks that work with a finger, kept only measures that ignore overall speed, tested what breaks that idea, and built the app, which shows real cases it gets wrong.
+The public study needs 25 tasks on a professional tablet. I cut it to tasks that work with a finger, kept only measures that ignore overall speed, tested what breaks that idea, recorded five people on real phones, and built the app, which shows real cases it gets wrong.
 
 ## How it works
 
@@ -46,22 +46,21 @@ Nested 5-fold cross-validation, repeated 3 or 4 times.
 | Of 100 patients | 19 | 15 | 65 |
 | Of 100 healthy people | 74 | 13 | 14 |
 
-On 35 people held out of training (not untouched: I looked at them while designing), 3 of 18 patients were told "usual" and 3 of 17 healthy people "worth mentioning".
-
-**Why bother, then.** A stopwatch threshold is in milliseconds: if a device makes everyone 1.5 times slower it flags 64% of healthy people. A share and a count ignore overall speed. That is arithmetic, not a finding.
+**Why bother, then.** A stopwatch threshold is in milliseconds: on a device 1.5 times slower it flags 64% of healthy people. A share and a count ignore overall speed (arithmetic, not a finding).
 
 **Where it fails** (`ml/results/8_ablation.txt`).
 
 ![Patients caught and healthy people wrongly flagged under different device changes](docs/what-breaks.png)
 
-- *Devices that change pauses and strokes differently.* Pauses twice as long: half of healthy people flagged. Strokes twice as long: more than half of patients missed. The simulation keeps pen-downs fixed, and a finger may lift differently. **It has never been tested on a phone.**
+- *Devices that change pauses and strokes differently* (simulated). Pauses twice as long: half of healthy people flagged. Strokes twice as long: more than half of patients missed. The simulation keeps pen-downs fixed.
+- *On real phones: my own data* (`ml/results/10_own_data.txt`). Five healthy volunteers did the check on their own phones. All five were told "usual pattern" (scores 6 to 24): no false alarms. But a finger does not write like the study's pen. Copying a word backwards, healthy people in the study lifted the pen 4 times and spent 46% of the task in the air; three of my five never lifted the finger in any scored task, which gives the lowest score the model can give. If patients also lift less with a finger, thresholds learned from a pen would miss them. Five people, one of them me. **No patient has tried it on a phone.**
 - *Slow writers.* 9 of 26 slow healthy test cases were flagged (35%), against 15 to 18% of the rest. The data has no age or sex, so I could not check those groups.
-- *My first idea was wrong.* Measuring each task against the person's own warm-up pace scores 59% on its own. I removed it.
-- *Not early detection.* Patients were already diagnosed and are half the sample. In real life most "worth mentioning" results would be false alarms.
+- *My first idea was wrong.* Each task against the person's own warm-up pace scores 59% alone. Removed.
+- *Not early detection.* Patients were already diagnosed and are half the sample; in real life most "worth mentioning" results would be false alarms.
 
 ## What I'd do next
 
-Record healthy volunteers, then people with a diagnosis through a patients' association, on real phones. `ml/own_data.py` and the app's study mode (`?study`) are ready for it.
+Record people with a diagnosis, through a patients' association, on real phones, and relearn the thresholds from finger data. The app's study mode (`?study`) and `ml/own_data.py` already collect and analyse it.
 
 ## Sources
 

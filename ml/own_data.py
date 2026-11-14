@@ -2,11 +2,13 @@
 
 Each line of data/own/volunteers.jsonl is what the app shows in study mode (?study):
 only timings and an age band. No name, no drawing. Everyone was asked first.
+The same line is what invited testers send with ?friends.
 
 Questions:
   1. How many healthy people does Tinta wrongly flag on a real phone? And a stopwatch rule?
   2. How different is a finger on a phone from a pen on the study's tablet?
      (Until now we only simulated this as "everything uniformly slower".)
+  3. Do the two measures the model uses (share of time in the air, number of touches) look the same?
 
 Run:  python ml/own_data.py
 """
@@ -16,7 +18,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from device_shift import WARMUP, logit, relative
+from device_shift import WARMUP, shape
 from experiments import Stopwatch, stopwatch
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -56,7 +58,7 @@ def main():
     print(f"{n} healthy volunteers on a phone; age bands: {own['age'].value_counts().to_dict()}\n")
 
     # 1. Tinta's short check, exactly as shipped (same weights as the app).
-    z = (relative(own, tasks) - np.array(model["mean"])) / np.array(model["std"])
+    z = (shape(own, tasks) - np.array(model["mean"])) / np.array(model["std"])
     p = 1 / (1 + np.exp(-(z @ np.array(model["coef"]) + model["intercept"])))
     flagged, unsure = int((p >= hi).sum()), int(((p > lo) & (p < hi)).sum())
     print("Tinta (short check, the shipped model)")
@@ -82,6 +84,21 @@ def main():
         print(f"  task {t:>2}: {a / 1000:5.1f} s  vs {b / 1000:5.1f} s   phone / tablet = x{b / a:.2f}")
     print(f"  the factor ranges from x{min(ratios):.2f} to x{max(ratios):.2f}.",
           "If it were one number for every task, our simulation would be exact; the spread is what it misses.\n")
+
+    # 4. The two measures the model reads. This is the part our simulation held fixed.
+    print("The model's two measures, per scored task: healthy people in the study (pen) vs our volunteers (finger)")
+    print("            share of time in the air (median)      touches (median)      did it in a single touch")
+    for t in tasks:
+        da = (healthy[f"air_time{t}"] / healthy[f"total_time{t}"].clip(lower=1))
+        oa = (own[f"air_time{t}"] / own[f"total_time{t}"].clip(lower=1))
+        dn, on = healthy[f"num_of_pendown{t}"], own[f"num_of_pendown{t}"]
+        print(f"  task {t:>2}:   study {100 * da.median():3.0f}%   ours {100 * oa.median():3.0f}%          "
+              f"study {dn.median():4.1f}   ours {on.median():4.1f}        "
+              f"study {int((dn <= 1).sum()):>2} of {len(dn)}   ours {int((on <= 1).sum())} of {n}")
+    never = int((own[[f"air_time{t}" for t in tasks]].sum(axis=1) == 0).sum())
+    print(f"  {never} of {n} volunteers never lifted the finger during the three scored tasks.")
+    low = float(np.round(100 * (1 / (1 + np.exp(-((shape(pd.DataFrame([{f'{m}{t}': v for t in tasks for m, v in (('air_time', 0), ('total_time', 1000), ('num_of_pendown', 1))}]), tasks) - np.array(model['mean'])) / np.array(model['std'])) @ np.array(model['coef']) - model['intercept'])))[0]))
+    print(f"  A person who never lifts gets {low:.0f}/100, the lowest score the model can give for one touch per task.\n")
 
     by_age = own.assign(p=p).groupby("age")["p"].agg(["count", "median", "max"]).round(2)
     print("Tinta's score by age band (healthy volunteers):")

@@ -1,0 +1,35 @@
+5 healthy volunteers on a phone; age bands: {'under 30': 3, '30 to 59': 2}
+
+Tinta (short check, the shipped model)
+  wrongly flagged 'worth mentioning': 0 of 5
+  'I can't tell': 0 of 5
+  'usual pattern': 5 of 5
+  scores: [6, 6, 6, 12, 24]
+
+Stopwatch rule learned on the study's tablet, same three tasks
+  wrongly flagged (score 50 or more): 0 of 5
+  Tinta with the same 50 cut-off:     0 of 5
+
+Median time per task: healthy people in the study (pen, tablet) vs our volunteers (finger, phone)
+  task  2:   9.2 s  vs   6.4 s   phone / tablet = x0.70
+  task  3:   6.6 s  vs   5.1 s   phone / tablet = x0.77
+  task 16:   4.2 s  vs   5.6 s   phone / tablet = x1.32
+  task  5:  14.4 s  vs   7.4 s   phone / tablet = x0.51
+  task  9:   6.0 s  vs   5.9 s   phone / tablet = x0.98
+  the factor ranges from x0.51 to x1.32. If it were one number for every task, our simulation would be exact; the spread is what it misses.
+
+The model's two measures, per scored task: healthy people in the study (pen) vs our volunteers (finger)
+            share of time in the air (median)      touches (median)      did it in a single touch
+  task 16:   study  46%   ours   0%          study  4.0   ours  1.0        study  8 of 85   ours 3 of 5
+  task  5:   study   6%   ours   0%          study  1.0   ours  1.0        study 64 of 85   ours 5 of 5
+  task  9:   study  21%   ours   0%          study  1.0   ours  1.0        study 56 of 85   ours 4 of 5
+  3 of 5 volunteers never lifted the finger during the three scored tasks.
+  A person who never lifts gets 6/100, the lowest score the model can give for one touch per task.
+
+Tinta's score by age band (healthy volunteers):
+          count  median   max
+age                          
+30 to 59      2    0.15  0.24
+under 30      3    0.06  0.12
+
+With so few people these are counts, not rates. They show whether the idea survives a real phone; they cannot say how it does with patients.
