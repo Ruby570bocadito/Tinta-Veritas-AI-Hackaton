@@ -12,7 +12,7 @@ type Props = {
 
 const INK = '#1c2340'
 const AIR = '#e8622a'
-const GUIDE = '#d6c7a8'
+const GUIDE = '#8c7b57'
 const CM = 37.8 // CSS pixels per centimetre
 const REPLAY_MS = [1400, 4200] // the replay is squeezed or stretched to last between these
 

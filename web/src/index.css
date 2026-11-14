@@ -59,7 +59,7 @@ body {
 .tag {
   font-family: var(--hand);
   font-size: 0.95rem;
-  background: var(--air);
+  background: var(--air-text);
   color: #fff;
   padding: 0.1rem 0.7rem 0.15rem;
   border-radius: 0.3rem 0.5rem 0.35rem 0.55rem;
@@ -477,7 +477,6 @@ textarea {
   font-family: var(--hand);
   font-size: 1.4rem;
   color: var(--soft);
-  opacity: 0.6;
   animation: breathe 2.4s ease-in-out infinite;
 }
 
@@ -513,8 +512,15 @@ textarea {
 
 @keyframes breathe {
   50% {
-    opacity: 0.25;
+    opacity: 0.6;
   }
+}
+
+/* The button that moves you on is always within reach, even on a small phone. */
+.sticky {
+  position: sticky;
+  bottom: 0.75rem;
+  z-index: 2;
 }
 
 .quit {
@@ -572,9 +578,10 @@ textarea {
 }
 
 .link.inline {
-  min-height: 0;
-  padding: 0 0.2rem;
-  font-size: 1.05rem;
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.4rem;
+  font-size: 1.1rem;
 }
 
 .brandbar .link {
@@ -622,7 +629,7 @@ textarea {
 }
 
 .history-label {
-  font-size: 11px;
+  font-size: 13px;
   fill: var(--soft);
   font-family: inherit;
 }

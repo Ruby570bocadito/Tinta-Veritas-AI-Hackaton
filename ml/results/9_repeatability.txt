@@ -1,0 +1,9 @@
+Short check, simulated second attempt (unseen people, 5-fold x 3 repeats, 20 wobbles each)
+
+typical wobble  score moves by    answer changes    usual <-> worth mentioning
+10%             3 points          9%                0.0%
+20%             5 points          14%               0.0%
+30%             6 points          19%               0.1%
+
+Most changes are into or out of "I can't tell". A jump straight from "usual" to
+"worth mentioning" (or back) is rare. Real people may vary more or less than this.

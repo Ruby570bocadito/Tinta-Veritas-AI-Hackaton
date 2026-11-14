@@ -224,7 +224,7 @@ export default function App() {
         <div className="poster">
           <Mascot mood={GUIDE_POSES[screen.step]} size={230} />
         </div>
-        <ol className="dots center">
+        <ol className="dots center" aria-hidden="true">
           {t.guide.cards.map((g, i) => (
             <li key={g.title} className={i < screen.step ? 'done' : i === screen.step ? 'now' : ''} />
           ))}
@@ -300,7 +300,7 @@ export default function App() {
         <header className="taskbar">
           <Mascot mood={screen.review ? 'writing' : task.pose} size={96} />
           <div>
-            <ol className="dots">
+            <ol className="dots" aria-hidden="true">
               {list.map((item, i) => (
                 <li key={item.id} className={i < screen.index ? 'done' : i === screen.index ? 'now' : ''} />
               ))}
@@ -365,14 +365,14 @@ export default function App() {
               </div>
             </dl>
             <button
-              className="primary"
+              className="primary sticky"
               onClick={() => (last ? afterLast() : setScreen({ name: 'task', index: screen.index + 1, review: false }))}
             >
               {last ? t.task.seeResult : t.task.next}
             </button>
           </>
         ) : (
-          <div className="row">
+          <div className="row sticky">
             <button className="ghost" onClick={() => setInk({ ...ink, [task.id]: [] })} disabled={!strokes.length}>
               {t.task.startOver}
             </button>

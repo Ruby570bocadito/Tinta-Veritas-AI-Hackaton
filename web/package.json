@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "check:model": "vite-node tools/parity.ts"
+    "check:model": "vite-node tools/parity.ts",
+    "test": "vite-node tools/ink.test.ts && vite-node tools/parity.ts"
   },
   "dependencies": {
     "react": "^19.3.1",
