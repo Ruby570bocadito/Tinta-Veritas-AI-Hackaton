@@ -1,0 +1,27 @@
+Accuracy when the test device is f times slower (f = 1 is the tablet itself)
+
+                                          f=0.5   f=0.7   f=1.0   f=1.5   f=2.0 
+stopwatch, 3 tasks                        0.600   0.711   0.797   0.676   0.550 
+stopwatch, 14 tasks                       0.569   0.709   0.858   0.626   0.529 
+relative model, 3 tasks (+2 warm-up)      0.793   0.793   0.793   0.793   0.793 
+relative model, 5 tasks (+2 warm-up)      0.801   0.801   0.801   0.801   0.801 
+relative model, 14 tasks, logistic        0.828   0.828   0.828   0.828   0.828 
+relative model, 14 tasks, forest          0.847   0.847   0.847   0.847   0.847 
+
+At f = 1 (no shift): accuracy ±sd | sensitivity | specificity | AUC
+stopwatch, 3 tasks                       0.797 ±0.061 | 0.782 | 0.812 | 0.884
+stopwatch, 14 tasks                      0.858 ±0.041 | 0.861 | 0.855 | 0.947
+relative model, 3 tasks (+2 warm-up)     0.793 ±0.056 | 0.767 | 0.820 | 0.881
+relative model, 5 tasks (+2 warm-up)     0.801 ±0.042 | 0.771 | 0.831 | 0.884
+relative model, 14 tasks, logistic       0.828 ±0.052 | 0.794 | 0.863 | 0.893
+relative model, 14 tasks, forest         0.847 ±0.045 | 0.866 | 0.827 | 0.936
+
+False alarms among healthy people (1 - specificity) at f = 1.5 and f = 2.0:
+stopwatch, 3 tasks                       0.635   0.922
+stopwatch, 14 tasks                      0.765   0.965
+relative model, 3 tasks (+2 warm-up)     0.180   0.180
+relative model, 5 tasks (+2 warm-up)     0.169   0.169
+relative model, 14 tasks, logistic       0.137   0.137
+relative model, 14 tasks, forest         0.173   0.173
+
+Tasks picked for the relative model (first 5): [(5, 15), (23, 14), (9, 13), (16, 13), (15, 6), (14, 5), (22, 4), (24, 2)]

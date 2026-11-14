@@ -1,0 +1,58 @@
+model tasks: [5, 23, 9] | stopwatch tasks: [15, 23, 6]
+{
+ "1.0": {
+  "model": {
+   "accuracy": 0.771,
+   "missed": 4,
+   "patients": 18,
+   "false_alarms": 4,
+   "healthy": 17,
+   "auc": 0.918
+  },
+  "stopwatch": {
+   "accuracy": 0.829,
+   "missed": 3,
+   "patients": 18,
+   "false_alarms": 3,
+   "healthy": 17,
+   "auc": 0.892
+  }
+ },
+ "1.5": {
+  "model": {
+   "accuracy": 0.771,
+   "missed": 4,
+   "patients": 18,
+   "false_alarms": 4,
+   "healthy": 17,
+   "auc": 0.918
+  },
+  "stopwatch": {
+   "accuracy": 0.743,
+   "missed": 0,
+   "patients": 18,
+   "false_alarms": 9,
+   "healthy": 17,
+   "auc": 0.892
+  }
+ },
+ "2.0": {
+  "model": {
+   "accuracy": 0.771,
+   "missed": 4,
+   "patients": 18,
+   "false_alarms": 4,
+   "healthy": 17,
+   "auc": 0.918
+  },
+  "stopwatch": {
+   "accuracy": 0.543,
+   "missed": 0,
+   "patients": 18,
+   "false_alarms": 16,
+   "healthy": 17,
+   "auc": 0.892
+  }
+ }
+}
+wrote C:\Users\rby\Desktop\Veritas AI - Hackaton\tinta\web\src\model.json
