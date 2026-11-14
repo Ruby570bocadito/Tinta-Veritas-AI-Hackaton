@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import History from './components/History'
-import InkCanvas, { type Guide } from './components/InkCanvas'
+import InkCanvas, { type Guide, type Size } from './components/InkCanvas'
 import Mascot, { type Mood } from './components/Mascot'
 import { addToHistory, clearHistory, loadHistory, type Entry } from './lib/history'
 import { measure, seconds, type Measures, type Stroke } from './lib/ink'
@@ -68,6 +68,7 @@ export default function App() {
   const [lang, setLang] = useState<Lang>(initialLang)
   const [screen, setScreen] = useState<Screen>({ name: 'intro' })
   const [ink, setInk] = useState<Record<number, Stroke[]>>({})
+  const [sheets, setSheets] = useState<Record<number, Size>>({}) // size of the sheet each task was written on
   const [example, setExample] = useState<number | null>(null)
   const [closer, setCloser] = useState(false) // true once the person accepts the three extra tasks
   const [history, setHistory] = useState<Entry[]>(loadHistory)
@@ -337,7 +338,15 @@ export default function App() {
             key={task.id + (screen.review ? 'r' + replay : 'w')}
             strokes={strokes}
             guide={task.guide}
-            onChange={screen.review ? undefined : (s) => setInk({ ...ink, [task.id]: [...s] })}
+            from={screen.review ? sheets[task.id] : undefined}
+            onChange={
+              screen.review
+                ? undefined
+                : (s, sheet) => {
+                    setInk({ ...ink, [task.id]: [...s] })
+                    setSheets({ ...sheets, [task.id]: sheet })
+                  }
+            }
             showInvisibleInk={screen.review}
           />
           {!screen.review && strokes.length === 0 && (

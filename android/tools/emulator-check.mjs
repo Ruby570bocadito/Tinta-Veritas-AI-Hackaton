@@ -4,8 +4,9 @@
 // and the page is read through the WebView's DevTools socket. Needs a debug build running.
 //
 //   node android/tools/emulator-check.mjs [screenshot.png]
+//   SHOTS=folder node android/tools/emulator-check.mjs     also saves a picture of every screen
 import { execFileSync } from 'node:child_process'
-import { writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 
 const ADB = process.env.ADB ?? `${process.env.LOCALAPPDATA}/Android/Sdk/platform-tools/adb.exe`
 const adb = (...args) => execFileSync(ADB, args, { encoding: 'utf8', env: { ...process.env, MSYS_NO_PATHCONV: '1' } })
@@ -73,24 +74,46 @@ const PLANS = [
   [0.08, 0.17, 0.26, 0.35, 0.44, 0.53, 0.62, 0.71, 0.8, 0.89].map(digit),
 ]
 
+// With SHOTS=folder, a picture of each screen is saved there (taken from the page itself).
+const shots = process.env.SHOTS
+if (shots) mkdirSync(shots, { recursive: true })
+let shotNo = 0
+async function shot(name) {
+  if (!shots) return
+  await js('window.scrollTo(0, 0)')
+  await sleep(700) // let the screen settle
+  const png = await cdp('Page.captureScreenshot', { format: 'png' })
+  writeFileSync(`${shots}/${String(++shotNo).padStart(2, '0')}-${name}.png`, Buffer.from(png.data, 'base64'))
+}
+
 await js(`location.reload()`)
 await sleep(2500)
 console.log('page:', await js('document.title'), '| native voice bridge:', await js('Boolean(window.TintaNative)'))
+await shot('home')
 await tap(button('Start'))
+await shot('guide')
 await tap(button('Skip')) // the three-card guide
+await shot('ready')
 await tap(button('Begin'))
+await shot('task-hint')
 for (const [i, plan] of PLANS.entries()) {
   for (const s of plan) {
     await stroke(s)
     await sleep(300)
   }
+  if (i === 2) await shot('task-circle')
   await tap(button("I'm done"))
+  if (i === 4) {
+    await sleep(4500) // wait for the replay to finish, so the invisible ink is complete
+    await shot('invisible-ink')
+  }
   console.log(`task ${i + 1}:`, (await js(`document.querySelector('.stats').innerText`)).replace(/\n/g, ' '))
   await tap(i === 4 ? button('See the result') : button('Next'))
 }
 // If the short check is unsure, the app asks for a closer look: three more tasks.
 if (await js(`Boolean(${button('Three more')})`)) {
   console.log('short check unsure -> closer look')
+  await shot('closer-look')
   await tap(button('Three more'))
   for (const plan of [[0.1, 0.25, 0.4, 0.55, 0.7, 0.85].map(digit), [0.2, 0.35, 0.5, 0.65, 0.8].map(digit), PLANS[4]]) {
     for (const s of plan) {
@@ -102,6 +125,14 @@ if (await js(`Boolean(${button('Three more')})`)) {
   }
 }
 console.log('\n' + (await js(`document.querySelector('main').innerText`)).split('\n').filter(Boolean).slice(0, 12).join('\n'))
+await shot('result')
+if (shots) {
+  await tap(button('Start again'))
+  await tap(button('Ask Tinta'))
+  await js(`document.querySelectorAll('details')[3].open = true`)
+  await shot('ask-tinta')
+  await tap(button('Back'))
+}
 await js('window.scrollTo(0, 0)')
 await sleep(300)
 if (process.argv[2]) {

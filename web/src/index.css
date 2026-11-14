@@ -253,6 +253,11 @@ select:focus-visible {
   box-shadow: var(--lift);
 }
 
+/* When the writing is being replayed the sheet is shorter, so the measures and the button fit below it. */
+.ink-readonly {
+  height: min(32dvh, 15rem);
+}
+
 .legend {
   margin: 0;
   font-size: 0.9rem;

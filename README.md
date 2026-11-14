@@ -14,6 +14,8 @@ Lucía is 45. Her mother Carmen, 72, repeats questions and left the stove on las
 
 A web app (also an offline Android app). Carmen does two practice tasks and three scored ones with her finger: trace a circle, write "le" four times, copy a word backwards. Tinta replays her "invisible ink" (where the finger left the screen, and for how long) and gives one of three answers: **usual pattern**, **worth mentioning to a doctor**, or **I can't tell**. If the short check is unsure, three more tasks follow and three models vote. Nothing leaves the phone.
 
+![Five screens of the app: start, tracing a circle, the invisible ink replay, the closer look, and the result](docs/screens.jpg)
+
 ## What I added
 
 The public study needs 25 tasks on a professional tablet. I cut it to tasks that work with a finger, kept only measures that ignore overall speed, tested what breaks that idea, and built the app, which shows real cases it gets wrong.
@@ -22,7 +24,7 @@ The public study needs 25 tasks on a professional tablet. I cut it to tasks that
 
 **Data.** [DARWIN](https://doi.org/10.24432/C55D0K): 174 people (89 diagnosed with Alzheimer's, 85 healthy), 25 handwriting tasks, pen on paper over a tablet.
 
-**Model.** Logistic regression on two numbers per task: the share of the task spent with the pen in the air, and the number of pen-downs. Tasks are chosen by forward selection on training people only. A score between 35 and 65 (a band I set by hand) triggers the closer look: three more tasks, and the average of a logistic regression, an RBF SVM and a random forest, tuned inside each fold. The models run in the browser and `npm test` checks they match scikit-learn to four decimals.
+**Model.** Logistic regression on two numbers per task: the share of the task spent with the pen in the air, and the number of pen-downs. Tasks are chosen by forward selection on training people only. A score between 35 and 65 (a band I set by hand) triggers the closer look: three more tasks, and the average of a logistic regression, an RBF SVM and a random forest. The models run in the browser; `npm test` checks they match scikit-learn to four decimals.
 
 ## Results
 
@@ -44,7 +46,7 @@ Nested 5-fold cross-validation, repeated 3 or 4 times.
 | Of 100 patients | 19 | 15 | 65 |
 | Of 100 healthy people | 74 | 13 | 14 |
 
-On 35 people held out of training (not untouched: I looked at them while designing): of 18 patients, 14 "worth mentioning", 1 "can't tell", 3 "usual"; of 17 healthy, 12 "usual", 2 "can't tell", 3 "worth mentioning".
+On 35 people held out of training (not untouched: I looked at them while designing), 3 of 18 patients were told "usual" and 3 of 17 healthy people "worth mentioning".
 
 **Why bother, then.** A stopwatch threshold is in milliseconds: if a device makes everyone 1.5 times slower it flags 64% of healthy people. A share and a count ignore overall speed. That is arithmetic, not a finding.
 
@@ -53,7 +55,7 @@ On 35 people held out of training (not untouched: I looked at them while designi
 ![Patients caught and healthy people wrongly flagged under different device changes](docs/what-breaks.png)
 
 - *Devices that change pauses and strokes differently.* Pauses twice as long: half of healthy people flagged. Strokes twice as long: more than half of patients missed. The simulation keeps pen-downs fixed, and a finger may lift differently. **It has never been tested on a phone.**
-- *Slow writers.* 9 of 26 slow healthy test cases were flagged (35%, about 3 of 9 distinct people), against 15 to 18% of the rest. The data has no age or sex, so I could not check those groups.
+- *Slow writers.* 9 of 26 slow healthy test cases were flagged (35%), against 15 to 18% of the rest. The data has no age or sex, so I could not check those groups.
 - *My first idea was wrong.* Measuring each task against the person's own warm-up pace scores 59% on its own. I removed it.
 - *Not early detection.* Patients were already diagnosed and are half the sample. In real life most "worth mentioning" results would be false alarms.
 

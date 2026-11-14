@@ -3,9 +3,12 @@ import { gaps, type Stroke } from '../lib/ink'
 
 export type Guide = 'hline' | 'vline' | 'circle'
 
+export type Size = { w: number; h: number }
+
 type Props = {
   strokes: Stroke[]
-  onChange?: (strokes: Stroke[]) => void // omit to make the canvas read-only
+  onChange?: (strokes: Stroke[], sheet: Size) => void // omit to make the canvas read-only
+  from?: Size // size of the sheet the strokes were written on, so a smaller replay shows all of it
   showInvisibleInk?: boolean // replay the writing and reveal the pauses in orange
   guide?: Guide
 }
@@ -17,7 +20,7 @@ const CM = 37.8 // CSS pixels per centimetre
 const REPLAY_MS = [1400, 4200] // the replay is squeezed or stretched to last between these
 
 /** Draws the sheet. With `until`, only what had happened by that moment (used by the replay). */
-function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, guide?: Guide, until = Infinity) {
+function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, guide?: Guide, until = Infinity, from?: Size) {
   const ctx = canvas.getContext('2d')!
   const ratio = window.devicePixelRatio || 1
   const { width, height } = canvas.getBoundingClientRect()
@@ -30,9 +33,20 @@ function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, 
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
 
+  // The replay sheet is smaller than the one the person wrote on: shrink the drawing to fit, centred.
+  let w = width
+  let h = height
+  if (from) {
+    const k = Math.min(width / from.w, height / from.h)
+    ctx.translate((width - from.w * k) / 2, (height - from.h * k) / 2)
+    ctx.scale(k, k)
+    w = from.w
+    h = from.h
+  }
+
   // Printed guide, like the sheet of paper in the original study.
-  const cx = width / 2
-  const cy = height / 2
+  const cx = w / 2
+  const cy = h / 2
   ctx.fillStyle = GUIDE
   ctx.strokeStyle = GUIDE
   ctx.lineWidth = 2
@@ -43,11 +57,11 @@ function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, 
     ctx.fill()
   }
   if (guide === 'hline') {
-    dot(cx - width * 0.32, cy)
-    dot(cx + width * 0.32, cy)
+    dot(cx - w * 0.32, cy)
+    dot(cx + w * 0.32, cy)
   } else if (guide === 'vline') {
-    dot(cx, cy - height * 0.32)
-    dot(cx, cy + height * 0.32)
+    dot(cx, cy - h * 0.32)
+    dot(cx, cy + h * 0.32)
   } else if (guide === 'circle') {
     ctx.beginPath()
     ctx.arc(cx, cy, CM * 1.5, 0, Math.PI * 2) // 3 cm across, as in the study
@@ -96,7 +110,7 @@ function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, 
   }
 }
 
-export default function InkCanvas({ strokes, onChange, showInvisibleInk = false, guide }: Props) {
+export default function InkCanvas({ strokes, onChange, showInvisibleInk = false, guide, from }: Props) {
   const ref = useRef<HTMLCanvasElement>(null)
   const live = useRef<Stroke[]>(strokes)
   const drawing = useRef(false)
@@ -104,7 +118,7 @@ export default function InkCanvas({ strokes, onChange, showInvisibleInk = false,
   useEffect(() => {
     live.current = strokes
     const canvas = ref.current!
-    const still = () => draw(canvas, live.current, showInvisibleInk, guide)
+    const still = () => draw(canvas, live.current, showInvisibleInk, guide, Infinity, from)
     window.addEventListener('resize', still)
 
     // Replay: the writing draws itself again and each pause swells in orange while it lasts.
@@ -118,7 +132,7 @@ export default function InkCanvas({ strokes, onChange, showInvisibleInk = false,
       const started = performance.now()
       const tick = (now: number) => {
         const progress = Math.min(1, (now - started) / length)
-        draw(canvas, strokes, true, guide, first + progress * total)
+        draw(canvas, strokes, true, guide, first + progress * total, from)
         if (progress < 1) frame = requestAnimationFrame(tick)
       }
       frame = requestAnimationFrame(tick)
@@ -129,7 +143,7 @@ export default function InkCanvas({ strokes, onChange, showInvisibleInk = false,
       cancelAnimationFrame(frame)
       window.removeEventListener('resize', still)
     }
-  }, [strokes, showInvisibleInk, guide])
+  }, [strokes, showInvisibleInk, guide, from])
 
   const point = (e: React.PointerEvent) => {
     const r = ref.current!.getBoundingClientRect()
@@ -151,7 +165,8 @@ export default function InkCanvas({ strokes, onChange, showInvisibleInk = false,
   const up = () => {
     if (!drawing.current) return
     drawing.current = false
-    onChange?.(live.current)
+    const r = ref.current!.getBoundingClientRect()
+    onChange?.(live.current, { w: r.width, h: r.height })
   }
 
   return (
