@@ -1,3 +1,103 @@
 fold 1/25 done
 fold 2/25 done
 fold 3/25 done
+fold 4/25 done
+fold 5/25 done
+fold 6/25 done
+fold 7/25 done
+fold 8/25 done
+fold 9/25 done
+fold 10/25 done
+fold 11/25 done
+fold 12/25 done
+fold 13/25 done
+fold 14/25 done
+fold 15/25 done
+fold 16/25 done
+fold 17/25 done
+fold 18/25 done
+fold 19/25 done
+fold 20/25 done
+fold 21/25 done
+fold 22/25 done
+fold 23/25 done
+fold 24/25 done
+fold 25/25 done
+
+All settings, best AUC first (accuracy on unseen people, 5-fold x 5 repeats, fully nested)
+
+ tasks measures         model  accuracy  acc_sd  fold_lo  fold_hi  sensitivity  specificity   auc
+     6    basic    blend of 3     0.823   0.053    0.720    0.925        0.820        0.826 0.894
+     6    basic random forest     0.807   0.050    0.720    0.908        0.822        0.791 0.887
+     5    basic random forest     0.797   0.051    0.691    0.884        0.808        0.784 0.886
+     5    basic    blend of 3     0.799   0.057    0.674    0.908        0.793        0.805 0.885
+     6     rich    blend of 3     0.814   0.058    0.709    0.896        0.808        0.819 0.884
+     6    basic      boosting     0.802   0.045    0.731    0.886        0.800        0.805 0.883
+     6     rich       RBF SVM     0.816   0.062    0.686    0.925        0.838        0.793 0.883
+     6     rich random forest     0.800   0.052    0.686    0.884        0.815        0.784 0.883
+     6    basic       RBF SVM     0.817   0.060    0.674    0.908        0.834        0.800 0.879
+     6     rich      boosting     0.792   0.056    0.703    0.908        0.784        0.800 0.879
+     4    basic    blend of 3     0.788   0.062    0.674    0.894        0.786        0.788 0.877
+     5     rich random forest     0.792   0.055    0.680    0.879        0.800        0.784 0.877
+     5     rich    blend of 3     0.800   0.057    0.691    0.908        0.795        0.805 0.875
+     6     rich     k-nearest     0.731   0.070    0.589    0.840        0.530        0.941 0.875
+     5    basic       RBF SVM     0.804   0.056    0.691    0.908        0.808        0.798 0.874
+     6    basic     k-nearest     0.709   0.069    0.611    0.823        0.468        0.962 0.874
+     6    basic    neural net     0.793   0.077    0.629    0.886        0.798        0.788 0.872
+     5     rich       RBF SVM     0.792   0.052    0.691    0.879        0.806        0.776 0.871
+     4     rich    blend of 3     0.786   0.054    0.674    0.879        0.788        0.784 0.870
+     6    basic      logistic     0.789   0.083    0.623    0.913        0.750        0.828 0.869
+     4     rich random forest     0.784   0.052    0.674    0.867        0.804        0.762 0.869
+     5    basic     k-nearest     0.725   0.075    0.549    0.840        0.513        0.948 0.868
+     6    basic    linear SVM     0.794   0.062    0.663    0.886        0.770        0.819 0.868
+     5    basic      boosting     0.777   0.050    0.663    0.867        0.764        0.791 0.867
+     6     rich    neural net     0.793   0.068    0.675    0.886        0.802        0.784 0.867
+     5     rich     k-nearest     0.739   0.059    0.640    0.840        0.577        0.908 0.867
+     4    basic random forest     0.784   0.064    0.663    0.869        0.795        0.772 0.866
+     4     rich       RBF SVM     0.786   0.062    0.680    0.896        0.804        0.767 0.865
+     5    basic      logistic     0.777   0.068    0.646    0.896        0.739        0.816 0.863
+     5    basic    linear SVM     0.791   0.063    0.674    0.879        0.772        0.809 0.862
+     4    basic       RBF SVM     0.791   0.058    0.691    0.896        0.800        0.781 0.862
+     5     rich      boosting     0.771   0.063    0.657    0.891        0.750        0.793 0.860
+     4    basic      logistic     0.773   0.072    0.623    0.882        0.746        0.800 0.857
+     4     rich    neural net     0.797   0.062    0.651    0.882        0.786        0.807 0.857
+     5    basic    neural net     0.790   0.052    0.691    0.879        0.782        0.798 0.857
+     4     rich      boosting     0.768   0.055    0.653    0.850        0.757        0.779 0.857
+     4    basic    neural net     0.790   0.062    0.657    0.879        0.791        0.788 0.857
+     4    basic      boosting     0.774   0.055    0.646    0.855        0.775        0.772 0.857
+     5     rich      logistic     0.786   0.071    0.657    0.886        0.755        0.819 0.856
+     6     rich      logistic     0.779   0.071    0.651    0.886        0.750        0.809 0.856
+     4    basic     k-nearest     0.727   0.069    0.617    0.829        0.555        0.906 0.856
+     3    basic    blend of 3     0.776   0.076    0.589    0.897        0.768        0.784 0.855
+     3     rich    neural net     0.786   0.073    0.674    0.926        0.779        0.793 0.855
+     5     rich    linear SVM     0.784   0.064    0.634    0.867        0.764        0.805 0.855
+     4    basic    linear SVM     0.780   0.066    0.640    0.884        0.773        0.786 0.855
+     3     rich    blend of 3     0.775   0.071    0.623    0.886        0.757        0.793 0.854
+     6     rich    linear SVM     0.783   0.061    0.674    0.869        0.766        0.800 0.854
+     3     rich       RBF SVM     0.771   0.075    0.623    0.895        0.773        0.769 0.851
+     4     rich     k-nearest     0.737   0.061    0.617    0.823        0.591        0.889 0.851
+     5     rich    neural net     0.787   0.062    0.663    0.886        0.784        0.791 0.850
+     4     rich      logistic     0.770   0.071    0.606    0.884        0.746        0.795 0.848
+     3     rich random forest     0.748   0.072    0.611    0.866        0.763        0.732 0.848
+     3    basic     k-nearest     0.754   0.079    0.600    0.897        0.617        0.896 0.847
+     3    basic       RBF SVM     0.770   0.070    0.617    0.880        0.775        0.765 0.847
+     4     rich    linear SVM     0.770   0.065    0.640    0.867        0.755        0.786 0.847
+     3     rich     k-nearest     0.769   0.078    0.629    0.909        0.658        0.885 0.846
+     3    basic random forest     0.756   0.074    0.640    0.869        0.765        0.746 0.846
+     3    basic    neural net     0.778   0.080    0.606    0.886        0.748        0.809 0.845
+     3     rich      boosting     0.739   0.065    0.624    0.840        0.730        0.748 0.839
+     3    basic    linear SVM     0.767   0.079    0.589    0.869        0.745        0.788 0.838
+     3    basic      logistic     0.771   0.077    0.589    0.886        0.741        0.802 0.837
+     3     rich    linear SVM     0.766   0.076    0.617    0.886        0.732        0.800 0.834
+     3     rich      logistic     0.771   0.078    0.606    0.869        0.741        0.802 0.829
+     3    basic      boosting     0.744   0.068    0.629    0.850        0.734        0.753 0.818
+
+Best by number of tasks:
+  3 tasks: blend of 3 on basic measures -> accuracy 0.776 ±0.076, sensitivity 0.768, specificity 0.784, AUC 0.855
+  4 tasks: blend of 3 on basic measures -> accuracy 0.788 ±0.062, sensitivity 0.786, specificity 0.788, AUC 0.877
+  5 tasks: random forest on basic measures -> accuracy 0.797 ±0.051, sensitivity 0.808, specificity 0.784, AUC 0.886
+  6 tasks: blend of 3 on basic measures -> accuracy 0.823 ±0.053, sensitivity 0.820, specificity 0.826, AUC 0.894
+  tasks most often chosen in the first 3: [(5, 25), (9, 17), (23, 15), (16, 7), (8, 3)]
+  tasks most often chosen in the first 4: [(5, 25), (9, 21), (23, 19), (16, 15), (14, 7), (15, 5)]
+  tasks most often chosen in the first 5: [(5, 25), (9, 23), (23, 22), (16, 15), (14, 11), (15, 10), (8, 5)]
+  tasks most often chosen in the first 6: [(5, 25), (9, 24), (23, 22), (14, 17), (16, 16), (15, 10), (8, 7), (24, 6)]
