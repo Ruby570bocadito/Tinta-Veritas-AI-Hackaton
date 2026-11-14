@@ -498,6 +498,8 @@ export default function App() {
     await navigator.clipboard.writeText(friendMessage)
     setSent('copied')
   }
+  // Found in our own phone data: some people never lift the finger, and then there is no pause to measure.
+  const noLift = !ex && scored.every((m) => m.air_time === 0 && m.num_of_pendown <= 1)
   const today = new Date().toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'long', year: 'numeric' })
   return (
     <main className="page" key="result">
@@ -509,6 +511,7 @@ export default function App() {
       </header>
       <h1 className={'verdict ' + kind}>{v.title}</h1>
       <p className="lead">{v.body}</p>
+      {noLift && <p className="why">{t.result.noLift}</p>}
       {ex && (
         <p className={'badge ' + (judged === 'wrong' ? 'bad' : judged === 'right' ? 'good' : 'none')}>
           {judged === 'wrong' ? t.result.wrong : judged === 'right' ? t.result.right : t.result.noAnswer}

@@ -49,6 +49,7 @@ export type Strings = {
     wrong: string
     noAnswer: string
     caveat: string
+    noLift: string
     score: (s: number) => string
     whatNow: string
     measurements: string
@@ -220,6 +221,7 @@ const en: Strings = {
     right: 'Tinta gets this one right.',
     wrong: 'Tinta gets this one wrong.',
     noAnswer: 'Tinta gives no answer for this one.',
+    noLift: 'You wrote every task without lifting your finger. Three of my seven phone volunteers did the same. With nothing in the air to time, my score comes out as low as it can go, so today I can tell you less than usual.',
     caveat: 'Tinta learned from pen-on-tablet data. On phones, only 7 healthy volunteers have tried her, and no patient has.',
     score: (s) => `Score ${s}/100. Under 35: usual pattern. Over 65: worth mentioning. In between: I don't know.`,
     whatNow: 'What now?',
@@ -509,6 +511,7 @@ const es: Strings = {
     right: 'Tinta acierta en este.',
     wrong: 'Tinta se equivoca en este.',
     noAnswer: 'En este, Tinta no da respuesta.',
+    noLift: 'Has escrito todas las tareas sin levantar el dedo. A tres de mis siete voluntarios con móvil les pasó lo mismo. Sin nada en el aire que cronometrar, mi nota sale lo más baja posible, así que hoy puedo decirte menos de lo normal.',
     caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 7 voluntarios sanos, y ningún paciente.',
     score: (s) => `Nota ${s}/100. Menos de 35: lo habitual. Más de 65: coméntalo. En medio: no lo sé.`,
     whatNow: '¿Y ahora qué?',
