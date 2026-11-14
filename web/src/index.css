@@ -443,6 +443,7 @@ select:focus-visible {
 }
 
 select,
+input[type='text'],
 textarea {
   font: inherit;
   padding: 0.5rem;
@@ -456,6 +457,13 @@ textarea {
 textarea {
   font-family: ui-monospace, Consolas, monospace;
   font-size: 0.75rem;
+}
+
+/* where a person writes their own words: normal letters, big enough that a phone does not zoom in */
+input[type='text'],
+textarea.words {
+  font: inherit;
+  font-size: 1rem;
 }
 
 /* A moving orange dot shows what to do, until the first touch. */

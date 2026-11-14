@@ -91,6 +91,7 @@ export type Strings = {
     limits: string
   }
   study: { title: string; body: string; age: string; choose: string; bands: string[]; copy: string; copied: string; save: string; saved: (n: number) => string; copyAll: (n: number) => string; clear: string; clearConfirm: string }
+  friends: { title: string; body: string; name: string; notes: string; notesHint: string; preview: string; send: string; sent: string; copied: string; header: string; result: string; nameLabel: string; notesLabel: string }
   crowd: { title: string; caseTitle: string; you: string; explain: (healthy: number, patients: number) => string; aria: (score: number) => string }
   ask: { title: string; lead: string; sources: string; back: string; items: Qa[] }
 }
@@ -286,6 +287,21 @@ const en: Strings = {
     copyAll: (n) => `Copy all ${n} people`,
     clear: 'Delete the saved people',
     clearConfirm: 'Delete every saved person from this phone?',
+  },
+  friends: {
+    title: 'Tell us how it went',
+    body: 'You were invited to try Tinta. If you want, send your result and your opinion to the person who invited you. Nothing is sent unless you press the button and choose who gets it. Your drawings are never included, only timings.',
+    name: 'Your name (optional)',
+    notes: 'What did you think?',
+    notesHint: 'Was anything confusing? Did anything look wrong on your phone?',
+    preview: 'See exactly what will be sent',
+    send: 'Send it',
+    sent: 'Thank you!',
+    copied: 'Copied. Paste it in a message to the person who invited you.',
+    header: 'Tinta test',
+    result: 'Result',
+    nameLabel: 'Name',
+    notesLabel: 'Notes',
   },
   crowd: {
     title: 'You among the 174 people in the study',
@@ -560,6 +576,21 @@ const es: Strings = {
     copyAll: (n) => `Copiar las ${n} personas`,
     clear: 'Borrar las personas guardadas',
     clearConfirm: '¿Borrar de este móvil a todas las personas guardadas?',
+  },
+  friends: {
+    title: 'Cuéntanos qué tal',
+    body: 'Te han invitado a probar Tinta. Si quieres, envía tu resultado y tu opinión a quien te invitó. No se envía nada si no pulsas el botón y eliges a quién. Tus dibujos nunca se incluyen, solo los tiempos.',
+    name: 'Tu nombre (opcional)',
+    notes: '¿Qué te ha parecido?',
+    notesHint: '¿Algo te ha confundido? ¿Algo se veía mal en tu móvil?',
+    preview: 'Ver exactamente lo que se enviará',
+    send: 'Enviar',
+    sent: '¡Gracias!',
+    copied: 'Copiado. Pégalo en un mensaje a quien te invitó.',
+    header: 'Prueba de Tinta',
+    result: 'Resultado',
+    nameLabel: 'Nombre',
+    notesLabel: 'Notas',
   },
   crowd: {
     title: 'Tú entre las 174 personas del estudio',

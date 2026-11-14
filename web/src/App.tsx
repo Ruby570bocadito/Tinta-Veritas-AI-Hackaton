@@ -49,6 +49,7 @@ const LOCALE: Record<Lang, string> = { en: 'en-GB', es: 'es-ES' }
 
 const params = new URLSearchParams(location.search)
 const study = params.has('study')
+const friends = params.has('friends') // invited testers: at the end they can send their result and opinion themselves
 // For demos: ?closer always shows the closer look, whatever the first score is.
 const forceCloser = params.has('closer')
 // A real case is judged by what the app would actually tell that person, not by a 50/50 cut.
@@ -79,6 +80,9 @@ export default function App() {
   const [copied, setCopied] = useState(false)
   const [people, setPeople] = useState<string[]>(loadPeople) // study mode: volunteers saved on this phone
   const [justSaved, setJustSaved] = useState(false)
+  const [who, setWho] = useState('')
+  const [notes, setNotes] = useState('')
+  const [sent, setSent] = useState<'no' | 'shared' | 'copied'>('no')
   const t = STRINGS[lang]
 
   useEffect(() => {
@@ -95,6 +99,7 @@ export default function App() {
     setExample(null)
     setCopied(false)
     setJustSaved(false)
+    setSent('no')
     setCloser(false)
     setScreen({ name: 'intro' })
   }
@@ -473,6 +478,26 @@ export default function App() {
   // Why a real case went wrong, from that person's own measures.
   const whyWrong = () => (ex!.label === 'patient' ? t.why.missed : t.why.falseAlarm)(meanAir, usual[0], meanTouches, usual[1])
   const studyLine = JSON.stringify({ age, lang, score, tasks: byTask })
+  // What an invited tester sends: a few readable lines, then the same timings as study mode. No drawing.
+  const friendMessage = [
+    t.friends.header,
+    `${t.friends.nameLabel}: ${who.trim() || '-'}`,
+    `${t.friends.result}: ${v.title} (${score}/100)`,
+    `${t.friends.notesLabel}: ${notes.trim() || '-'}`,
+    JSON.stringify({ age, lang, score, verdict: kind, closer: Boolean(second), screen: [window.innerWidth, window.innerHeight], tasks: byTask }),
+  ].join('\n')
+  const sendToFriend = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ text: friendMessage })
+        return setSent('shared')
+      }
+    } catch (e) {
+      if ((e as Error).name === 'AbortError') return // the person closed the share sheet
+    }
+    await navigator.clipboard.writeText(friendMessage)
+    setSent('copied')
+  }
   const today = new Date().toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'long', year: 'numeric' })
   return (
     <main className="page" key="result">
@@ -509,6 +534,39 @@ export default function App() {
       </div>
       <p className="fine">{t.result.score(score)}</p>
       <p className="fine caveat">{t.result.caveat}</p>
+      {friends && !ex && (
+        <section className="honest noprint">
+          <h2>{t.friends.title}</h2>
+          <p>{t.friends.body}</p>
+          <label className="field">
+            {t.friends.name}
+            <input type="text" value={who} maxLength={40} autoComplete="off" onChange={(e) => setWho(e.target.value)} />
+          </label>
+          <label className="field">
+            {t.study.age}
+            <select value={age} onChange={(e) => setAge(e.target.value)}>
+              <option value="">{t.study.choose}</option>
+              {t.study.bands.map((band, i) => (
+                <option key={band} value={['under 30', '30 to 59', '60 or over'][i]}>
+                  {band}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            {t.friends.notes}
+            <textarea className="words" value={notes} rows={3} maxLength={600} placeholder={t.friends.notesHint} onChange={(e) => setNotes(e.target.value)} />
+          </label>
+          <details className="fold">
+            <summary>{t.friends.preview}</summary>
+            <textarea readOnly value={friendMessage} rows={8} />
+          </details>
+          <button className="primary" onClick={sendToFriend}>
+            {sent === 'shared' ? t.friends.sent : t.friends.send}
+          </button>
+          {sent === 'copied' && <p className="fine">{t.friends.copied}</p>}
+        </section>
+      )}
       <section className="honest">
         <h2>{ex ? t.crowd.caseTitle : t.crowd.title}</h2>
         <Crowd

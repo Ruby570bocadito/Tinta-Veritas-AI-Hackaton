@@ -119,6 +119,18 @@ await js(`document.querySelector('.history')?.scrollIntoView({ block: 'center' }
 await sleep(500)
 const png = await cdp('Page.captureScreenshot', { format: 'png' })
 writeFileSync(join(out, `${String(++n).padStart(2, '0')}-history.png`), Buffer.from(png.data, 'base64'))
+if (url.includes('friends')) {
+  // Invited testers: fill in the form and press Send; the share sheet is replaced by a recorder.
+  await js(`window.shared = null; navigator.share = async (d) => { window.shared = d.text }`)
+  await js(`(() => { const set = (el, v) => { Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value').set.call(el, v); el.dispatchEvent(new Event('input', { bubbles: true })) }
+    set(document.querySelector('input[type=text]'), 'Test person'); set(document.querySelector('textarea.words'), 'Easy to follow.') })()`)
+  await sleep(300)
+  await press('Send it')
+  console.log('friends: message that would be shared: ' + (await js('window.shared'))?.slice(0, 260))
+  await js(`document.querySelector('input[type=text]').scrollIntoView({ block: 'center' })`)
+  await sleep(400)
+  writeFileSync(join(out, 'friends.png'), Buffer.from((await cdp('Page.captureScreenshot', { format: 'png' })).data, 'base64'))
+}
 if (url.includes('study')) {
   // Study mode: saving the volunteer keeps one line of timings on the phone.
   await press('Save this person')
