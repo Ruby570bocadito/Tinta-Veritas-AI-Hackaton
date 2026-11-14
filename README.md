@@ -1,3 +1,5 @@
+![Tinta, a paper cut-out squid drawing with a pencil](docs/scene-cover.jpg)
+
 # Tinta
 
 **A 2-minute handwriting check on the phone you already own. It measures how you write, not what you write.**
@@ -9,6 +11,8 @@
 <!-- TODO before submitting: live demo link, video link, screenshot or GIF -->
 
 ## The problem
+
+![An older woman draws on a phone with her finger while her daughter watches](docs/scene-family.jpg)
 
 Lucía is 45. Her mother Carmen, 72, repeats questions and left the stove on last week. Is it normal forgetfulness, or should they see a doctor? Screening tests happen in a clinic, weeks away. People with early Alzheimer's hesitate more while writing: the pen spends longer in the air between strokes. Paper hides that. A touchscreen can time it.
 
@@ -77,6 +81,6 @@ node android/tools/emulator-check.mjs shot.png      # end-to-end check with real
 - **Libraries:** scikit-learn, pandas, NumPy (Python); React, Vite, TypeScript (web).
 - **Fonts:** Fraunces, Atkinson Hyperlegible and Patrick Hand (SIL Open Font License), via Google Fonts.
 - **AI tools:** Claude Code (Anthropic) was used to plan, write and debug code and to draft this text. Every experiment was run and checked by us, and we can explain each part.
-- **Images:** the six pictures of Tinta the squid were generated with Meta's Muse Image model (`muse-image-1.0`) from our own prompts, then cut out with our own script. No pretrained model is used for the health result.
+- **Images:** the pictures of Tinta the squid and the paper scenes were generated with Meta's Muse Image model (`muse-image-1.0`) from our own prompts, then cut out with our own script. No pretrained model is used for the health result.
 
 MIT License.
