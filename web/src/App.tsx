@@ -70,7 +70,17 @@ function whyWrong(label: string, byTask: Record<number, Measures>): string {
   return 'This healthy person slowed down a lot on the harder tasks, more than most healthy people. A hesitation, a distraction or an unfamiliar task looks the same as a cognitive pause to Tinta.'
 }
 
+// In the Android app the voice is native (Android WebView has no speech synthesis).
+declare global {
+  interface Window {
+    TintaNative?: { speak(text: string): void }
+  }
+}
+
+const canSpeak = Boolean(window.TintaNative) || 'speechSynthesis' in window
+
 function say(text: string) {
+  if (window.TintaNative) return window.TintaNative.speak(text)
   const u = new SpeechSynthesisUtterance(text)
   u.rate = 0.8
   u.lang = 'en-US'
@@ -154,10 +164,13 @@ export default function App() {
         </header>
         <h2>{screen.review ? 'Here is your invisible ink' : task.instruction}</h2>
         {task.prompt && !screen.review && <p className="prompt">{task.prompt}</p>}
-        {task.speak && !screen.review && (
+        {task.speak && !screen.review && canSpeak && (
           <button className="ghost" onClick={() => say(task.speak!)}>
             ▶ Listen
           </button>
+        )}
+        {task.speak && !screen.review && !canSpeak && (
+          <p className="why">This device has no voice. Ask someone to read this number aloud to you: {task.speak}</p>
         )}
         <InkCanvas
           key={task.id + (screen.review ? 'r' : 'w')}

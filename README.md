@@ -14,7 +14,7 @@ Lucía is 45. Her mother Carmen, 72, repeats questions and left the stove on las
 
 ## What we built
 
-A web app that runs on any phone. Carmen does five short tasks with her finger: two warm-ups (joining two dots), then tracing a circle, writing "le" four times, and writing a phone number she hears. After each task Tinta shows her "invisible ink": where the finger left the screen and how long it paused. At the end she gets one of three answers: **within the usual pattern**, **worth mentioning to a doctor**, or **I can't tell**. The model runs in the browser. Nothing leaves the phone.
+A web app that runs on any phone, also packaged as an Android app that works offline. Carmen does five short tasks with her finger: two warm-ups (joining two dots), then tracing a circle, writing "le" four times, and writing a phone number she hears. After each task Tinta shows her "invisible ink": where the finger left the screen and how long it paused. At the end she gets one of three answers: **within the usual pattern**, **worth mentioning to a doctor**, or **I can't tell**. The model runs in the browser. Nothing leaves the phone.
 
 ## What we added
 
@@ -65,6 +65,10 @@ cd web && npm install && npm run dev        # the app
 python -m venv .venv && .venv/Scripts/python -m pip install -r requirements.txt
 cd ml && ../.venv/Scripts/python device_shift.py   # any experiment; saved outputs are in ml/results/
 ../.venv/Scripts/python figures.py                 # redraw the charts in docs/
+
+# Android app (the same web app bundled in a WebView, with a native voice for the dictation)
+cd web && npm run build && cd ../android && ./gradlew assembleDebug
+node android/tools/emulator-check.mjs shot.png      # end-to-end check with real touch events on an emulator
 ```
 
 ## Sources
