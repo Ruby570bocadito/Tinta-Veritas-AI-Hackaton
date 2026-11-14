@@ -18,7 +18,7 @@ A web app (also an offline Android app). Carmen does two practice tasks and thre
 
 ## What I added
 
-The public study needs 25 tasks on a professional tablet. I cut it to tasks that work with a finger, kept only measures that ignore overall speed, tested what breaks that idea, recorded five people on real phones, and built the app, which shows real cases it gets wrong.
+The public study needs 25 tasks on a professional tablet. I cut it to tasks that work with a finger, kept only measures that ignore overall speed, tested what breaks that idea, recorded seven people on real phones, and built the app, which shows real cases it gets wrong.
 
 ## How it works
 
@@ -53,7 +53,7 @@ Nested 5-fold cross-validation, repeated 3 or 4 times.
 ![Patients caught and healthy people wrongly flagged under different device changes](docs/what-breaks.png)
 
 - *Devices that change pauses and strokes differently* (simulated). Pauses twice as long: half of healthy people flagged. Strokes twice as long: more than half of patients missed. The simulation keeps pen-downs fixed.
-- *On real phones: my own data* (`ml/results/10_own_data.txt`). Five healthy volunteers did the check on their own phones. All five were told "usual pattern" (scores 6 to 24): no false alarms. But a finger does not write like the study's pen. Copying a word backwards, healthy people in the study lifted the pen 4 times and spent 46% of the task in the air; three of my five never lifted the finger in any scored task, which gives the lowest score the model can give. If patients also lift less with a finger, thresholds learned from a pen would miss them. Five people, one of them me. **No patient has tried it on a phone.**
+- *On real phones: my own data* (`ml/results/10_own_data.txt`). Seven healthy volunteers did the check on phones. All seven were told "usual pattern" (final scores 6 to 24; two needed the closer look): no false alarms. But a finger does not always write like the study's pen. Copying a word backwards, healthy people in the study spent 46% of the task with the pen in the air and only 8 of 85 did it without lifting; my volunteers spent 14%, and three of seven never lifted the finger in any scored task, which gives the lowest score the model can give. If patients also lift less with a finger, thresholds learned from a pen would miss them. Seven people, one of them me. **No patient has tried it on a phone.**
 - *Slow writers.* 9 of 26 slow healthy test cases were flagged (35%), against 15 to 18% of the rest. The data has no age or sex, so I could not check those groups.
 - *My first idea was wrong.* Each task against the person's own warm-up pace scores 59% alone. Removed.
 - *Not early detection.* Patients were already diagnosed and are half the sample; in real life most "worth mentioning" results would be false alarms.

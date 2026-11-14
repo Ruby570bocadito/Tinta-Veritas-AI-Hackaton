@@ -220,7 +220,7 @@ const en: Strings = {
     right: 'Tinta gets this one right.',
     wrong: 'Tinta gets this one wrong.',
     noAnswer: 'Tinta gives no answer for this one.',
-    caveat: 'Tinta learned from pen-on-tablet data. On phones, only 5 healthy volunteers have tried her, and no patient has.',
+    caveat: 'Tinta learned from pen-on-tablet data. On phones, only 7 healthy volunteers have tried her, and no patient has.',
     score: (s) => `Score ${s}/100. Under 35: usual pattern. Over 65: worth mentioning. In between: I don't know.`,
     whatNow: 'What now?',
     measurements: 'See the measurements',
@@ -370,7 +370,7 @@ const en: Strings = {
         q: 'How often are you right?',
         a: [
           'About 3 times out of 4 on people I had never seen, in the study data. So I am wrong about 1 time in 4, in both directions. A simple stopwatch does a little better on the study\'s own tablet.',
-          'And that study used a pen on a tablet. On phones, only five healthy volunteers have tried me. They lifted the finger far less than people lifted the pen in the study, so my scores may run low on a phone. No patient has tried me on one. I say so on every result.',
+          'And that study used a pen on a tablet. On phones, only seven healthy volunteers have tried me. Several lifted the finger far less than people lifted the pen in the study, so my scores may run low on a phone. No patient has tried me on one. I say so on every result.',
         ],
       },
       {
@@ -509,7 +509,7 @@ const es: Strings = {
     right: 'Tinta acierta en este.',
     wrong: 'Tinta se equivoca en este.',
     noAnswer: 'En este, Tinta no da respuesta.',
-    caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 5 voluntarios sanos, y ningún paciente.',
+    caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 7 voluntarios sanos, y ningún paciente.',
     score: (s) => `Nota ${s}/100. Menos de 35: lo habitual. Más de 65: coméntalo. En medio: no lo sé.`,
     whatNow: '¿Y ahora qué?',
     measurements: 'Ver las medidas',
@@ -659,7 +659,7 @@ const es: Strings = {
         q: '¿Cuántas veces aciertas?',
         a: [
           'Unas 3 de cada 4 con personas que no había visto nunca, en los datos del estudio. O sea, me equivoco 1 de cada 4, en los dos sentidos. Un simple cronómetro acierta un poco más en la tableta del estudio.',
-          'Y ese estudio se hizo con lápiz y tableta. En móviles solo me han probado cinco voluntarios sanos. Levantaron el dedo mucho menos de lo que la gente levantaba el lápiz en el estudio, así que en un móvil mis notas pueden salir bajas. Ningún paciente me ha probado en uno. Lo digo en cada resultado.',
+          'Y ese estudio se hizo con lápiz y tableta. En móviles solo me han probado siete voluntarios sanos. Varios levantaron el dedo mucho menos de lo que la gente levantaba el lápiz en el estudio, así que en un móvil mis notas pueden salir bajas. Ningún paciente me ha probado en uno. Lo digo en cada resultado.',
         ],
       },
       {

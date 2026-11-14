@@ -35,7 +35,7 @@ def load_own():
         if not line or line.startswith("#"):
             continue
         rec = json.loads(line)
-        row = {"age": rec.get("age", ""), "app_score": rec.get("score")}
+        row = {"age": rec.get("age", ""), "app_score": rec.get("score"), "verdict": rec.get("verdict", ""), "closer": bool(rec.get("closer"))}
         for task, m in rec["tasks"].items():
             for name in MEASURES:
                 row[f"{name}{task}"] = m[name]
@@ -66,6 +66,11 @@ def main():
     print(f"  'I can't tell': {unsure} of {n}")
     print(f"  'usual pattern': {n - flagged - unsure} of {n}")
     print(f"  scores: {np.round(100 * np.sort(p)).astype(int).tolist()}\n")
+
+    # What the app itself told each person, after the closer look when the short check was unsure.
+    print("What the app told them (short check, plus the closer look when it was unsure)")
+    print(f"  needed the closer look: {int(own['closer'].sum())} of {n}")
+    print(f"  final answers: {own['verdict'].value_counts().to_dict()}; final scores: {sorted(int(v) for v in own['app_score'])}\n")
 
     # 2. A stopwatch rule learned on the tablet, on the very same three tasks (so the comparison is fair).
     sw = Stopwatch().fit(stopwatch(darwin, tasks), y)
