@@ -39,7 +39,8 @@ export default function Crowd({ healthy, patients, you, label, aria }: Props) {
           {s}
         </text>
       ))}
-      <line x1={mine} x2={mine} y1="14" y2={H} stroke="#27305a" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1={mine} x2={mine} y1="14" y2={top - 1} stroke="#27305a" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1={mine} x2={mine} y1={top + AXIS + 1} y2={H} stroke="#27305a" strokeWidth="2.5" strokeLinecap="round" />
       <text x={mine} y="11" textAnchor={you < 12 ? 'start' : you > 88 ? 'end' : 'middle'} className="crowd-you">
         {label}
       </text>

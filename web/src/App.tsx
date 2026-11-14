@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import History from './components/History'
+import Playground from './components/Playground'
 import Crowd from './components/Crowd'
 import InkCanvas, { type Guide, type Size } from './components/InkCanvas'
 import Mascot, { type Mood } from './components/Mascot'
@@ -7,7 +8,7 @@ import { addToHistory, clearHistory, loadHistory, loadPeople, savePeople, type E
 import { check, laps, les, turns } from './lib/check'
 import { measure, seconds, stillTime, type Measures, type Stroke } from './lib/ink'
 import { judge, score as scoreOf, wantsCloser, type Answer } from './lib/judge'
-import { counts, examples, isGrey, crowd, metrics, airShare, typical, EXTRA_IDS, TASK_IDS, WARMUP_IDS, type Verdict } from './lib/model'
+import { counts, examples, isGrey, crowd, metrics, airShare, onScale, typical, EXTRA_IDS, TASK_IDS, WARMUP_IDS, type Verdict } from './lib/model'
 import { initialLang, SOURCES, STRINGS, type Lang } from './lib/strings'
 import { canSpeak, say } from './lib/voice'
 
@@ -31,7 +32,7 @@ const EXTRA: Task[] = [
 ]
 
 const GUIDE_POSES: Mood[] = ['onb-pauses', 'onb-yourself', 'onb-private']
-const VERDICT_MOOD: Record<Verdict, Mood> = { typical: 'happy', unsure: 'unsure', mention: 'caring' }
+const VERDICT_MOOD: Record<Verdict, Mood> = { typical: 'jump', unsure: 'unsure', mention: 'caring' }
 const LOCALE: Record<Lang, string> = { en: 'en-GB', es: 'es-ES' }
 
 const params = new URLSearchParams(location.search)
@@ -53,6 +54,7 @@ type Screen =
   | { name: 'closer' }
   | { name: 'result' }
   | { name: 'ask' }
+  | { name: 'play'; review: boolean } // the free sheet: write anything and see the invisible ink
 
 export default function App() {
   const [lang, setLang] = useState<Lang>(initialLang)
@@ -64,6 +66,8 @@ export default function App() {
   const [tries, setTries] = useState<Record<number, number>>({}) // how many times each task was done again
   const [warned, setWarned] = useState<Record<number, string>>({}) // tasks where Tinta said something was missing, and what
   const [redo, setRedo] = useState<number[]>([]) // tasks being done again from the result screen, in order
+  const [doodle, setDoodle] = useState<Stroke[]>([]) // the free sheet: never scored, never saved
+  const [doodleSheet, setDoodleSheet] = useState<Size>({ w: 360, h: 340 })
   const [history, setHistory] = useState<Entry[]>(loadHistory)
   const [replay, setReplay] = useState(0)
   const [age, setAge] = useState('')
@@ -72,8 +76,9 @@ export default function App() {
   const [justSaved, setJustSaved] = useState(false)
   const [who, setWho] = useState('')
   const [notes, setNotes] = useState('')
-  const [sent, setSent] = useState<'no' | 'shared' | 'copied'>('no')
+  const [sent, setSent] = useState<'no' | 'shared' | 'copied' | 'manual'>('no')
   const t = STRINGS[lang]
+  const secs = (ms: number) => seconds(ms, lang)
 
   useEffect(() => {
     document.documentElement.lang = lang
@@ -86,7 +91,7 @@ export default function App() {
 
   // Each new screen starts from its first words: for someone using a screen reader or a keyboard, focus goes
   // to what Tinta says (or to the heading), instead of being lost when the button they pressed disappears.
-  const review = screen.name === 'task' && screen.review
+  const review = (screen.name === 'task' || screen.name === 'play') && screen.review
   const step = screen.name === 'task' ? screen.index : screen.name === 'guide' ? screen.step : 0
   useEffect(() => {
     const first = document.querySelector<HTMLElement>('main .cheer, main h1, main h2')
@@ -135,7 +140,7 @@ export default function App() {
   const finish = (withCloser: boolean) => {
     const a = judge(ink, sheets, withCloser, forceCloser)
     // A check with no result has no number, so it does not go on the "you against you" line.
-    if (!a.noResult.length) setHistory(addToHistory({ t: Date.now(), score: Math.round(a.p * 100), verdict: a.kind, closer: Boolean(a.second) }))
+    if (!a.noResult.length) setHistory(addToHistory({ t: Date.now(), score: onScale(a.p), verdict: a.kind, closer: Boolean(a.second) }))
     setScreen({ name: 'result' })
   }
 
@@ -156,9 +161,9 @@ export default function App() {
         <button className="primary" onClick={() => setScreen({ name: 'guide', step: 0 })}>
           {t.home.start}
         </button>
-        <p className="fine">
-          {t.disclaimer} {t.private}
-        </p>
+        <button className="ghost" onClick={() => setScreen({ name: 'play', review: false })}>
+          ✎ {t.play.open}
+        </button>
         <div className="row">
           <button
             className="ghost"
@@ -173,6 +178,9 @@ export default function App() {
             {t.home.ask}
           </button>
         </div>
+        <p className="fine">
+          {t.disclaimer} {t.private}
+        </p>
         <ul className="chips">
           {t.home.chips.map((chip) => (
             <li key={chip}>{chip}</li>
@@ -210,6 +218,7 @@ export default function App() {
           </div>
         </div>
         <p className="lead">{t.ask.lead}</p>
+        <Playground t={t} />
         {t.ask.items.map((item) => (
           <details className="fold qa" key={item.q}>
             <summary>{item.q}</summary>
@@ -218,7 +227,7 @@ export default function App() {
                 <p key={line}>{line}</p>
               ))}
               {canSpeak && (
-                <button className="link" onClick={() => say(item.a.join(' '), t.voice)}>
+                <button className="link" aria-label={`${t.task.read}: ${item.q}`} onClick={() => say(item.a.join(' '), t.voice)}>
                   ▶ {t.task.read}
                 </button>
               )}
@@ -241,6 +250,92 @@ export default function App() {
         <button className="primary" onClick={() => setScreen({ name: 'intro' })}>
           {t.ask.back}
         </button>
+      </main>
+    )
+  }
+
+  // The free sheet. Ten seconds to see what the app is about: write anything, then watch the invisible ink.
+  if (screen.name === 'play') {
+    const m = measure(doodle)
+    const leave = (to: Screen) => {
+      setDoodle([])
+      setScreen(to)
+    }
+    return (
+      <main className="page" key={'play' + screen.review}>
+        <header className="taskbar">
+          <Mascot mood={screen.review ? 'writing' : 'finger-tap'} size={96} />
+          <p className="step">{t.play.kicker}</p>
+          <button className="link quit" onClick={() => leave({ name: 'intro' })}>
+            {t.play.back}
+          </button>
+        </header>
+        <h2>{screen.review ? t.task.inkTitle : t.play.title}</h2>
+        {!screen.review && <p className="fine">{t.play.hint}</p>}
+        {!screen.review && <p className="why rotate">{t.task.rotate}</p>}
+        <div className="sheet">
+          <InkCanvas
+            key={screen.review ? 'r' + replay : 'w'}
+            strokes={doodle}
+            from={screen.review ? doodleSheet : undefined}
+            onChange={
+              screen.review
+                ? undefined
+                : (strokes, sheet) => {
+                    setDoodle([...strokes])
+                    setDoodleSheet(sheet)
+                  }
+            }
+            showInvisibleInk={screen.review}
+          />
+          {!screen.review && doodle.length === 0 && (
+            <div className="hint hint-write" aria-hidden="true">
+              <span className="here">{t.task.writeHere}</span>
+            </div>
+          )}
+        </div>
+        {screen.review && (
+          <p className="legend">
+            <span className="dot air" /> {t.task.legend}{' '}
+            <button className="link inline" onClick={() => setReplay(replay + 1)}>
+              ↻ {t.task.again}
+            </button>
+          </p>
+        )}
+        {/* The three numbers move as you write: every lift adds a touch and some time in the air. */}
+        <dl className="stats" aria-live="polite">
+          <div>
+            <dt>{t.task.air}</dt>
+            <dd>{secs(m.air_time)}</dd>
+          </div>
+          <div>
+            <dt>{t.task.screen}</dt>
+            <dd>{secs(m.paper_time)}</dd>
+          </div>
+          <div>
+            <dt>{t.task.touches}</dt>
+            <dd>{m.num_of_pendown}</dd>
+          </div>
+        </dl>
+        {screen.review ? (
+          <div className="row sticky">
+            <button className="ghost" onClick={() => leave({ name: 'play', review: false })}>
+              {t.play.again}
+            </button>
+            <button className="primary" onClick={() => leave({ name: 'guide', step: 0 })}>
+              {t.play.start}
+            </button>
+          </div>
+        ) : (
+          <div className="row sticky">
+            <button className="ghost" onClick={() => setDoodle([])} disabled={!doodle.length}>
+              {t.play.clear}
+            </button>
+            <button className="primary" onClick={() => setScreen({ name: 'play', review: true })} disabled={!doodle.length}>
+              {t.play.show}
+            </button>
+          </div>
+        )}
       </main>
     )
   }
@@ -353,7 +448,7 @@ export default function App() {
                 <li key={item.id} className={i < screen.index ? 'done' : i === screen.index ? 'now' : ''} />
               ))}
             </ol>
-            <p className="step">{t.task.step(screen.index + 1, list.length, text.title)}</p>
+            <p className="step">{redoing ? t.check.redoing(text.title) : t.task.step(screen.index + 1, list.length, text.title)}</p>
           </div>
           <button className="link quit" onClick={() => window.confirm(t.task.quitConfirm) && restart()}>
             {t.task.quit}
@@ -385,6 +480,8 @@ export default function App() {
           </button>
         )}
         {text.speak && !screen.review && !canSpeak && <p className="why">{t.task.noVoice(text.speak)}</p>}
+        {/* Only shown by the styles when the phone is on its side and the sheet would be cramped. */}
+        {!screen.review && <p className="why rotate">{t.task.rotate}</p>}
         <div className="sheet">
           <InkCanvas
             key={task.id + (screen.review ? 'r' + replay : 'w')}
@@ -418,17 +515,17 @@ export default function App() {
             {/* What was measured is always shown. When Tinta has something to say, it goes in one line to leave room for her words. */}
             {issue ? (
               <p className="fine measured">
-                {t.task.touches}: <b>{m.num_of_pendown}</b> · {t.task.air}: <b>{seconds(m.air_time)}</b> · {t.task.screen}: <b>{seconds(m.paper_time)}</b>
+                {t.task.touches}: <b>{m.num_of_pendown}</b> · {t.task.air}: <b>{secs(m.air_time)}</b> · {t.task.screen}: <b>{secs(m.paper_time)}</b>
               </p>
             ) : (
               <dl className="stats">
                 <div>
                   <dt>{t.task.air}</dt>
-                  <dd>{seconds(m.air_time)}</dd>
+                  <dd>{secs(m.air_time)}</dd>
                 </div>
                 <div>
                   <dt>{t.task.screen}</dt>
-                  <dd>{seconds(m.paper_time)}</dd>
+                  <dd>{secs(m.paper_time)}</dd>
                 </div>
                 <div>
                   <dt>{t.task.touches}</dt>
@@ -446,9 +543,11 @@ export default function App() {
                 </button>
               </div>
             ) : (
-              <button className="primary sticky" onClick={goOn}>
-                {lastOne ? t.task.seeResult : t.task.next}
-              </button>
+              <div className="row sticky">
+                <button className="primary" onClick={goOn}>
+                  {lastOne ? t.task.seeResult : t.task.next}
+                </button>
+              </div>
             )}
           </>
         ) : (
@@ -484,7 +583,7 @@ export default function App() {
           <Mascot mood="closer-look" size={220} />
         </div>
         <h1>{t.closer.title}</h1>
-        <p className="lead">{t.closer.body}</p>
+        <p className="lead">{forceCloser && !isGrey(judge(ink, sheets, false).first) ? t.closer.demo : t.closer.body}</p>
         <div className="row push sticky">
           <button className="ghost" onClick={() => finish(false)}>
             {t.closer.stop}
@@ -518,7 +617,7 @@ export default function App() {
   const invalid = answer.noResult.length > 0
   const why = answer.noResult.map(({ id, issue }) => `${t.tasks[id].title}: ${t.check.text(issue)}`).join(' ')
   const v = t.verdicts[kind]
-  const score = Math.round(p * 100)
+  const score = onScale(p)
   const shown = second ? [...TASKS, ...EXTRA] : TASKS
   const judged: Outcome | null = ex ? outcome(ex) : null
   const wrong = judged === 'wrong'
@@ -566,14 +665,18 @@ export default function App() {
     } catch (e) {
       if ((e as Error).name === 'AbortError') return // the person closed the share sheet
     }
-    await navigator.clipboard.writeText(friendMessage)
-    setSent('copied')
+    try {
+      await navigator.clipboard.writeText(friendMessage)
+      setSent('copied')
+    } catch {
+      setSent('manual') // some in-app browsers allow neither sharing nor copying: the text is shown to copy by hand
+    }
   }
   const today = new Date().toLocaleDateString(LOCALE[lang], { day: 'numeric', month: 'long', year: 'numeric' })
   return (
     <main className="page" key="result">
       <header className="taskbar">
-        <Mascot mood={VERDICT_MOOD[kind]} size={130} />
+        <Mascot mood={invalid ? 'shrug' : VERDICT_MOOD[kind]} size={130} />
         {!ex && kind === 'typical' && (
           <div className="confetti" aria-hidden="true">
             {Array.from({ length: 18 }, (_, i) => (
@@ -625,7 +728,7 @@ export default function App() {
       {ex && wrong && <p className="why">{whyWrong()}</p>}
       {second && !invalid && (
         <div className="votes">
-          <p className="fine">{isGrey(first) ? t.result.votesUnsure(Math.round(first * 100)) : t.result.votesDemo(Math.round(first * 100))}</p>
+          <p className="fine">{isGrey(first) ? t.result.votesUnsure(onScale(first)) : t.result.votesDemo(onScale(first))}</p>
           <ul>
             {second.votes.map((vote, i) => (
               <li key={vote.name}>
@@ -645,7 +748,8 @@ export default function App() {
           <p className="fine">{t.result.score(score)}</p>
         </>
       )}
-      <p className="fine caveat">{t.result.caveat}</p>
+      {/* With no result there is no number to put a warning on. */}
+      {!invalid && <p className="fine caveat">{t.result.caveat}</p>}
       {friends && !ex && (
         <section className="honest noprint">
           <h2>{t.friends.title}</h2>
@@ -677,6 +781,12 @@ export default function App() {
             {sent === 'shared' ? t.friends.sent : t.friends.send}
           </button>
           {sent === 'copied' && <p className="fine">{t.friends.copied}</p>}
+          {sent === 'manual' && (
+            <>
+              <p className="why">{t.friends.manual}</p>
+              <textarea readOnly value={friendMessage} rows={8} onFocus={(e) => e.currentTarget.select()} />
+            </>
+          )}
         </section>
       )}
       <section className="honest" hidden={invalid}>
@@ -684,9 +794,9 @@ export default function App() {
         <Crowd
           healthy={crowd.healthy}
           patients={crowd.patients}
-          you={Math.round(first * 100)}
+          you={onScale(first)}
           label={ex ? '▼' : t.crowd.you}
-          aria={t.crowd.aria(Math.round(first * 100))}
+          aria={t.crowd.aria(onScale(first))}
         />
         <p>{t.crowd.explain(crowd.healthy.length, crowd.patients.length)}</p>
       </section>
@@ -755,7 +865,7 @@ export default function App() {
       {!ex && (
         <section className="honest note">
           <h2>{t.note.title}</h2>
-          <p>{invalid ? t.note.noResult(today, why) : t.note.line(today, v.title.toLowerCase(), score, Boolean(second))}</p>
+          <p>{invalid ? t.note.noResult(today, why) : t.note.line(today, v.title, score, Boolean(second))}</p>
           {!invalid && <p>{t.note.detail(meanAir, usual[0], meanTouches, usual[1])}</p>}
           <p>{t.note.about}</p>
           <button className="ghost noprint" onClick={() => window.print()}>
@@ -779,7 +889,7 @@ export default function App() {
             </select>
           </label>
           <textarea readOnly value={studyLine} rows={4} />
-          <button className="ghost" onClick={() => navigator.clipboard.writeText(studyLine).then(() => setCopied(true))}>
+          <button className="ghost" onClick={() => navigator.clipboard.writeText(studyLine).then(() => setCopied(true), () => setCopied(false))}>
             {copied ? t.study.copied : t.study.copy}
           </button>
           <button
@@ -796,7 +906,7 @@ export default function App() {
           </button>
           {people.length > 0 && (
             <>
-              <button className="ghost" onClick={() => navigator.clipboard.writeText(people.join('\n')).then(() => setCopied(true))}>
+              <button className="ghost" onClick={() => navigator.clipboard.writeText(people.join('\n')).then(() => setCopied(true), () => setCopied(false))}>
                 {t.study.copyAll(people.length)}
               </button>
               <button
@@ -805,6 +915,7 @@ export default function App() {
                   if (!window.confirm(t.study.clearConfirm)) return
                   savePeople([])
                   setPeople([])
+                  setJustSaved(false)
                 }}
               >
                 {t.study.clear}
@@ -816,7 +927,10 @@ export default function App() {
       <details className="fold" open={Boolean(ex)}>
         <summary>{t.honest.summary}</summary>
         <section className="honest">
-          <h2>{t.honest.title}</h2>
+          <div className="lab-head">
+            <Mascot mood="stopwatch-sad" size={84} />
+            <h2>{t.honest.title}</h2>
+          </div>
           <p>{t.honest.short(metrics['1.0'].model, metrics['1.0'].stopwatch, counts.train, counts.test)}</p>
           <p>{t.honest.closer(metrics.adaptive, counts.test)}</p>
           <p>{t.honest.told(metrics.told.patients, metrics.told.healthy)}</p>

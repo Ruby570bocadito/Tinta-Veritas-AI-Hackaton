@@ -24,9 +24,16 @@ export type Mood =
   | 'task-copy'
   | 'closer-look'
   | 'read'
+  | 'jump'
+  | 'shrug'
+  | 'think'
+  | 'finger-tap'
+  | 'stopwatch-sad'
+  | 'point-down'
+  | 'thumbs'
 
 // Poses with an eyes-closed frame in public/img (tinta-<mood>-blink.webp).
-const BLINKS: Mood[] = ['wave', 'watching', 'caring', 'unsure', 'writing', 'closer-look', 'read']
+const BLINKS: Mood[] = ['wave', 'watching', 'caring', 'unsure', 'writing', 'closer-look', 'read', 'thumbs', 'jump', 'shrug', 'think', 'finger-tap', 'point-down', 'stopwatch-sad']
 
 type Props = { mood?: Mood; size?: number; label?: string }
 

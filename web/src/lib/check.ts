@@ -4,15 +4,17 @@
 // word, and so on. The model compares pauses and lifts, so its answer only means something when the task
 // was really done. These checks catch the clear cases: one lap instead of four, half a word, a tap.
 //
-// One check is about phones, not about the person. In the study nobody had zero time in the air in any
-// task, because a pen tablet also sees the pen hovering before and after each stroke. A phone cannot see
-// a finger in the air, so a word written in a single drag has no pause at all: a value the model has
-// never seen. Then there is nothing to compare, and Tinta says so.
+// One check is about phones, not about the person. A pen tablet also sees the pen hovering before and
+// after each stroke, so in the study everybody had some time in the air: on the backwards word, never
+// under 12.5% of the task. A phone cannot see a finger in the air, so a word written in a single drag,
+// or with one quick lift, has less than anyone in the study: a value the model has never seen. Then there
+// is nothing to compare, and Tinta says so. (The limits come from the data: AIR_FLOOR in model.ts.)
 //
 // The checks are loose on purpose (a task counts from about two and a half of its four repetitions), so
 // that nobody who did the task is told off. They cannot read handwriting: someone who scribbles for long
 // enough, lifting now and then, still gets a score. tools/personas.test.ts shows what is caught.
-import type { Stroke } from './ink'
+import { measure, type Stroke } from './ink'
+import { AIR_FLOOR } from './model'
 
 export type Sheet = { w: number; h: number }
 
@@ -23,7 +25,7 @@ export type Issue =
   | { kind: 'lifted'; seen: number } // practice only: lifted the finger many times in a task meant to be done in one go
   | { kind: 'part' } // a word or a number: it looks like only part of it is there
   | { kind: 'little' } // hardly anything was written: a tap, a dot, a dash
-  | { kind: 'joined'; digits: boolean } // a word or a number written without lifting the finger: no pause to time
+  | { kind: 'joined'; digits: boolean; lifted: boolean } // a word or a number with less pause than anyone in the study: nothing to time
 
 const ASKED = 4 // the study asks for four lines, four circles and four "le"
 const ENOUGH = ASKED - 1.5 // from two and a half of the four, the task counts as done
@@ -144,7 +146,8 @@ export function check(task: number, strokes: Stroke[], sheet: Sheet): Issue | nu
     const seen = passes(done, sheet, task === 2 ? 'x' : 'y')
     if (seen < ENOUGH) return { kind: 'passes', seen, asked: ASKED }
     // In the study even healthy people often lifted once or twice here, so only say it when it is clearly not "in one go".
-    return done.length - 1 >= 3 ? { kind: 'lifted', seen: done.length - 1 } : null
+    const lifts = measure(done).num_of_pendown - 1 // skips of the finger are not lifts
+    return lifts >= 3 ? { kind: 'lifted', seen: lifts } : null
   }
   if (task === 5) {
     const seen = laps(done)
@@ -157,6 +160,10 @@ export function check(task: number, strokes: Stroke[], sheet: Sheet): Issue | nu
   const fewest = FEWEST_TURNS[task]
   if (fewest === undefined) return null
   if (turns(done, sheet) < fewest) return { kind: 'part' }
-  // Written in a single drag: on a phone that leaves no pause to time (see the top of this file).
-  return done.length < 2 ? { kind: 'joined', digits: task === 22 || task === 23 } : null
+  // Less time in the air than anyone in the study had on this task: written in a single drag, or nearly.
+  // On a phone that leaves too little pause to time (see the top of this file).
+  const m = measure(done)
+  const floor = AIR_FLOOR[task]
+  if (floor === undefined || m.air_time / Math.max(m.total_time, 1) >= floor) return null
+  return { kind: 'joined', digits: task === 22 || task === 23, lifted: m.num_of_pendown > 1 }
 }

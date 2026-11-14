@@ -9,6 +9,14 @@ import '@fontsource/patrick-hand/400.css'
 import './index.css'
 import App from './App.tsx'
 
+// Keep a copy of the app on the phone, so that it opens with no connection (see public/sw.js).
+// Not in the Android app, which carries its files inside, and not while developing.
+if (import.meta.env.PROD && 'serviceWorker' in navigator && !('TintaNative' in window)) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {
+    // no service worker here: the app works the same, it just needs a connection to open
+  })
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

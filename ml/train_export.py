@@ -153,6 +153,15 @@ def main():
     print("crowd: healthy under 35:", sum(v < 35 for v in crowd["healthy"]), "of", len(crowd["healthy"]),
           "| patients over 65:", sum(v > 65 for v in crowd["patients"]), "of", len(crowd["patients"]))
 
+    # The lowest share of time in the air that anyone in the study had, on the tasks where lifting comes naturally
+    # (words and numbers; the circle and the loops are asked "in one go"). A pen tablet also sees the pen hovering,
+    # so nobody is near zero. On a phone a lower value means a word written in one drag, or nearly: a value the
+    # model never saw, and the app gives no result instead of its lowest score.
+    one_go = {5, 9}
+    air_floor = {str(t): float(np.floor(1000 * (df[f"air_time{t}"] / df[f"total_time{t}"].clip(lower=1)).min()) / 1000)
+                 for t in all_tasks if t not in one_go}
+    print("lowest share of time in the air in the study, by task:", air_floor)
+
     needed = sorted(set(WARMUP + all_tasks))
     examples = [dict(id=str(dte.iloc[i]["ID"]), label="patient" if y[te][i] else "healthy",
                      p1=round(float(p1[i]), 4), p2=round(float(p2[i]), 4), p=round(float(final[i]), 4),
@@ -169,7 +178,7 @@ def main():
         blend=export,
         stopwatch=dict(tasks=sw_tasks, mean=sw.mu.tolist(), std=sw.sd.tolist(),
                        coef=float(sw.m.coef_[0][0]), intercept=float(sw.m.intercept_[0])),
-        metrics=metrics, crowd=crowd, train_n=int(len(tr)), test_n=int(len(te)), examples=examples,
+        metrics=metrics, crowd=crowd, air_floor=air_floor, train_n=int(len(tr)), test_n=int(len(te)), examples=examples,
         # Typical values in the healthy training people, used to explain a result in plain words.
         healthy_air=float(np.median(shape(dtr[y[tr] == 0], tasks)[:, 0::2])),
         healthy_touches=float(np.median(np.expm1(shape(dtr[y[tr] == 0], tasks)[:, 1::2]))),

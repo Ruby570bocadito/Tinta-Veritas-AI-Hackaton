@@ -80,8 +80,11 @@ function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, 
       ctx.fill()
       continue
     }
+    // A curve through the middle of each pair of points: the same ink, without the corners of straight segments.
     ctx.beginPath()
-    s.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)))
+    ctx.moveTo(s[0].x, s[0].y)
+    for (let i = 1; i < s.length - 1; i++) ctx.quadraticCurveTo(s[i].x, s[i].y, (s[i].x + s[i + 1].x) / 2, (s[i].y + s[i + 1].y) / 2)
+    ctx.lineTo(s[s.length - 1].x, s[s.length - 1].y)
     ctx.stroke()
   }
 

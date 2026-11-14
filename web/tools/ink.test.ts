@@ -1,7 +1,7 @@
 // Checks that the app measures writing correctly and that the model behaves as described.
 // No test framework: plain assertions, run with `npm test`.
 import assert from 'node:assert/strict'
-import { gaps, measure, type Stroke } from '../src/lib/ink'
+import { SKIP_MS, gaps, joinSkips, measure, type Stroke } from '../src/lib/ink'
 import { EXTRA_IDS, GREY_HI, GREY_LO, TASK_IDS, WARMUP_IDS, airShare, examples, isGrey, predict, predictCloser, verdict } from '../src/lib/model'
 import type { Measures } from '../src/lib/ink'
 
@@ -92,6 +92,26 @@ test('when the three models pull far apart, the closer look is flagged as split'
     const ps = votes.map((v) => v.p)
     assert.equal(split, Math.max(...ps) - Math.min(...ps) > 0.5)
   }
+})
+
+test('a finger that skips on the glass for a tenth of a second has not lifted: one touch, and the break counts as writing', () => {
+  const skipped = [stroke(0, 400), stroke(500, 300)]
+  assert.ok(100 < SKIP_MS)
+  assert.deepEqual(measure(skipped), { air_time: 0, paper_time: 800, total_time: 800, num_of_pendown: 1 })
+  assert.equal(gaps(skipped).length, 0)
+  assert.equal(joinSkips(skipped).length, 1)
+})
+
+test('a pause of a fifth of a second is a lift', () => {
+  const lifted = [stroke(0, 400), stroke(600, 300)]
+  assert.deepEqual(measure(lifted), { air_time: 200, paper_time: 700, total_time: 900, num_of_pendown: 2 })
+  assert.equal(gaps(lifted).length, 1)
+})
+
+test('four skips while tracing give the same measures as tracing in one go', () => {
+  const oneGo = measure([stroke(0, 5000)])
+  const skipping = measure([stroke(0, 1000), stroke(1100, 900), stroke(2100, 900), stroke(3100, 900), stroke(4100, 900)])
+  assert.deepEqual(skipping, oneGo)
 })
 
 console.log(`\n${passed} checks passed`)

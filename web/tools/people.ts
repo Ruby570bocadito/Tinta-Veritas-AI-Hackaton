@@ -4,7 +4,7 @@
 import { check, laps, les, type Issue } from '../src/lib/check'
 import { measure, seconds, type Stroke } from '../src/lib/ink'
 import { judge, score, wantsCloser, type Answer } from '../src/lib/judge'
-import { EXTRA_IDS, TASK_IDS, WARMUP_IDS, airShare } from '../src/lib/model'
+import { EXTRA_IDS, TASK_IDS, WARMUP_IDS, airShare, onScale } from '../src/lib/model'
 import { STRINGS, type Lang } from '../src/lib/strings'
 import { SHEET, perform, toStrokes } from './shapes.mjs'
 
@@ -96,7 +96,7 @@ export function play(person: Person): Played {
   const answer = judge(ink, sheets, closer)
   const none = answer.noResult.length > 0
   const v = t.verdicts[answer.kind]
-  const points = Math.round(answer.p * 100)
+  const points = onScale(answer.p)
   const scored = TASK_IDS.map((id) => answer.byTask[id])
   const air = Math.round((100 * scored.reduce((sum, m) => sum + airShare(m), 0)) / scored.length)
   const touches = Math.round(scored.reduce((sum, m) => sum + m.num_of_pendown, 0) / scored.length)
@@ -111,7 +111,7 @@ export function play(person: Person): Played {
     lines.push(`   Text: "${v.body}"`)
     lines.push(`   Then: "${t.note.detail(air, 22, touches, 2)}"   (the two "healthy people" numbers come from the study; shown here as examples)`)
     if (answer.second) {
-      lines.push(`   Closer look: "${t.result.votesUnsure(Math.round(answer.first * 100))}" ${answer.second.votes.map((vote, i) => `${t.result.models[i]} ${Math.round(vote.p * 100)}`).join(', ')}`)
+      lines.push(`   Closer look: "${t.result.votesUnsure(onScale(answer.first))}" ${answer.second.votes.map((vote, i) => `${t.result.models[i]} ${Math.round(vote.p * 100)}`).join(', ')}`)
       if (answer.second.split) lines.push(`   Note: "${t.result.split}"`)
     }
     lines.push(`   Number: "${t.result.score(points)}"`)
@@ -123,7 +123,7 @@ export function play(person: Person): Played {
     ? `no result: ${answer.noResult.map((n) => `${t.tasks[n.id].title.toLowerCase()} ${WHY[n.issue.kind]}`).join(', ')}`
     : `${SHORT[answer.kind]} (${points}/100${answer.second ? ', after the closer look' : ''})`
   const alone = score(answer.byTask, closer && EXTRA_IDS.every((id) => (ink[id] ?? []).length > 0))
-  return { answer, lines, warned, retried, closer, said, modelAlone: `${SHORT[alone.kind]} (${Math.round(alone.p * 100)}/100)` }
+  return { answer, lines, warned, retried, closer, said, modelAlone: `${SHORT[alone.kind]} (${onScale(alone.p)}/100)` }
 }
 
 const WHY: Record<Issue['kind'], string> = { laps: 'not finished', loops: 'not finished', passes: 'not finished', lifted: 'lifted', part: 'not finished', little: 'hardly written', joined: 'written with no pause to time' }

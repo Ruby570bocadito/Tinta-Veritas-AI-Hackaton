@@ -21,6 +21,8 @@ export const metrics = data.metrics
 export const examples = data.examples
 // Short-check score of every person in the study, from a model that had not seen them (for the dot chart).
 export const crowd: { healthy: number[]; patients: number[] } = data.crowd
+// The lowest share of time in the air that anyone in the study had, for the tasks where lifting comes naturally.
+export const AIR_FLOOR: Record<number, number> = data.air_floor
 export const counts = { train: data.train_n, test: data.test_n }
 // Typical values among the healthy people the model learned from.
 export const typical = { air: data.healthy_air, touches: data.healthy_touches }
@@ -87,6 +89,20 @@ export function predictCloser(byTask: ByTask): { p: number; votes: { name: strin
 }
 
 export const isGrey = (p: number) => p > GREY_LO && p < GREY_HI
+
+/**
+ * The number shown to people, from 0 to 100. It is rounded so that it never contradicts the answer:
+ * "usual pattern" is always 35 or under, "worth mentioning" always 65 or over, "I can't tell" always in between.
+ * (Plain rounding would show 65 both for 0.646, which is "I can't tell", and for 0.654, which is "worth mentioning".)
+ */
+export function onScale(p: number): number {
+  const n = Math.round(p * 100)
+  const lo = Math.round(GREY_LO * 100)
+  const hi = Math.round(GREY_HI * 100)
+  if (p <= GREY_LO) return Math.min(n, lo)
+  if (p >= GREY_HI) return Math.max(n, hi)
+  return Math.min(hi - 1, Math.max(lo + 1, n))
+}
 
 export type Verdict = 'typical' | 'unsure' | 'mention'
 

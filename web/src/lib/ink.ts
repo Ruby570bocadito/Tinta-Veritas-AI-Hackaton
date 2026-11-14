@@ -13,18 +13,37 @@ export type Measures = {
 
 export type Gap = { from: Point; to: Point; ms: number }
 
+// A finger sliding on glass sometimes loses contact for an instant. A break shorter than this is a skip, not a
+// lift: the two pieces are one stroke. A pen on the study's tablet does not skip like that, and without this
+// four skips in a circle were enough to turn "usual pattern" into "worth mentioning".
+export const SKIP_MS = 150
+
+/** The strokes as the person meant them: pieces less than a skip apart are joined into one. */
+export function joinSkips(strokes: Stroke[]): Stroke[] {
+  const out: Stroke[] = []
+  for (const s of strokes) {
+    if (s.length === 0) continue
+    const last = out[out.length - 1]
+    if (last && s[0].t - last[last.length - 1].t < SKIP_MS) out[out.length - 1] = [...last, ...s]
+    else out.push(s)
+  }
+  return out
+}
+
+/** The pauses with the finger in the air, one per lift (skips are not lifts). */
 export function gaps(strokes: Stroke[]): Gap[] {
+  const done = joinSkips(strokes)
   const out: Gap[] = []
-  for (let i = 1; i < strokes.length; i++) {
-    const from = strokes[i - 1][strokes[i - 1].length - 1]
-    const to = strokes[i][0]
+  for (let i = 1; i < done.length; i++) {
+    const from = done[i - 1][done[i - 1].length - 1]
+    const to = done[i][0]
     out.push({ from, to, ms: to.t - from.t })
   }
   return out
 }
 
 export function measure(strokes: Stroke[]): Measures {
-  const done = strokes.filter((s) => s.length > 0)
+  const done = joinSkips(strokes)
   if (done.length === 0) return { air_time: 0, paper_time: 0, total_time: 0, num_of_pendown: 0 }
   const paper = done.reduce((sum, s) => sum + (s[s.length - 1].t - s[0].t), 0)
   const air = gaps(done).reduce((sum, g) => sum + g.ms, 0)
@@ -48,4 +67,4 @@ export function stillTime(strokes: Stroke[], least = 250): number {
   return Math.round(sum)
 }
 
-export const seconds = (ms: number) => (ms / 1000).toFixed(1) + ' s'
+export const seconds = (ms: number, lang = 'en') => (ms / 1000).toFixed(1).replace('.', lang === 'es' ? ',' : '.') + '\u00a0s'

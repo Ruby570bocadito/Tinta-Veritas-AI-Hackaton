@@ -11,6 +11,8 @@
 //
 //   npm run personas        (also part of npm test)
 import assert from 'node:assert/strict'
+import type { Measures } from '../src/lib/ink'
+import { TASK_IDS, onScale, predict, verdict } from '../src/lib/model'
 import { play, type Person } from './people'
 
 type Case = Person & { name: string; rule?: 'left alone' | 'no result' | 'gets a result' }
@@ -44,6 +46,9 @@ const PEOPLE: Case[] = [
   { name: 'The same, but writes the word again letter by letter when Tinta asks', all: { lifts: 0 }, onWarning: 'retry', rule: 'gets a result' },
   { name: 'Lifts ten times in the loops but writes the word in a single drag', all: { lifts: 0 }, tasks: { 9: { lifts: 10, pause: 1.5 } }, rule: 'no result' },
   { name: 'Holds the finger down for a minute on each task, never lifting', all: { lifts: 0, seconds: 60 }, rule: 'no result' },
+  // Found by a judge in ten minutes, and fixed by cleaning what the phone hands to the model.
+  { name: 'The word in one drag except for one quick lift (a quarter of a second)', tasks: { 16: { lifts: 1, pause: 0.25 } }, rule: 'no result' },
+  { name: 'A finger that skips on the glass: four breaks of a tenth of a second in the circle and in the loops', tasks: { 5: { lifts: 4, pause: 0.1 }, 9: { lifts: 4, pause: 0.1 } }, rule: 'left alone' },
   // Holes that are still open. Tinta cannot read: she counts laps, loops and turns, not letters.
   { name: 'STILL OPEN. Does lines and circle, then scribbles a long zigzag with a few lifts instead of writing', tasks: { 9: { do: 'scribble', amount: 1.5 }, 16: { do: 'scribble', amount: 1.5, lifts: 3 } } },
   { name: 'STILL OPEN. Does every task but lifts the finger 15 times in each, on purpose', all: { lifts: 15, pause: 0.3 } },
@@ -85,10 +90,37 @@ test('a scored task that was not done, or has no pause to time, means no result,
     assert.equal(played.answer.kind, 'unsure', person.name)
   }
 })
+test('a finger that skips on the glass gets the same answer as one that does not', () => {
+  const plain = rows.find((r) => r.person.name === 'Does every task as asked')!.played.answer
+  const skipping = rows.find((r) => r.person.name.startsWith('A finger that skips'))!.played.answer
+  assert.equal(skipping.kind, plain.kind)
+  assert.ok(Math.abs(skipping.p - plain.p) < 0.02, `${skipping.p} against ${plain.p}`)
+})
 test('doing it again as asked gives a result', () => {
   for (const { person, played } of with_('gets a result')) assert.equal(played.answer.noResult.length, 0, person.name)
 })
 test('nobody is ever given "usual pattern" or "worth mentioning" with a task that cannot be compared', () => {
   for (const { person, played } of rows) if (played.answer.noResult.length) assert.equal(played.answer.kind, 'unsure', person.name)
+})
+test('in the short check, more lifts or longer pauses never give a lower number', () => {
+  // The same made-up writer as the sliders in the app: the same lifts and pauses in each scored task.
+  const number = (lifts: number, pause: number) => {
+    const byTask: Record<number, Measures> = {}
+    for (const id of TASK_IDS) byTask[id] = { air_time: 1000 * lifts * pause, paper_time: 5000, total_time: 5000 + 1000 * lifts * pause, num_of_pendown: lifts + 1 }
+    return predict(byTask)
+  }
+  for (let lifts = 1; lifts <= 12; lifts++)
+    for (let pause = 0.1; pause <= 3; pause += 0.1) {
+      assert.ok(number(lifts, pause + 0.1) >= number(lifts, pause) - 0.005, `longer pause: ${lifts} lifts, ${pause.toFixed(1)} s`)
+      assert.ok(number(lifts + 1, pause) >= number(lifts, pause) - 0.005, `one more lift: ${lifts} lifts, ${pause.toFixed(1)} s`)
+    }
+})
+test('the number shown never contradicts the answer: 35 or under is "usual", 65 or over "worth mentioning"', () => {
+  for (let p = 0; p <= 1; p += 0.0005) {
+    const shown = onScale(p)
+    const kind = verdict(p)
+    assert.ok(kind === 'typical' ? shown <= 35 : kind === 'mention' ? shown >= 65 : shown > 35 && shown < 65, `${p.toFixed(4)} is "${kind}" but would show ${shown}`)
+    assert.ok(Math.abs(shown - 100 * p) <= 1, `${p.toFixed(4)} would show ${shown}`)
+  }
 })
 console.log(`\n${passed} rules hold for ${rows.length} made-up people. These are drawings made by a formula, not people.`)

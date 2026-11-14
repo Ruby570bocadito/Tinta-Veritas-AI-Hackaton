@@ -115,6 +115,16 @@ Holds the finger down for a minute on each task, never lifting
     at the end:    no result: backwards written with no pause to time
     model alone:   usual pattern (6/100)
 
+The word in one drag except for one quick lift (a quarter of a second)
+    along the way: asks about task 16 (the person keeps them)
+    at the end:    no result: backwards written with no pause to time
+    model alone:   usual pattern (8/100)
+
+A finger that skips on the glass: four breaks of a tenth of a second in the circle and in the loops
+    along the way: nothing
+    at the end:    usual pattern (18/100)
+    model alone:   usual pattern (18/100)
+
 STILL OPEN. Does lines and circle, then scribbles a long zigzag with a few lifts instead of writing
     along the way: nothing
     at the end:    usual pattern (21/100)
@@ -126,14 +136,17 @@ STILL OPEN. Does every task but lifts the finger 15 times in each, on purpose
     model alone:   worth mentioning (97/100)
 
 STILL OPEN. Writes very slowly with long stops, finger down, lifting only between letters
-    along the way: nothing
-    at the end:    usual pattern (8/100)
+    along the way: asks about task 16 (the person keeps them)
+    at the end:    no result: backwards written with no pause to time
     model alone:   usual pattern (8/100)
 
 ok  people who do the tasks are left alone: Tinta asks nothing and gives a result
 ok  lifting the finger a lot in a scored task is never treated as "not done"
 ok  a scored task that was not done, or has no pause to time, means no result, whatever the models say
+ok  a finger that skips on the glass gets the same answer as one that does not
 ok  doing it again as asked gives a result
 ok  nobody is ever given "usual pattern" or "worth mentioning" with a task that cannot be compared
+ok  in the short check, more lifts or longer pauses never give a lower number
+ok  the number shown never contradicts the answer: 35 or under is "usual", 65 or over "worth mentioning"
 
-5 rules hold for 26 made-up people. These are drawings made by a formula, not people.
+8 rules hold for 28 made-up people. These are drawings made by a formula, not people.

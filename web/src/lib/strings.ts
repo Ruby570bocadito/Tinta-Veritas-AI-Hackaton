@@ -26,6 +26,7 @@ export type Strings = {
     listen: string
     noVoice: (n: string) => string
     writeHere: string
+    rotate: string
     startOver: string
     done: string
     next: string
@@ -38,9 +39,9 @@ export type Strings = {
     touches: string
     cheers: string[]
   }
-  closer: { title: string; body: string; stop: string; more: string }
+  closer: { title: string; body: string; demo: string; stop: string; more: string }
   // What Tinta says when a task was clearly not done as asked.
-  check: { text: (issue: Issue) => string; practice: string; scored: string; again: string; keep: string; redone: string }
+  check: { text: (issue: Issue) => string; practice: string; scored: string; again: string; keep: string; redone: string; redoing: (title: string) => string }
   verdicts: Record<Verdict, { title: string; body: string }>
   nextSteps: Record<Verdict, string[]>
   result: {
@@ -100,9 +101,13 @@ export type Strings = {
     limits: string
   }
   study: { title: string; body: string; age: string; choose: string; bands: string[]; copy: string; copied: string; save: string; saved: (n: number) => string; copyAll: (n: number) => string; clear: string; clearConfirm: string }
-  friends: { title: string; body: string; name: string; notes: string; notesHint: string; preview: string; send: string; sent: string; copied: string; header: string; result: string; nameLabel: string; notesLabel: string }
+  friends: { title: string; body: string; name: string; notes: string; notesHint: string; preview: string; send: string; sent: string; copied: string; manual: string; header: string; result: string; nameLabel: string; notesLabel: string }
   crowd: { title: string; caseTitle: string; you: string; explain: (healthy: number, patients: number) => string; aria: (score: number) => string }
   ask: { title: string; lead: string; sources: string; back: string; items: Qa[] }
+  // The free sheet: write anything and see the invisible ink. Nothing is scored.
+  play: { open: string; kicker: string; title: string; hint: string; clear: string; show: string; again: string; start: string; back: string }
+  // The sliders in "Ask Tinta": the real model answering to made-up lifts and pauses.
+  lab: { title: string; lead: string; lifts: (n: number) => string; pause: (seconds: number) => string; none: string; share: (percent: number) => string; at: (n: number) => string; grey: string; note: string }
 }
 
 const en: Strings = {
@@ -173,6 +178,7 @@ const en: Strings = {
     listen: 'Listen',
     noVoice: (n) => `This device has no voice. Ask someone to read this number aloud to you: ${n}`,
     writeHere: 'Write here with your finger',
+    rotate: 'Turn the phone upright: there is more room to write.',
     startOver: 'Start over',
     done: "I'm done",
     next: 'Next',
@@ -211,7 +217,7 @@ const en: Strings = {
         case 'little':
           return 'I can hardly see any writing. Did you finish it?'
         case 'joined':
-          return `You wrote it without lifting your finger, so there is no pause for me to time. Could you write it again, one ${i.digits ? 'number' : 'letter'} at a time, as you would with a pen?`
+          return `${i.lifted ? 'You wrote it almost without lifting your finger, so there is too little pause for me to time.' : 'You wrote it without lifting your finger, so there is no pause for me to time.'} Could you write it again, one ${i.digits ? 'number' : 'letter'} at a time, as you would with a pen?`
       }
     },
     practice: 'It is only practice, so nothing is scored yet.',
@@ -219,10 +225,12 @@ const en: Strings = {
     again: 'Try again',
     keep: 'Keep it',
     redone: 'Thank you. That one is done now.',
+    redoing: (title) => `Once more · ${title}`,
   },
   closer: {
     title: 'Let me look a little closer',
     body: 'Your pattern sits between the two groups, so I would rather not guess. Three more short tasks, and then three models will look at all six.',
+    demo: 'Demo mode: your short check was clear, but here are the three extra tasks anyway, to show how the closer look works.',
     stop: 'Stop here',
     more: 'Three more',
   },
@@ -262,13 +270,13 @@ const en: Strings = {
     noResult: (n) => `Thank you for trying. This time I cannot compare you with the people in the study, because of ${n === 1 ? 'this task' : 'these tasks'}:`,
     redo: (n) => (n === 1 ? 'Do that task again' : 'Do those tasks again'),
     notAskedHard: 'If you were doing your best and a task was hard to finish, tell a doctor about that and show them this screen. It is useful for them to know.',
-    joinedWhy: 'About writing without lifting: in the study people used a pen, and the tablet could also see the pen hovering over the paper, so nobody had zero time in the air. A phone cannot see a finger in the air. Three of my first eight phone volunteers wrote the word in a single drag, like you.',
+    joinedWhy: 'About writing with hardly a lift: in the study people used a pen, and the tablet could also see the pen hovering over the paper, so everybody had some time in the air (on the word, never under an eighth of the task). A phone cannot see a finger in the air. Three of my first eight phone volunteers wrote a word in a single drag too.',
     caveat: 'Tinta learned from pen-on-tablet data. On phones, only 9 healthy volunteers have tried her, and no patient has.',
-    score: (s) => `${s} out of 100 on my scale. Under 35: usual pattern. Over 65: worth mentioning. In between: I don't know. A higher number is not better, and it is not a percentage of risk.`,
+    score: (s) => `${s} out of 100 on my scale. 35 or under: usual pattern. 65 or over: worth mentioning. In between: I don't know. A higher number is not better, and it is not a percentage of risk.`,
     whatNow: 'What now?',
     measurements: 'See the measurements',
     colTask: 'Task',
-    colAir: 'In the air',
+    colAir: 'Share of time in the air',
     colTouches: 'Touches',
     nextCase: 'Next case',
     mistake: 'Show a mistake',
@@ -328,7 +336,7 @@ const en: Strings = {
     copied: 'Copied',
     save: 'Save this person on this phone',
     saved: (n) => `Saved. ${n} on this phone.`,
-    copyAll: (n) => `Copy all ${n} people`,
+    copyAll: (n) => (n === 1 ? 'Copy the 1 person saved' : `Copy all ${n} people`),
     clear: 'Delete the saved people',
     clearConfirm: 'Delete every saved person from this phone?',
   },
@@ -342,6 +350,7 @@ const en: Strings = {
     send: 'Send it',
     sent: 'Thank you!',
     copied: 'Copied. Paste it in a message to the person who invited you.',
+    manual: 'This browser will not let me share or copy. Press and hold the text below, copy it, and paste it in a message to the person who invited you.',
     header: 'Tinta test',
     result: 'Result',
     nameLabel: 'Name',
@@ -354,6 +363,28 @@ const en: Strings = {
     explain: (healthy, patients) =>
       `Each dot is one person from the study, placed by the short-check score from a model that had not seen them. Green, above: the ${healthy} healthy people. Orange, below: the ${patients} people with Alzheimer's. The dark line is the short-check score of this result. Look at the middle: the two groups mix. That is why I am sometimes wrong, and why I sometimes say I can't tell.`,
     aria: (score) => `Dot chart of the 174 people in the study by score. The short-check score of this result is ${score} out of 100.`,
+  },
+  play: {
+    open: 'Try the invisible ink first',
+    kicker: 'Just to try',
+    title: 'Write anything. I will show you your invisible ink.',
+    hint: 'Your name, a word, a doodle. Nothing here is scored or saved.',
+    clear: 'Clear',
+    show: 'Show my ink',
+    again: 'Write again',
+    start: 'Start the check',
+    back: 'Back',
+  },
+  lab: {
+    title: 'See how I decide',
+    lead: 'This is everything I look at. Move the sliders: the pin is my real model answering, not a drawing.',
+    lifts: (n) => `Lifts of the finger in each task: ${n}`,
+    pause: (seconds) => `Pause at each lift: ${seconds.toFixed(1)} s`,
+    none: 'With so little time in the air there is too little for me to time, so I give no result.',
+    share: (percent) => `That puts the finger in the air about ${percent}% of the time.`,
+    at: (n) => `${n} on my scale of 100`,
+    grey: 'Between 35 and 65 I would ask for three more tasks before answering.',
+    note: 'This is not a target to aim for. Here every task gets the same lifts and pauses, which real writing never has, and I am easy to move on purpose: a result only means something if you wrote the way you always do.',
   },
   ask: {
     title: 'Ask Tinta',
@@ -483,7 +514,7 @@ const es: Strings = {
     16: { title: 'Al revés', instruction: 'Copia esta palabra al revés, empezando por la última letra.', prompt: 'casa' },
     6: { title: 'Letras', instruction: 'Copia estas tres letras.', prompt: 'l  m  p' },
     5: { title: 'Círculo', instruction: 'Repasa el círculo cuatro veces seguidas, sin levantar el dedo.' },
-    9: { title: 'Bucles', instruction: 'Escribe «le» cuatro veces con letra ligada, de un tirón.', prompt: 'le le le le' },
+    9: { title: 'Bucles', instruction: 'Escribe «le» cuatro veces seguidas, con letra ligada y sin levantar el dedo.', prompt: 'le le le le' },
     23: { title: 'Teléfono', instruction: 'Pulsa «Escuchar» y escribe el número de teléfono que oigas.', speak: '3, 4, 7. 5, 9, 2. 0, 1, 6, 8' },
     15: { title: 'Al revés', instruction: 'Copia esta palabra al revés, empezando por la última letra.', prompt: 'botella' },
     18: { title: '¿Qué es?', instruction: 'Escribe el nombre del objeto del dibujo.' },
@@ -497,6 +528,7 @@ const es: Strings = {
     listen: 'Escuchar',
     noVoice: (n) => `Este móvil no tiene voz. Pide a alguien que te lea este número en voz alta: ${n}`,
     writeHere: 'Escribe aquí con el dedo',
+    rotate: 'Pon el móvil de pie: hay más sitio para escribir.',
     startOver: 'Borrar',
     done: 'Ya está',
     next: 'Siguiente',
@@ -506,7 +538,7 @@ const es: Strings = {
     again: 'Verlo otra vez',
     air: 'En el aire',
     screen: 'En la pantalla',
-    touches: 'Toques',
+    touches: 'Veces que tocas',
     cheers: [
       'Muy bien. Eso era solo para practicar.',
       'Práctica hecha. Ahora las de verdad.',
@@ -535,7 +567,7 @@ const es: Strings = {
         case 'little':
           return 'Casi no veo nada escrito. ¿La has terminado?'
         case 'joined':
-          return `Lo has escrito sin levantar el dedo, así que no tengo ninguna pausa que cronometrar. ¿Lo escribes otra vez, ${i.digits ? 'número a número' : 'letra a letra'}, como con un boli?`
+          return `${i.lifted ? 'Lo has escrito casi sin levantar el dedo, así que apenas hay pausas que cronometrar.' : 'Lo has escrito sin levantar el dedo, así que no tengo ninguna pausa que cronometrar.'} ¿Lo escribes otra vez, ${i.digits ? 'número a número' : 'letra a letra'}, como con un boli?`
       }
     },
     practice: 'Es solo práctica: todavía no puntúa nada.',
@@ -543,10 +575,12 @@ const es: Strings = {
     again: 'Repetirla',
     keep: 'Dejarla así',
     redone: 'Gracias. Esa ya está.',
+    redoing: (title) => `Otra vez · ${title}`,
   },
   closer: {
     title: 'Déjame mirar un poco mejor',
     body: 'Tu patrón queda entre los dos grupos, y prefiero no adivinar. Tres tareas cortas más, y después tres modelos mirarán las seis.',
+    demo: 'Modo demostración: tu prueba corta estaba clara, pero aquí van las tres tareas extra igualmente, para enseñar cómo es la segunda mirada.',
     stop: 'Lo dejo aquí',
     more: 'Tres más',
   },
@@ -586,14 +620,14 @@ const es: Strings = {
     noResult: (n) => `Gracias por intentarlo. Esta vez no puedo compararte con las personas del estudio, por ${n === 1 ? 'esta tarea' : 'estas tareas'}:`,
     redo: (n) => (n === 1 ? 'Repetir esa tarea' : 'Repetir esas tareas'),
     notAskedHard: 'Si lo estabas haciendo lo mejor que podías y alguna tarea te costó terminarla, cuéntaselo a un médico y enséñale esta pantalla. Le sirve saberlo.',
-    joinedWhy: 'Sobre escribir sin levantar el dedo: en el estudio se escribía con lápiz, y la tableta veía también el lápiz flotando sobre el papel, así que nadie tuvo cero tiempo en el aire. Un móvil no ve el dedo en el aire. Tres de mis ocho primeros voluntarios con móvil escribieron la palabra de un solo trazo, como tú.',
+    joinedWhy: 'Sobre escribir casi sin levantar el dedo: en el estudio se escribía con lápiz, y la tableta veía también el lápiz flotando sobre el papel, así que todo el mundo tenía algo de tiempo en el aire (en la palabra, nunca menos de una octava parte de la tarea). Un móvil no ve el dedo en el aire. Tres de mis ocho primeros voluntarios con móvil también escribieron una palabra de un solo trazo.',
     caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 9 voluntarios sanos, y ningún paciente.',
-    score: (s) => `${s} sobre 100 en mi escala. Menos de 35: dentro de lo habitual. Más de 65: coméntalo. En medio: no lo sé. Un número más alto no es mejor, y tampoco es un porcentaje de riesgo.`,
+    score: (s) => `${s} sobre 100 en mi escala. 35 o menos: dentro de lo habitual. 65 o más: coméntalo. En medio: no lo sé. Un número más alto no es mejor, y tampoco es un porcentaje de riesgo.`,
     whatNow: '¿Y ahora qué?',
     measurements: 'Ver las medidas',
     colTask: 'Tarea',
-    colAir: 'En el aire',
-    colTouches: 'Toques',
+    colAir: 'Parte del tiempo en el aire',
+    colTouches: 'Veces que tocas',
     nextCase: 'Otro caso',
     mistake: 'Ver un fallo',
     votesUnsure: (s) => `La prueba corta no lo tenía claro (${s}/100), así que tres modelos miraron las seis tareas:`,
@@ -652,7 +686,7 @@ const es: Strings = {
     copied: 'Copiado',
     save: 'Guardar a esta persona en este móvil',
     saved: (n) => `Guardado. ${n} en este móvil.`,
-    copyAll: (n) => `Copiar las ${n} personas`,
+    copyAll: (n) => (n === 1 ? 'Copiar la persona guardada' : `Copiar las ${n} personas`),
     clear: 'Borrar las personas guardadas',
     clearConfirm: '¿Borrar de este móvil a todas las personas guardadas?',
   },
@@ -666,6 +700,7 @@ const es: Strings = {
     send: 'Enviar',
     sent: '¡Gracias!',
     copied: 'Copiado. Pégalo en un mensaje a quien te invitó.',
+    manual: 'Este navegador no me deja compartir ni copiar. Mantén pulsado el texto de abajo, cópialo y pégalo en un mensaje a quien te invitó.',
     header: 'Prueba de Tinta',
     result: 'Resultado',
     nameLabel: 'Nombre',
@@ -678,6 +713,28 @@ const es: Strings = {
     explain: (healthy, patients) =>
       `Cada punto es una persona del estudio, colocada según el número de la prueba corta que le dio un modelo que no la había visto. En verde, arriba: las ${healthy} personas sanas. En naranja, abajo: las ${patients} personas con alzhéimer. La línea oscura es el número de la prueba corta de este resultado. Mira el centro: los dos grupos se mezclan. Por eso a veces me equivoco, y por eso a veces digo que no lo sé.`,
     aria: (score) => `Gráfica de puntos de las 174 personas del estudio según su número. El número de la prueba corta de este resultado es ${score} sobre 100.`,
+  },
+  play: {
+    open: 'Prueba antes la tinta invisible',
+    kicker: 'Solo para probar',
+    title: 'Escribe lo que quieras. Te enseño tu tinta invisible.',
+    hint: 'Tu nombre, una palabra, un dibujo. Aquí nada puntúa ni se guarda.',
+    clear: 'Borrar',
+    show: 'Ver mi tinta',
+    again: 'Escribir otra',
+    start: 'Empezar la prueba',
+    back: 'Volver',
+  },
+  lab: {
+    title: 'Mira cómo decido',
+    lead: 'Esto es todo lo que miro. Mueve los controles: el marcador es mi modelo de verdad contestando, no un dibujo.',
+    lifts: (n) => `Veces que se levanta el dedo en cada tarea: ${n}`,
+    pause: (seconds) => `Pausa en cada levantada: ${seconds.toFixed(1).replace('.', ',')} s`,
+    none: 'Con tan poco tiempo en el aire apenas hay nada que cronometrar, así que no doy resultado.',
+    share: (percent) => `Con eso, el dedo está en el aire más o menos el ${percent} % del tiempo.`,
+    at: (n) => `${n} en mi escala de 100`,
+    grey: 'Entre 35 y 65 pediría tres tareas más antes de contestar.',
+    note: 'Esto no es una meta a la que apuntar. Aquí todas las tareas tienen las mismas levantadas y pausas, cosa que no pasa al escribir de verdad, y es fácil moverme a propósito: un resultado solo significa algo si escribiste como escribes siempre.',
   },
   ask: {
     title: 'Pregunta a Tinta',
@@ -760,6 +817,7 @@ export const SOURCES = [
   { name: 'World Health Organization: Dementia fact sheet', url: 'https://www.who.int/news-room/fact-sheets/detail/dementia' },
   { name: "US National Institute on Aging: Alzheimer's and dementia", url: 'https://www.nia.nih.gov/health/alzheimers-and-dementia' },
   { name: 'Cilia et al. 2022, the DARWIN handwriting study', url: 'https://doi.org/10.24432/C55D0K' },
+  { name: 'Tinta: all the code, the experiments and the tests', url: 'https://github.com/Ruby570bocadito/Tinta-Veritas-AI-Hackaton' },
 ]
 
 export function initialLang(): Lang {

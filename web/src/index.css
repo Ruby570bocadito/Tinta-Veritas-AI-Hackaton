@@ -359,6 +359,71 @@ select:focus-visible {
   box-shadow: var(--lift);
 }
 
+/* On a very short screen (a phone on its side) pinned buttons would cover the sheet: they go back into the page. */
+@media (max-height: 520px) {
+  .sticky {
+    position: static;
+  }
+  div.sticky::before {
+    display: none;
+  }
+}
+
+/* A small phone: a smaller Tinta on the first screen, so the ways in are all in view. */
+@media (max-height: 700px) {
+  .hero .mascot {
+    width: 7.5rem;
+    height: 7.5rem;
+  }
+}
+
+/* With the phone on its side there is little room for the sheet: a kind word to turn it upright. */
+.rotate {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .rotate {
+    display: block;
+  }
+}
+
+/* "See how I decide": two sliders and the real model. */
+input[type='range'] {
+  width: 100%;
+  height: 2.75rem; /* a tall strip to grab, though the track is thin */
+  margin: 0;
+  accent-color: var(--air);
+  background: none;
+}
+
+.lab-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.lab-head .mascot {
+  width: 4.4rem;
+  height: 4.4rem;
+}
+
+.lab-answer {
+  margin: 0.7rem 0 0;
+  font-size: 1.05rem;
+}
+
+.lab-answer .verdict {
+  font-family: var(--display);
+  font-size: 1.15rem;
+}
+
+/* Under a slider the pin follows the finger instead of travelling from zero. */
+.meter-pin.live {
+  animation: none;
+  transition: left 0.18s ease-out;
+}
+
 /* The three measures of a task in one line, under Tinta's words. */
 .measured {
   margin: 0;
@@ -906,7 +971,8 @@ h2:focus,
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.mascot-happy {
+.mascot-happy,
+.mascot-jump {
   animation: pop 0.55s cubic-bezier(0.3, 1.7, 0.5, 1) backwards, hop 1.2s ease-in-out 0.55s infinite;
 }
 .mascot.poked {
@@ -1123,8 +1189,13 @@ h2:focus,
   .row,
   .page > button,
   .honest:not(.note),
+  .fold,
+  .confetti,
   .mascot {
     display: none !important;
+  }
+  .page > * {
+    animation: none !important;
   }
   .honest,
   .ink {
@@ -1135,15 +1206,16 @@ h2:focus,
 
 /* Size of the writing sheet and of its replay. */
 :root {
-  --sheet: min(42dvh, 21rem);
-  --replay: min(32dvh, 15rem);
+  /* Never smaller than a sheet you can write on, even with the phone on its side. */
+  --sheet: max(11rem, min(42dvh, 21rem));
+  --replay: max(7.5rem, min(32dvh, 15rem));
 }
 
 /* Short screens (small phones, or a browser bar eating the top): tighten everything so nothing needs scrolling while writing. */
 @media (max-height: 800px) {
   :root {
-    --sheet: 33dvh;
-    --replay: 24dvh;
+    --sheet: max(11rem, 33dvh);
+    --replay: max(7.5rem, 24dvh);
   }
   .page {
     padding-top: 0.6rem;

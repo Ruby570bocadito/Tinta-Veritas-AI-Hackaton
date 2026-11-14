@@ -38,7 +38,7 @@ Files 2, 3, 4 and 6 belong to the first design, which also measured each task ag
 
 `figures.py` redraws the charts in `docs/`. `own_data.py` analyses volunteers recorded on real phones with the app's study mode (`results/10_own_data.txt`: nine healthy people, and what a phone cannot see that the study's tablet could: the pen hovering).
 
-`results/11_done_wrong.txt` is not machine learning: it is what the app tells 26 made-up people who do the check in different ways, some of them wrong on purpose. It is printed by `npm run personas` in `web/` (also part of `npm test`), and `npx vite-node tools/try.ts '<json>'` plays any made-up person and prints every screen.
+`results/11_done_wrong.txt` is not machine learning: it is what the app tells 28 made-up people who do the check in different ways, some of them wrong on purpose. It is printed by `npm run personas` in `web/` (also part of `npm test`), and `npx vite-node tools/try.ts '<json>'` plays any made-up person and prints every screen.
 
 ## The Android app
 

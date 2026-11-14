@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node tools/precache.mjs",
+    "test:offline": "node tools/offline.test.mjs",
     "lint": "oxlint",
     "preview": "vite preview",
     "check:model": "vite-node tools/parity.ts",
     "personas": "vite-node tools/personas.test.ts",
     "try": "vite-node tools/try.ts",
-    "test": "vite-node tools/ink.test.ts && vite-node tools/personas.test.ts && vite-node tools/parity.ts"
+    "test": "vite-node tools/ink.test.ts && vite-node tools/check.test.ts && vite-node tools/strings.test.ts && vite-node tools/personas.test.ts && vite-node tools/parity.ts"
   },
   "dependencies": {
     "react": "^19.3.1",
