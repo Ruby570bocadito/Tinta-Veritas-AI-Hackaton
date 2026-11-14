@@ -10,9 +10,9 @@ type Props = {
   guide?: Guide
 }
 
-const INK = '#1d2433'
-const AIR = '#e4572e'
-const GUIDE = '#c9bfa9'
+const INK = '#1c2340'
+const AIR = '#e8622a'
+const GUIDE = '#d6c7a8'
 const CM = 37.8 // CSS pixels per centimetre
 
 function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, guide?: Guide) {

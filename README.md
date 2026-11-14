@@ -75,8 +75,8 @@ node android/tools/emulator-check.mjs shot.png      # end-to-end check with real
 
 - **Dataset:** Fontanella, F. (2022). DARWIN. UCI Machine Learning Repository, CC BY 4.0. https://doi.org/10.24432/C55D0K · Cilia, De Gregorio, De Stefano, Fontanella, Marcelli, Parziale (2022), *Diagnosing Alzheimer's disease from on-line handwriting: a novel dataset and performance benchmarking*, Engineering Applications of Artificial Intelligence. Task list from https://arxiv.org/abs/2405.00755.
 - **Libraries:** scikit-learn, pandas, NumPy (Python); React, Vite, TypeScript (web).
-- **Fonts:** Fraunces and Atkinson Hyperlegible (SIL Open Font License), via Google Fonts.
+- **Fonts:** Fraunces, Atkinson Hyperlegible and Patrick Hand (SIL Open Font License), via Google Fonts.
 - **AI tools:** Claude Code (Anthropic) was used to plan, write and debug code and to draft this text. Every experiment was run and checked by us, and we can explain each part.
-- **Pretrained models:** none. The mascot is hand-written SVG.
+- **Images:** the six pictures of Tinta the squid were generated with Meta's Muse Image model (`muse-image-1.0`) from our own prompts, then cut out with our own script. No pretrained model is used for the health result.
 
 MIT License.

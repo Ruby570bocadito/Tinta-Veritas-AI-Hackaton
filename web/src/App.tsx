@@ -115,7 +115,7 @@ export default function App() {
           <span className="tag">prototype</span>
         </header>
         <div className="hero">
-          <Mascot mood="hello" size={150} label="Tinta, a small squid holding a pen" />
+          <Mascot mood="hello" size={170} label="Tinta, a paper cut-out squid holding a pencil" />
           <p className="bubble">Hi, I'm Tinta. Lend me your finger for two minutes?</p>
         </div>
         <h1>How you write says more than what you write.</h1>
@@ -150,7 +150,7 @@ export default function App() {
     return (
       <main className="page">
         <header className="taskbar">
-          <Mascot mood={screen.review ? 'happy' : 'watching'} size={52} />
+          <Mascot mood={screen.review ? 'writing' : 'watching'} size={84} />
           <div>
             <ol className="dots" aria-label={`Task ${screen.index + 1} of ${TASKS.length}`}>
               {TASKS.map((t, i) => (
@@ -172,13 +172,15 @@ export default function App() {
         {task.speak && !screen.review && !canSpeak && (
           <p className="why">This device has no voice. Ask someone to read this number aloud to you: {task.speak}</p>
         )}
-        <InkCanvas
-          key={task.id + (screen.review ? 'r' : 'w')}
-          strokes={strokes}
-          guide={task.guide}
-          onChange={screen.review ? undefined : (s) => setInk({ ...ink, [task.id]: [...s] })}
-          showInvisibleInk={screen.review}
-        />
+        <div className="sheet">
+          <InkCanvas
+            key={task.id + (screen.review ? 'r' : 'w')}
+            strokes={strokes}
+            guide={task.guide}
+            onChange={screen.review ? undefined : (s) => setInk({ ...ink, [task.id]: [...s] })}
+            showInvisibleInk={screen.review}
+          />
+        </div>
         {screen.review ? (
           <>
             <p className="legend">
@@ -247,7 +249,7 @@ export default function App() {
   return (
     <main className="page">
       <header className="taskbar">
-        <Mascot mood={v.mood} size={72} />
+        <Mascot mood={v.mood} size={110} />
         <p className="step">
           {ex ? `Real case ${example! + 1} of ${examples.length} · this person is actually ${ex.label}` : 'Your result'}
         </p>
@@ -261,7 +263,6 @@ export default function App() {
       )}
       {ex && wrong && <p className="why">{whyWrong(ex.label, byTask)}</p>}
       <div className="meter" role="img" aria-label={`Model score ${Math.round(p * 100)} out of 100`}>
-        <div className="meter-zone" />
         <div className="meter-pin" style={{ left: `${Math.round(p * 100)}%` }} />
       </div>
       <p className="fine">
