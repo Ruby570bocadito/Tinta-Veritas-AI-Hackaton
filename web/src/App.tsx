@@ -142,7 +142,7 @@ export default function App() {
           {langButton}
         </header>
         <div className="hero">
-          <Mascot mood="hello" size={170} label="Tinta" />
+          <Mascot mood="wave" size={170} label="Tinta" />
           <p className="bubble">{t.home.bubble}</p>
         </div>
         <h1>{t.home.title}</h1>

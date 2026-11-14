@@ -5,6 +5,7 @@ import { useEffect, useState, type CSSProperties } from 'react'
 // She pops in, floats, wiggles when you tap her and, for the poses that have a second frame, blinks.
 export type Mood =
   | 'hello'
+  | 'wave'
   | 'watching'
   | 'happy'
   | 'unsure'
@@ -25,7 +26,7 @@ export type Mood =
   | 'read'
 
 // Poses with an eyes-closed frame in public/img (tinta-<mood>-blink.webp).
-const BLINKS: Mood[] = []
+const BLINKS: Mood[] = ['wave', 'watching', 'caring', 'unsure', 'writing', 'closer-look', 'read']
 
 type Props = { mood?: Mood; size?: number; label?: string }
 
