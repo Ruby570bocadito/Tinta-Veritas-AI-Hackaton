@@ -244,7 +244,7 @@ select:focus-visible {
 
 .ink {
   width: 100%;
-  height: min(44dvh, 21rem);
+  height: var(--sheet);
   background: #fffdf7;
   border: 0;
   border-radius: 0.5rem 0.7rem 0.45rem 0.65rem;
@@ -255,7 +255,8 @@ select:focus-visible {
 
 /* When the writing is being replayed the sheet is shorter, so the measures and the button fit below it. */
 .ink-readonly {
-  height: min(32dvh, 15rem);
+  height: var(--replay);
+  touch-action: pan-y; /* nothing to write here, so a finger on it can scroll the page */
 }
 
 .legend {
@@ -508,10 +509,10 @@ textarea {
 @keyframes updown {
   0%,
   100% {
-    transform: translateY(calc(-0.32 * min(44dvh, 21rem)));
+    transform: translateY(calc(-0.32 * var(--sheet)));
   }
   50% {
-    transform: translateY(calc(0.32 * min(44dvh, 21rem)));
+    transform: translateY(calc(0.32 * var(--sheet)));
   }
 }
 
@@ -793,6 +794,9 @@ textarea {
 
 /* Mascot: she floats gently, unless the person asked for less motion. */
 .mascot {
+  /* never taller than a quarter of the screen, so the button below her stays in view on a small phone */
+  width: min(var(--size), 26dvh);
+  height: min(var(--size), 26dvh);
   flex: none;
   user-select: none;
   animation: bob 3.4s ease-in-out infinite;
@@ -842,5 +846,29 @@ textarea {
   .ink {
     box-shadow: none;
     transform: none;
+  }
+}
+
+/* Size of the writing sheet and of its replay. */
+:root {
+  --sheet: min(42dvh, 21rem);
+  --replay: min(32dvh, 15rem);
+}
+
+/* Short screens (small phones, or a browser bar eating the top): tighten everything so nothing needs scrolling while writing. */
+@media (max-height: 800px) {
+  :root {
+    --sheet: 33dvh;
+    --replay: 24dvh;
+  }
+  .page {
+    padding-top: 0.6rem;
+    gap: 0.55rem;
+  }
+  h1 {
+    font-size: 1.5rem;
+  }
+  h2 {
+    font-size: 1.1rem;
   }
 }

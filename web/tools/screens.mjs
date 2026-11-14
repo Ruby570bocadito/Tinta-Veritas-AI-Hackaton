@@ -35,7 +35,9 @@ ws.onmessage = (m) => {
 const cdp = (method, params = {}) => new Promise((res) => (waiting.set(++id, res), ws.send(JSON.stringify({ id, method, params }))))
 const js = async (expression) => (await cdp('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result?.value
 
-await cdp('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true })
+// SIZE=360x640 tries a smaller phone. Each screen also reports anything that sticks out of it.
+const [W, H] = (process.env.SIZE ?? '390x844').split('x').map(Number)
+await cdp('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 2, mobile: true })
 await cdp('Page.navigate', { url })
 await sleep(2500)
 await js(`localStorage.setItem('tinta-lang', 'en'); localStorage.removeItem('tinta-history'); location.reload()`)
@@ -58,7 +60,13 @@ async function shot(name) {
   await sleep(900)
   const png = await cdp('Page.captureScreenshot', { format: 'png' })
   writeFileSync(join(out, `${String(++n).padStart(2, '0')}-${name}.png`), Buffer.from(png.data, 'base64'))
-  console.log('saved', name)
+  const sticking = await js(`(() => {
+    const wide = [...document.querySelectorAll('body *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && (r.right > innerWidth + 1 || r.left < -1) })
+      .map(e => e.tagName + '.' + e.className).slice(0, 4)
+    const b = [...document.querySelectorAll('button')].filter(e => { const r = e.getBoundingClientRect(); return r.height > 0 && r.bottom > innerHeight + 1 }).map(e => e.textContent.trim().slice(0, 20))
+    return JSON.stringify({ page: document.documentElement.scrollHeight, wide, buttonsBelow: b })
+  })()`)
+  console.log("saved", name, sticking)
 }
 const press = async (label) => (await js(`press(${JSON.stringify(label)})`), await sleep(500))
 const write = async (strokes, ms = 700, pause = 500) => {

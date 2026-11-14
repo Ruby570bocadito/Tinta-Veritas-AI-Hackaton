@@ -30,6 +30,7 @@ export default function Mascot({ mood = 'hello', size = 120, label }: Props) {
       src={`${import.meta.env.BASE_URL}img/tinta-${mood}.webp`}
       width={size}
       height={size}
+      style={{ '--size': size + 'px' } as React.CSSProperties}
       alt={label ?? ''}
       aria-hidden={label ? undefined : true}
       draggable={false}

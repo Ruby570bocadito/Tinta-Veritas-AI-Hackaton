@@ -241,7 +241,7 @@ export default function App() {
             ▶ {t.task.read}
           </button>
         )}
-        <div className="row push">
+        <div className="row push sticky">
           <button
             className="ghost"
             onClick={() => setScreen(screen.step ? { name: 'guide', step: screen.step - 1 } : { name: 'intro' })}
@@ -275,7 +275,7 @@ export default function App() {
           ))}
         </ul>
         <p className="lead">{t.ready.lead}</p>
-        <div className="row push">
+        <div className="row push sticky">
           <button className="ghost" onClick={() => setScreen({ name: 'guide', step: t.guide.cards.length - 1 })}>
             {t.guide.back}
           </button>
@@ -416,7 +416,7 @@ export default function App() {
         </div>
         <h1>{t.closer.title}</h1>
         <p className="lead">{t.closer.body}</p>
-        <div className="row push">
+        <div className="row push sticky">
           <button className="ghost" onClick={() => finish(false)}>
             {t.closer.stop}
           </button>
