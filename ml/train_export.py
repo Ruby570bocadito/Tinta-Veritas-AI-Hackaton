@@ -143,6 +143,16 @@ def main():
     print("told (adaptive):", metrics["told"], "| short:", metrics["told_short"])
     print(json.dumps({k: metrics[k] for k in ("1.0", "adaptive", "long")}, indent=1))
 
+    # "You among the 174": the short-check score of every person in the study, each one given by a model
+    # trained on the other four fifths (the three tasks stay fixed). The app draws them as dots.
+    Xall = shape(df, tasks)
+    crowd_p = np.zeros(len(df))
+    for a, b in StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED).split(Xall, y):
+        crowd_p[b] = logit().fit(Xall[a], y[a]).proba(Xall[b])
+    crowd = {who: sorted(int(round(100 * v)) for v in crowd_p[y == label]) for label, who in ((0, "healthy"), (1, "patients"))}
+    print("crowd: healthy under 35:", sum(v < 35 for v in crowd["healthy"]), "of", len(crowd["healthy"]),
+          "| patients over 65:", sum(v > 65 for v in crowd["patients"]), "of", len(crowd["patients"]))
+
     needed = sorted(set(WARMUP + all_tasks))
     examples = [dict(id=str(dte.iloc[i]["ID"]), label="patient" if y[te][i] else "healthy",
                      p1=round(float(p1[i]), 4), p2=round(float(p2[i]), 4), p=round(float(final[i]), 4),
@@ -159,7 +169,7 @@ def main():
         blend=export,
         stopwatch=dict(tasks=sw_tasks, mean=sw.mu.tolist(), std=sw.sd.tolist(),
                        coef=float(sw.m.coef_[0][0]), intercept=float(sw.m.intercept_[0])),
-        metrics=metrics, train_n=int(len(tr)), test_n=int(len(te)), examples=examples,
+        metrics=metrics, crowd=crowd, train_n=int(len(tr)), test_n=int(len(te)), examples=examples,
         # Typical values in the healthy training people, used to explain a result in plain words.
         healthy_air=float(np.median(shape(dtr[y[tr] == 0], tasks)[:, 0::2])),
         healthy_touches=float(np.median(np.expm1(shape(dtr[y[tr] == 0], tasks)[:, 1::2]))),

@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
 import History from './components/History'
+import Crowd from './components/Crowd'
 import InkCanvas, { type Guide, type Size } from './components/InkCanvas'
 import Mascot, { type Mood } from './components/Mascot'
-import { addToHistory, clearHistory, loadHistory, type Entry } from './lib/history'
+import { addToHistory, clearHistory, loadHistory, loadPeople, savePeople, type Entry } from './lib/history'
 import { measure, seconds, type Measures, type Stroke } from './lib/ink'
 import {
   counts,
   examples,
   isGrey,
+  crowd,
   metrics,
   predict,
   predictCloser,
@@ -75,6 +77,8 @@ export default function App() {
   const [replay, setReplay] = useState(0)
   const [age, setAge] = useState('')
   const [copied, setCopied] = useState(false)
+  const [people, setPeople] = useState<string[]>(loadPeople) // study mode: volunteers saved on this phone
+  const [justSaved, setJustSaved] = useState(false)
   const t = STRINGS[lang]
 
   useEffect(() => {
@@ -90,6 +94,7 @@ export default function App() {
     setInk({})
     setExample(null)
     setCopied(false)
+    setJustSaved(false)
     setCloser(false)
     setScreen({ name: 'intro' })
   }
@@ -504,6 +509,17 @@ export default function App() {
       </div>
       <p className="fine">{t.result.score(score)}</p>
       <p className="fine caveat">{t.result.caveat}</p>
+      <section className="honest">
+        <h2>{ex ? t.crowd.caseTitle : t.crowd.title}</h2>
+        <Crowd
+          healthy={crowd.healthy}
+          patients={crowd.patients}
+          you={Math.round(first * 100)}
+          label={ex ? '▼' : t.crowd.you}
+          aria={t.crowd.aria(Math.round(first * 100))}
+        />
+        <p>{t.crowd.explain(crowd.healthy.length, crowd.patients.length)}</p>
+      </section>
       {!ex && (
         <section className="honest steps">
           <h2>{t.result.whatNow}</h2>
@@ -595,6 +611,35 @@ export default function App() {
           <button className="ghost" onClick={() => navigator.clipboard.writeText(studyLine).then(() => setCopied(true))}>
             {copied ? t.study.copied : t.study.copy}
           </button>
+          <button
+            className="primary"
+            disabled={justSaved}
+            onClick={() => {
+              const list = [...people, studyLine]
+              savePeople(list)
+              setPeople(list)
+              setJustSaved(true)
+            }}
+          >
+            {justSaved ? t.study.saved(people.length) : t.study.save}
+          </button>
+          {people.length > 0 && (
+            <>
+              <button className="ghost" onClick={() => navigator.clipboard.writeText(people.join('\n')).then(() => setCopied(true))}>
+                {t.study.copyAll(people.length)}
+              </button>
+              <button
+                className="link left"
+                onClick={() => {
+                  if (!window.confirm(t.study.clearConfirm)) return
+                  savePeople([])
+                  setPeople([])
+                }}
+              >
+                {t.study.clear}
+              </button>
+            </>
+          )}
         </section>
       )}
       <details className="fold" open={Boolean(ex)}>

@@ -31,3 +31,23 @@ export function clearHistory() {
     // nothing to clear
   }
 }
+
+// Study mode: the timings of each volunteer, kept on this phone until they are copied out by hand.
+const PEOPLE = 'tinta-study'
+
+export function loadPeople(): string[] {
+  try {
+    const list = JSON.parse(localStorage.getItem(PEOPLE) ?? '[]')
+    return Array.isArray(list) ? list : []
+  } catch {
+    return []
+  }
+}
+
+export function savePeople(list: string[]) {
+  try {
+    localStorage.setItem(PEOPLE, JSON.stringify(list))
+  } catch {
+    // storage unavailable: the line can still be copied one by one
+  }
+}

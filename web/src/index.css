@@ -649,6 +649,20 @@ textarea {
   font-family: inherit;
 }
 
+/* You among the 174 */
+.crowd {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.crowd-you {
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--felt);
+  font-family: inherit;
+}
+
 /* the object to name, pinned like a photo */
 .picture {
   align-self: center;

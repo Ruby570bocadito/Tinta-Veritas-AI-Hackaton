@@ -119,6 +119,12 @@ await js(`document.querySelector('.history')?.scrollIntoView({ block: 'center' }
 await sleep(500)
 const png = await cdp('Page.captureScreenshot', { format: 'png' })
 writeFileSync(join(out, `${String(++n).padStart(2, '0')}-history.png`), Buffer.from(png.data, 'base64'))
+if (url.includes('study')) {
+  // Study mode: saving the volunteer keeps one line of timings on the phone.
+  await press('Save this person')
+  console.log('study: people saved on this phone =', await js(`JSON.parse(localStorage.getItem('tinta-study')).length`), '| copy-all button:', await js(`[...document.querySelectorAll('button')].some(b => b.textContent.includes('Copy all 1'))`))
+  await js(`localStorage.removeItem('tinta-study')`)
+}
 await press('Start again')
 await press('See real cases')
 await press('Show a mistake')

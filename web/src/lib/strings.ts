@@ -90,7 +90,8 @@ export type Strings = {
     uneven: (pauses: Record<string, number>, screen: Record<string, number>) => string
     limits: string
   }
-  study: { title: string; body: string; age: string; choose: string; bands: string[]; copy: string; copied: string }
+  study: { title: string; body: string; age: string; choose: string; bands: string[]; copy: string; copied: string; save: string; saved: (n: number) => string; copyAll: (n: number) => string; clear: string; clearConfirm: string }
+  crowd: { title: string; caseTitle: string; you: string; explain: (healthy: number, patients: number) => string; aria: (score: number) => string }
   ask: { title: string; lead: string; sources: string; back: string; items: Qa[] }
 }
 
@@ -280,6 +281,19 @@ const en: Strings = {
     bands: ['under 30', '30 to 59', '60 or over'],
     copy: 'Copy timings',
     copied: 'Copied',
+    save: 'Save this person on this phone',
+    saved: (n) => `Saved. ${n} on this phone.`,
+    copyAll: (n) => `Copy all ${n} people`,
+    clear: 'Delete the saved people',
+    clearConfirm: 'Delete every saved person from this phone?',
+  },
+  crowd: {
+    title: 'You among the 174 people in the study',
+    caseTitle: 'This person among the 174 in the study',
+    you: 'you',
+    explain: (healthy, patients) =>
+      `Each dot is one person from the study, placed by the short-check score from a model that had not seen them. Green, above: the ${healthy} healthy people. Orange, below: the ${patients} people with Alzheimer's. The dark line is the short-check score of this result. Look at the middle: the two groups mix. That is why I am sometimes wrong, and why I sometimes say I can't tell.`,
+    aria: (score) => `Dot chart of the 174 people in the study by score. The short-check score of this result is ${score} out of 100.`,
   },
   ask: {
     title: 'Ask Tinta',
@@ -541,6 +555,19 @@ const es: Strings = {
     bands: ['menos de 30', 'de 30 a 59', '60 o más'],
     copy: 'Copiar tiempos',
     copied: 'Copiado',
+    save: 'Guardar a esta persona en este móvil',
+    saved: (n) => `Guardado. ${n} en este móvil.`,
+    copyAll: (n) => `Copiar las ${n} personas`,
+    clear: 'Borrar las personas guardadas',
+    clearConfirm: '¿Borrar de este móvil a todas las personas guardadas?',
+  },
+  crowd: {
+    title: 'Tú entre las 174 personas del estudio',
+    caseTitle: 'Esta persona entre las 174 del estudio',
+    you: 'tú',
+    explain: (healthy, patients) =>
+      `Cada punto es una persona del estudio, colocada según la nota de la prueba corta que le dio un modelo que no la había visto. En verde, arriba: las ${healthy} personas sanas. En naranja, abajo: las ${patients} personas con alzhéimer. La línea oscura es la nota de la prueba corta de este resultado. Mira el centro: los dos grupos se mezclan. Por eso a veces me equivoco, y por eso a veces digo que no lo sé.`,
+    aria: (score) => `Gráfica de puntos de las 174 personas del estudio según su nota. La nota de la prueba corta de este resultado es ${score} sobre 100.`,
   },
   ask: {
     title: 'Pregunta a Tinta',

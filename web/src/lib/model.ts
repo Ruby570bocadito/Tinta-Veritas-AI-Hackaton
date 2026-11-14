@@ -19,6 +19,8 @@ export const [GREY_LO, GREY_HI] = data.grey
 export const SPLIT: number = data.split
 export const metrics = data.metrics
 export const examples = data.examples
+// Short-check score of every person in the study, from a model that had not seen them (for the dot chart).
+export const crowd: { healthy: number[]; patients: number[] } = data.crowd
 export const counts = { train: data.train_n, test: data.test_n }
 // Typical values among the healthy people the model learned from.
 export const typical = { air: data.healthy_air, touches: data.healthy_touches }
