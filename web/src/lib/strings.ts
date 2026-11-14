@@ -166,7 +166,7 @@ const en: Strings = {
     3: { title: 'Practice', instruction: 'Now up and down: join the two dots four times, without lifting your finger.' },
     // The four tasks before this one all say "without lifting your finger", and people carried on that way here:
     // 7 of our first 15 volunteers wrote the word in a single drag, which leaves a phone no pause to time.
-    // In the study the usual way was one pen-down per letter (a median of 4 for the 4 letters of "casa").
+    // In the study the healthy group's median was 4 pen-downs for the 4 letters of "casa", which fits one per letter.
     16: { title: 'Backwards', instruction: 'Copy this word backwards: start from its last letter, and lift your finger after each letter.', prompt: 'house' },
     6: { title: 'Letters', instruction: 'Copy these three letters, one at a time.', prompt: 'l  m  p' },
     5: { title: 'Circle', instruction: 'Trace over the circle four times in a row, without lifting your finger.' },
