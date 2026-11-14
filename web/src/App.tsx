@@ -4,37 +4,42 @@ import Mascot, { type Mood } from './components/Mascot'
 import { measure, seconds, type Measures, type Stroke } from './lib/ink'
 import { counts, examples, metrics, predict, reference, slowdown, verdict, TASK_IDS, WARMUP_IDS, type Verdict } from './lib/model'
 
-type Task = { id: number; title: string; instruction: string; prompt?: string; speak?: string; guide?: Guide }
+type Task = { id: number; title: string; instruction: string; pose: Mood; prompt?: string; speak?: string; guide?: Guide }
 
 // Five of the 25 tasks of the DARWIN protocol (numbers are the original task numbers).
 // 2 and 3 are warm-ups that measure the person's own pace; 5, 9 and 23 are scored against it.
 const TASKS: Task[] = [
   {
     id: 2,
+    pose: 'task-warmup',
     title: 'Warm-up',
     instruction: 'Join the two dots with a line, back and forth four times, without lifting your finger.',
     guide: 'hline',
   },
   {
     id: 3,
+    pose: 'task-lines',
     title: 'Warm-up',
     instruction: 'Now up and down: join the two dots four times, without lifting your finger.',
     guide: 'vline',
   },
   {
     id: 5,
+    pose: 'task-circle',
     title: 'Circle',
     instruction: 'Trace over the circle four times in a row, without lifting your finger.',
     guide: 'circle',
   },
   {
     id: 9,
+    pose: 'task-loops',
     title: 'Loops',
     instruction: 'Write "le" four times in joined-up writing, in one smooth movement.',
     prompt: 'le le le le',
   },
   {
     id: 23,
+    pose: 'task-phone',
     title: 'Phone number',
     instruction: 'Tap "Listen", then write the phone number you hear.',
     speak: '3 4 7. 5 9 2. 0 1 6 8',
@@ -91,7 +96,38 @@ function say(text: string) {
 const study = new URLSearchParams(location.search).has('study')
 const isWrong = (e: (typeof examples)[number]) => e.p >= 0.5 !== (e.label === 'patient')
 
-type Screen = { name: 'intro' } | { name: 'task'; index: number; review: boolean } | { name: 'result' }
+type Screen =
+  | { name: 'intro' }
+  | { name: 'guide'; step: number }
+  | { name: 'ready' }
+  | { name: 'task'; index: number; review: boolean }
+  | { name: 'result' }
+
+// What Tinta explains before the first check. Three ideas, one picture each.
+const GUIDE: { pose: Mood; title: string; body: string }[] = [
+  {
+    pose: 'onb-pauses',
+    title: "I time the pauses you can't see",
+    body: 'Between one stroke and the next, your finger leaves the screen for a moment. Those tiny pauses grow when the mind has to work harder. Paper hides them. I can time them.',
+  },
+  {
+    pose: 'onb-yourself',
+    title: 'I compare you with yourself',
+    body: 'Some people write fast, some slowly, and every phone is different. So I start with two easy warm-ups to learn your own pace, and measure the harder tasks against it. Not against a clock.',
+  },
+  {
+    pose: 'onb-private',
+    title: 'What you write stays here',
+    body: 'Everything is worked out on this phone. Nothing is sent anywhere. And I am a student prototype, not a doctor: my answer is a reason to talk to one, never a diagnosis.',
+  },
+]
+
+const TIPS = [
+  'Pick a calm moment, sitting down.',
+  'Lay the phone flat on a table.',
+  'Use the finger you would point with.',
+  'Wear your glasses if you need them.',
+]
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'intro' })
@@ -109,7 +145,7 @@ export default function App() {
 
   if (screen.name === 'intro') {
     return (
-      <main className="page intro">
+      <main className="page intro" key="intro">
         <header className="brandbar">
           <span className="brand">Tinta</span>
           <span className="tag">prototype</span>
@@ -120,11 +156,11 @@ export default function App() {
         </div>
         <h1>How you write says more than what you write.</h1>
         <p className="lead">
-          Five short writing tasks. I time the pauses your eye can't see and compare them with data from 174 people, 89
-          of them living with Alzheimer's.
+          A two-minute writing check for early signs of Alzheimer's, on the phone you already have. Built on data from
+          174 people, 89 of them living with the disease.
         </p>
-        <button className="primary" onClick={() => setScreen({ name: 'task', index: 0, review: false })}>
-          Start the check
+        <button className="primary" onClick={() => setScreen({ name: 'guide', step: 0 })}>
+          Start
         </button>
         <button
           className="ghost"
@@ -135,9 +171,81 @@ export default function App() {
         >
           See real cases from the study
         </button>
+        <ul className="chips" aria-label="At a glance">
+          <li>5 short tasks</li>
+          <li>About 2 minutes</li>
+          <li>Works offline</li>
+        </ul>
         <p className="fine">
           This project is a prototype and is not medical advice. Nothing you write leaves this device.
         </p>
+      </main>
+    )
+  }
+
+  if (screen.name === 'guide') {
+    const card = GUIDE[screen.step]
+    const lastCard = screen.step === GUIDE.length - 1
+    return (
+      <main className="page" key={'guide' + screen.step}>
+        <header className="brandbar">
+          <span className="brand">Tinta</span>
+          <button className="link" onClick={() => setScreen({ name: 'ready' })}>
+            Skip
+          </button>
+        </header>
+        <div className="poster">
+          <Mascot mood={card.pose} size={230} />
+        </div>
+        <ol className="dots center" aria-label={`Step ${screen.step + 1} of ${GUIDE.length}`}>
+          {GUIDE.map((g, i) => (
+            <li key={g.pose} className={i < screen.step ? 'done' : i === screen.step ? 'now' : ''} />
+          ))}
+        </ol>
+        <h1>{card.title}</h1>
+        <p className="lead">{card.body}</p>
+        <div className="row push">
+          <button
+            className="ghost"
+            onClick={() => setScreen(screen.step ? { name: 'guide', step: screen.step - 1 } : { name: 'intro' })}
+          >
+            Back
+          </button>
+          <button
+            className="primary"
+            onClick={() => setScreen(lastCard ? { name: 'ready' } : { name: 'guide', step: screen.step + 1 })}
+          >
+            {lastCard ? 'Got it' : 'Next'}
+          </button>
+        </div>
+      </main>
+    )
+  }
+
+  if (screen.name === 'ready') {
+    return (
+      <main className="page" key="ready">
+        <header className="brandbar">
+          <span className="brand">Tinta</span>
+        </header>
+        <div className="poster">
+          <Mascot mood="onb-calm" size={210} />
+        </div>
+        <h1>Ready when you are</h1>
+        <ul className="tips">
+          {TIPS.map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ul>
+        <p className="lead">There are no right or wrong drawings. Just write the way you always do.</p>
+        <div className="row push">
+          <button className="ghost" onClick={() => setScreen({ name: 'guide', step: GUIDE.length - 1 })}>
+            Back
+          </button>
+          <button className="primary" onClick={() => setScreen({ name: 'task', index: 0, review: false })}>
+            Begin
+          </button>
+        </div>
       </main>
     )
   }
@@ -148,9 +256,9 @@ export default function App() {
     const m = measure(strokes)
     const last = screen.index === TASKS.length - 1
     return (
-      <main className="page">
+      <main className="page" key={'task' + screen.index + screen.review}>
         <header className="taskbar">
-          <Mascot mood={screen.review ? 'writing' : 'watching'} size={84} />
+          <Mascot mood={screen.review ? 'writing' : task.pose} size={96} />
           <div>
             <ol className="dots" aria-label={`Task ${screen.index + 1} of ${TASKS.length}`}>
               {TASKS.map((t, i) => (

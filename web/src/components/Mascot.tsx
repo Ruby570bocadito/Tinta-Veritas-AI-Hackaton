@@ -1,6 +1,21 @@
 // Tinta, a paper cut-out squid who lends you her ink.
-// The six poses are images made for this project (see README, Sources).
-export type Mood = 'hello' | 'watching' | 'happy' | 'unsure' | 'caring' | 'writing'
+// Every pose is an image made for this project (see README, Sources).
+export type Mood =
+  | 'hello'
+  | 'watching'
+  | 'happy'
+  | 'unsure'
+  | 'caring'
+  | 'writing'
+  | 'onb-pauses'
+  | 'onb-yourself'
+  | 'onb-private'
+  | 'onb-calm'
+  | 'task-warmup'
+  | 'task-lines'
+  | 'task-circle'
+  | 'task-loops'
+  | 'task-phone'
 
 type Props = { mood?: Mood; size?: number; label?: string }
 

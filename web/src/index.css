@@ -443,6 +443,106 @@ textarea {
   font-size: 0.75rem;
 }
 
+/* Each screen arrives like a sheet of paper being laid on the table. */
+.page {
+  animation: lay 0.32s ease-out both;
+}
+
+@keyframes lay {
+  from {
+    opacity: 0;
+    transform: translateY(14px) rotate(0.6deg);
+  }
+}
+
+.poster {
+  display: grid;
+  place-items: center;
+  margin: 0.25rem 0 0;
+}
+
+.dots.center {
+  justify-content: center;
+}
+
+.push {
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+.link {
+  min-height: 2.75rem;
+  padding: 0.3rem 0.6rem;
+  background: none;
+  box-shadow: none;
+  color: var(--soft);
+  font-family: var(--hand);
+  font-size: 1.15rem;
+  font-weight: 400;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* little paper tickets */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0.2rem 0 0;
+  padding: 0;
+}
+
+.chips li {
+  font-family: var(--hand);
+  font-size: 1.05rem;
+  background: var(--card) var(--grain);
+  padding: 0.15rem 0.7rem 0.2rem;
+  border-radius: 0.3rem 0.5rem 0.35rem 0.55rem;
+  box-shadow: var(--lift);
+}
+
+.chips li:nth-child(odd) {
+  transform: rotate(-2deg);
+}
+
+.chips li:nth-child(even) {
+  transform: rotate(1.5deg);
+}
+
+/* a hand-written checklist on a scrap of paper */
+.tips {
+  list-style: none;
+  margin: 0;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  font-family: var(--hand);
+  font-size: 1.3rem;
+  line-height: 1.2;
+  background: var(--card) var(--grain);
+  border-radius: 0.5rem 0.8rem 0.55rem 0.75rem;
+  box-shadow: var(--lift);
+  transform: rotate(-0.6deg);
+}
+
+.tips li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+
+.tips li::before {
+  content: '';
+  flex: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: var(--air);
+  transform: translateY(0.05rem);
+}
+
 /* Mascot: she floats gently, unless the person asked for less motion. */
 .mascot {
   flex: none;
@@ -467,7 +567,8 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mascot {
+  .mascot,
+  .page {
     animation: none;
   }
   button {
