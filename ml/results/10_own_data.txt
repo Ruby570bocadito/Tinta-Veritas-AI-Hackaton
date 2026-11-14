@@ -35,9 +35,16 @@ What a phone cannot see: time in the air of people in the study who did a task i
   task  5: 101 of 174 people in the study did it in one stroke; their median share of time in the air was  5%. With exactly zero time in the air: study 0 of 174, our volunteers 9 of 9
   task  9:  90 of 174 people in the study did it in one stroke; their median share of time in the air was 12%. With exactly zero time in the air: study 0 of 174, our volunteers 5 of 9
   Zero time in the air never happens in the study and is common on a phone: for the model it is a value it never saw.
-  The app now gives no result when the word (the task whose time in the air weighs most) has no pause at all,
-  and asks for it letter by letter. 8 volunteers did the check before that rule existed:
-  3 of 8 wrote the word in a single drag and were told 'usual pattern' with the lowest score; today they would get no result.
+
+Today's rule: no result when a word or a number has less time in the air than anyone in the study had on that task
+  the backwards word: the study's lowest is 12.5%. Our volunteers: 0%, 0%, 0%, 14%, 21%, 23%, 29%, 35%, 49%
+  under that line: 3 of 9, all of them with the word written in a single drag
+  the closest one above it: 13.9%. A line this sharp is a choice: a little less pause and that person would get no result.
+  the 2 who did the closer look: tasks under their line, 0 of 3 (lines: task 6 13.3%, task 23 23.8%, task 22 17.0%)
+  What those 3 were told by the app of that moment: {'typical': 3}, with its lowest scores. Today they would get no result,
+  and Tinta would ask for the word again, letter by letter.
+  All of these timings were recorded before the app joined breaks under 150 ms into one stroke (a finger skipping on
+  glass), so the touches above may include skips. Only totals were saved, so that cannot be redone.
 
 Recorded with the version that checks the tasks: 1 volunteer
   laps of the circle 4.3 (asked 4, counts from 2.5) | 'le' 4.0 (asked 4, counts from 2.5) | turns in the word 20 (counts from 10) | tasks repeated 0 | tasks with no result 0 | told: typical (29/100)

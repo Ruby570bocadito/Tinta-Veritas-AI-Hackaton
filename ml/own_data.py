@@ -120,13 +120,28 @@ def main():
         ours = int(((own[f"num_of_pendown{t}"] <= 1) & (own[f"air_time{t}"] == 0)).sum())
         print(f"  task {t:>2}: {len(one):>3} of {len(darwin)} people in the study did it in one stroke; their median share of time in the air was "
               f"{100 * share.median():2.0f}%. With exactly zero time in the air: study {zero} of {len(darwin)}, our volunteers {ours} of {n}")
-    print("  Zero time in the air never happens in the study and is common on a phone: for the model it is a value it never saw.")
-    print("  The app now gives no result when the word (the task whose time in the air weighs most) has no pause at all,")
+    print("  Zero time in the air never happens in the study and is common on a phone: for the model it is a value it never saw.\n")
+
+    # 5b. The rule the app has today: a word or a number with less time in the air than anyone in the study had on
+    # that task gets no result (the limits are exported by train_export.py as air_floor). Who would it stop?
+    floor = {int(t): v for t, v in model["air_floor"].items()}
     word = tasks[0]
-    before = own[own["laps"].isna()]
-    drag = int((before[f"air_time{word}"] == 0).sum())
-    print(f"  and asks for it letter by letter. {len(before)} volunteers did the check before that rule existed:")
-    print(f"  {drag} of {len(before)} wrote the word in a single drag and were told 'usual pattern' with the lowest score; today they would get no result.\n")
+    share = 100 * own[f"air_time{word}"] / own[f"total_time{word}"].clip(lower=1)
+    below = share < 100 * floor[word]
+    print("Today's rule: no result when a word or a number has less time in the air than anyone in the study had on that task")
+    print(f"  the backwards word: the study's lowest is {100 * floor[word]:.1f}%. Our volunteers: {', '.join(f'{v:.0f}%' for v in sorted(share))}")
+    print(f"  under that line: {int(below.sum())} of {n}, all of them with the word written in a single drag" if (own.loc[below, f"num_of_pendown{word}"] <= 1).all()
+          else f"  under that line: {int(below.sum())} of {n}")
+    print(f"  the closest one above it: {share[~below].min():.1f}%. A line this sharp is a choice: a little less pause and that person would get no result.")
+    looked = own[own["closer"]]
+    extra = [t for t in model["extra_tasks"] if t in floor]
+    under = int(sum(((100 * looked[f"air_time{t}"] / looked[f"total_time{t}"].clip(lower=1)) < 100 * floor[t]).any() for t in extra)) if len(looked) else 0
+    print(f"  the {len(looked)} who did the closer look: tasks under their line, {under} of {len(extra)} (lines: {', '.join(f'task {t} {100 * floor[t]:.1f}%' for t in extra)})")
+    told = own.loc[below, "verdict"].value_counts().to_dict()
+    print(f"  What those {int(below.sum())} were told by the app of that moment: {told}, with its lowest scores. Today they would get no result,")
+    print("  and Tinta would ask for the word again, letter by letter.")
+    print("  All of these timings were recorded before the app joined breaks under 150 ms into one stroke (a finger skipping on")
+    print("  glass), so the touches above may include skips. Only totals were saved, so that cannot be redone.\n")
 
     # 6. The checks of the tasks on real fingers. Their limits were set with drawings made by a formula
     # (a task counts from 2.5 of its 4 repetitions; a word needs 10 turns), so every real person matters here.
