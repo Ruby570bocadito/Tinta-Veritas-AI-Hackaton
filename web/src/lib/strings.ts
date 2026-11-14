@@ -236,9 +236,9 @@ const en: Strings = {
   },
   why: {
     missed: (air, usualAir, touches, usualTouches) =>
-      `This patient's pen was in the air ${air}% of the time and touched down ${touches} times per task. Typical for healthy people in the study: ${usualAir}% and ${usualTouches}. On these three tasks the writing looks healthy, and Tinta cannot see anything else.`,
+      `This patient's pen was in the air ${air}% of the time and touched down ${touches} times per task. Typical for healthy people in the study: ${usualAir}% and ${usualTouches}. Tinta still answered "usual pattern". Some patients are simply not set apart by these two measures, and Tinta cannot see anything else.`,
     falseAlarm: (air, usualAir, touches, usualTouches) =>
-      `This healthy person's pen was in the air ${air}% of the time and touched down ${touches} times per task. Typical for healthy people in the study: ${usualAir}% and ${usualTouches}. A careful or hesitant way of writing looks the same as a cognitive pause to Tinta.`,
+      `This healthy person's pen was in the air ${air}% of the time and touched down ${touches} times per task. Typical for healthy people in the study: ${usualAir}% and ${usualTouches}. Tinta still answered "worth mentioning". Some healthy people pause or lift as much as patients do: a careful or hesitant way of writing looks the same to Tinta.`,
   },
   note: {
     title: 'Note for the doctor',
@@ -497,9 +497,9 @@ const es: Strings = {
   },
   why: {
     missed: (air, usualAir, touches, usualTouches) =>
-      `El lápiz de este paciente estuvo en el aire el ${air} % del tiempo y se apoyó ${touches} veces por tarea. Lo típico en las personas sanas del estudio: ${usualAir} % y ${usualTouches}. En estas tres tareas su escritura parece sana, y Tinta no puede ver nada más.`,
+      `El lápiz de este paciente estuvo en el aire el ${air} % del tiempo y se apoyó ${touches} veces por tarea. Lo típico en las personas sanas del estudio: ${usualAir} % y ${usualTouches}. Aun así, Tinta contestó «dentro de lo habitual». A algunos pacientes estas dos medidas no los distinguen, y Tinta no puede ver nada más.`,
     falseAlarm: (air, usualAir, touches, usualTouches) =>
-      `El lápiz de esta persona sana estuvo en el aire el ${air} % del tiempo y se apoyó ${touches} veces por tarea. Lo típico en las personas sanas del estudio: ${usualAir} % y ${usualTouches}. Una forma de escribir cuidadosa o con dudas se parece, para Tinta, a una pausa cognitiva.`,
+      `El lápiz de esta persona sana estuvo en el aire el ${air} % del tiempo y se apoyó ${touches} veces por tarea. Lo típico en las personas sanas del estudio: ${usualAir} % y ${usualTouches}. Aun así, Tinta contestó «coméntalo». Algunas personas sanas hacen tantas pausas o levantan tanto el lápiz como los pacientes: una forma de escribir cuidadosa o con dudas le parece lo mismo.`,
   },
   note: {
     title: 'Nota para el médico',
