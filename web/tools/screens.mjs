@@ -49,7 +49,7 @@ await js(`
   window.press = (label) => { const b = [...document.querySelectorAll('button')].find(b => b.textContent.trim().includes(label) && !b.disabled); b?.click(); return Boolean(b) }
   window.stroke = async (pts, ms) => {
     const c = document.querySelector('canvas'), r = c.getBoundingClientRect()
-    const ev = (type, p) => c.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 1, pointerType: 'touch', clientX: r.left + p[0] * r.width, clientY: r.top + p[1] * r.height }))
+    const ev = (type, p) => c.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 1, isPrimary: true, pointerType: 'touch', clientX: r.left + p[0] * r.width, clientY: r.top + p[1] * r.height }))
     ev('pointerdown', pts[0])
     for (const p of pts.slice(1)) { await new Promise(r => setTimeout(r, ms / pts.length)); ev('pointermove', p) }
     ev('pointerup', pts[pts.length - 1])
@@ -178,6 +178,15 @@ await press("I'm done")
 await press('See the result')
 await shot('no-result')
 console.log('circle left at one lap ->', await js(`document.querySelector('h1').textContent + ' | ' + document.querySelector('.issues').textContent + ' | number shown: ' + Boolean(document.querySelector('.meter'))`))
+// From "no result", only the missing task is done again; everything else that was written is kept.
+await press('Do that task again')
+await task(5, { seconds: 3 })
+await press("I'm done")
+console.log('circle done again ->', await says())
+await press('See the result')
+if (await js(`[...document.querySelectorAll('button')].some(b => b.textContent.includes('Stop here'))`)) await press('Stop here')
+await shot('result-after-redo')
+console.log('after doing the circle again ->', await js(`document.querySelector('h1').textContent + ' | number shown: ' + Boolean(document.querySelector('.meter'))`))
 await press('Start again')
 await press('See real cases')
 await press('Show a mistake')

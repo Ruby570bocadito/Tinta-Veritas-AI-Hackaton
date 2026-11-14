@@ -40,7 +40,7 @@ export type Strings = {
   }
   closer: { title: string; body: string; stop: string; more: string }
   // What Tinta says when a task was clearly not done as asked.
-  check: { text: (issue: Issue) => string; practice: string; scored: string; again: string; keep: string }
+  check: { text: (issue: Issue) => string; practice: string; scored: string; again: string; keep: string; redone: string }
   verdicts: Record<Verdict, { title: string; body: string }>
   nextSteps: Record<Verdict, string[]>
   result: {
@@ -54,6 +54,7 @@ export type Strings = {
     caveat: string
     noResultTitle: string
     noResult: (n: number) => string
+    redo: (n: number) => string
     notAskedHard: string
     joinedWhy: string
     score: (s: number) => string
@@ -217,6 +218,7 @@ const en: Strings = {
     scored: 'If you keep it, there will be no result at the end.',
     again: 'Try again',
     keep: 'Keep it',
+    redone: 'Thank you. That one is done now.',
   },
   closer: {
     title: 'Let me look a little closer',
@@ -258,9 +260,10 @@ const en: Strings = {
     noAnswer: 'Tinta gives no answer for this one.',
     noResultTitle: 'No result this time',
     noResult: (n) => `Thank you for trying. This time I cannot compare you with the people in the study, because of ${n === 1 ? 'this task' : 'these tasks'}:`,
+    redo: (n) => (n === 1 ? 'Do that task again' : 'Do those tasks again'),
     notAskedHard: 'If you were doing your best and a task was hard to finish, tell a doctor about that and show them this screen. It is useful for them to know.',
     joinedWhy: 'About writing without lifting: in the study people used a pen, and the tablet could also see the pen hovering over the paper, so nobody had zero time in the air. A phone cannot see a finger in the air. Three of my first eight phone volunteers wrote the word in a single drag, like you.',
-    caveat: 'Tinta learned from pen-on-tablet data. On phones, only 8 healthy volunteers have tried her, and no patient has.',
+    caveat: 'Tinta learned from pen-on-tablet data. On phones, only 9 healthy volunteers have tried her, and no patient has.',
     score: (s) => `${s} out of 100 on my scale. Under 35: usual pattern. Over 65: worth mentioning. In between: I don't know. A higher number is not better, and it is not a percentage of risk.`,
     whatNow: 'What now?',
     measurements: 'See the measurements',
@@ -411,7 +414,7 @@ const en: Strings = {
         q: 'How often are you right?',
         a: [
           'About 3 times out of 4, tested on people in the study that the model had not been trained on. So I am wrong about 1 time in 4, in both directions. A simple stopwatch does a little better on the study\'s own tablet.',
-          'And that study used a pen on a tablet, which can also see the pen hovering over the paper. A phone cannot see your finger in the air, so on a phone my numbers run low. Only eight healthy volunteers have tried me on phones, and no patient has. I say so on every result.',
+          'And that study used a pen on a tablet, which can also see the pen hovering over the paper. A phone cannot see your finger in the air, so on a phone my numbers run low. Only nine healthy volunteers have tried me on phones, and no patient has. I say so on every result.',
         ],
       },
       {
@@ -539,6 +542,7 @@ const es: Strings = {
     scored: 'Si la dejas así, al final no habrá resultado.',
     again: 'Repetirla',
     keep: 'Dejarla así',
+    redone: 'Gracias. Esa ya está.',
   },
   closer: {
     title: 'Déjame mirar un poco mejor',
@@ -580,9 +584,10 @@ const es: Strings = {
     noAnswer: 'En este, Tinta no da respuesta.',
     noResultTitle: 'Esta vez no hay resultado',
     noResult: (n) => `Gracias por intentarlo. Esta vez no puedo compararte con las personas del estudio, por ${n === 1 ? 'esta tarea' : 'estas tareas'}:`,
+    redo: (n) => (n === 1 ? 'Repetir esa tarea' : 'Repetir esas tareas'),
     notAskedHard: 'Si lo estabas haciendo lo mejor que podías y alguna tarea te costó terminarla, cuéntaselo a un médico y enséñale esta pantalla. Le sirve saberlo.',
     joinedWhy: 'Sobre escribir sin levantar el dedo: en el estudio se escribía con lápiz, y la tableta veía también el lápiz flotando sobre el papel, así que nadie tuvo cero tiempo en el aire. Un móvil no ve el dedo en el aire. Tres de mis ocho primeros voluntarios con móvil escribieron la palabra de un solo trazo, como tú.',
-    caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 8 voluntarios sanos, y ningún paciente.',
+    caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 9 voluntarios sanos, y ningún paciente.',
     score: (s) => `${s} sobre 100 en mi escala. Menos de 35: dentro de lo habitual. Más de 65: coméntalo. En medio: no lo sé. Un número más alto no es mejor, y tampoco es un porcentaje de riesgo.`,
     whatNow: '¿Y ahora qué?',
     measurements: 'Ver las medidas',
@@ -733,7 +738,7 @@ const es: Strings = {
         q: '¿Cuántas veces aciertas?',
         a: [
           'Unas 3 de cada 4, probando con personas del estudio con las que el modelo no se había entrenado. O sea, me equivoco 1 de cada 4, en los dos sentidos. Un simple cronómetro acierta un poco más en la tableta del estudio.',
-          'Y ese estudio se hizo con lápiz y una tableta que ve también el lápiz flotando sobre el papel. Un móvil no ve tu dedo en el aire, así que en un móvil mis números salen bajos. En móviles solo me han probado ocho voluntarios sanos, y ningún paciente. Lo digo en cada resultado.',
+          'Y ese estudio se hizo con lápiz y una tableta que ve también el lápiz flotando sobre el papel. Un móvil no ve tu dedo en el aire, así que en un móvil mis números salen bajos. En móviles solo me han probado nueve voluntarios sanos, y ningún paciente. Lo digo en cada resultado.',
         ],
       },
       {

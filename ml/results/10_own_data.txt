@@ -1,48 +1,52 @@
-8 healthy volunteers on a phone; age bands: {'30 to 59': 4, 'under 30': 4}
+9 healthy volunteers on a phone; age bands: {'under 30': 5, '30 to 59': 4}
 
 Tinta (short check, the shipped model)
-  wrongly flagged 'worth mentioning': 0 of 8
-  'I can't tell': 2 of 8
-  'usual pattern': 6 of 8
-  scores: [6, 6, 6, 12, 13, 24, 39, 48]
+  wrongly flagged 'worth mentioning': 0 of 9
+  'I can't tell': 2 of 9
+  'usual pattern': 7 of 9
+  scores: [6, 6, 6, 12, 13, 24, 29, 39, 48]
 
 What the app told them (short check, plus the closer look when it was unsure)
-  needed the closer look: 2 of 8
-  final answers: {'typical': 8}; final scores: [6, 6, 6, 11, 12, 13, 18, 24]
+  needed the closer look: 2 of 9
+  final answers: {'typical': 9}; final scores: [6, 6, 6, 11, 12, 13, 18, 24, 29]
 
 Stopwatch rule learned on the study's tablet, same three tasks
-  wrongly flagged (score 50 or more): 0 of 8
-  Tinta with the same 50 cut-off:     0 of 8
+  wrongly flagged (score 50 or more): 0 of 9
+  Tinta with the same 50 cut-off:     0 of 9
 
 Median time per task: healthy people in the study (pen, tablet) vs our volunteers (finger, phone)
-  task  2:   9.2 s  vs   5.3 s   phone / tablet = x0.58
-  task  3:   6.6 s  vs   3.1 s   phone / tablet = x0.47
-  task 16:   4.2 s  vs   4.4 s   phone / tablet = x1.03
-  task  5:  14.4 s  vs   6.5 s   phone / tablet = x0.45
-  task  9:   6.0 s  vs   5.9 s   phone / tablet = x0.97
-  the factor ranges from x0.45 to x1.03. If it were one number for every task, our simulation would be exact; the spread is what it misses.
+  task  2:   9.2 s  vs   4.2 s   phone / tablet = x0.46
+  task  3:   6.6 s  vs   2.7 s   phone / tablet = x0.40
+  task 16:   4.2 s  vs   4.2 s   phone / tablet = x1.00
+  task  5:  14.4 s  vs   5.7 s   phone / tablet = x0.39
+  task  9:   6.0 s  vs   5.8 s   phone / tablet = x0.97
+  the factor ranges from x0.39 to x1.00. If it were one number for every task, our simulation would be exact; the spread is what it misses.
 
 The model's two measures, per scored task: healthy people in the study (pen) vs our volunteers (finger)
             share of time in the air (median)      touches (median)      did it in a single touch
-  task 16:   study  46%   ours  17%          study  4.0   ours  3.5        study  8 of 85   ours 3 of 8
-  task  5:   study   6%   ours   0%          study  1.0   ours  1.0        study 64 of 85   ours 8 of 8
-  task  9:   study  21%   ours   0%          study  1.0   ours  1.0        study 56 of 85   ours 5 of 8
-  3 of 8 volunteers never lifted the finger during the three scored tasks.
+  task 16:   study  46%   ours  21%          study  4.0   ours  4.0        study  8 of 85   ours 3 of 9
+  task  5:   study   6%   ours   0%          study  1.0   ours  1.0        study 64 of 85   ours 9 of 9
+  task  9:   study  21%   ours   0%          study  1.0   ours  1.0        study 56 of 85   ours 5 of 9
+  3 of 9 volunteers never lifted the finger during the three scored tasks.
   A person who never lifts gets 6/100, the lowest score the model can give for one touch per task.
 
 What a phone cannot see: time in the air of people in the study who did a task in ONE stroke (all of it is the pen hovering)
-  task 16:  13 of 174 people in the study did it in one stroke; their median share of time in the air was 22%. With exactly zero time in the air: study 0 of 174, our volunteers 3 of 8
-  task  5: 101 of 174 people in the study did it in one stroke; their median share of time in the air was  5%. With exactly zero time in the air: study 0 of 174, our volunteers 8 of 8
-  task  9:  90 of 174 people in the study did it in one stroke; their median share of time in the air was 12%. With exactly zero time in the air: study 0 of 174, our volunteers 5 of 8
+  task 16:  13 of 174 people in the study did it in one stroke; their median share of time in the air was 22%. With exactly zero time in the air: study 0 of 174, our volunteers 3 of 9
+  task  5: 101 of 174 people in the study did it in one stroke; their median share of time in the air was  5%. With exactly zero time in the air: study 0 of 174, our volunteers 9 of 9
+  task  9:  90 of 174 people in the study did it in one stroke; their median share of time in the air was 12%. With exactly zero time in the air: study 0 of 174, our volunteers 5 of 9
   Zero time in the air never happens in the study and is common on a phone: for the model it is a value it never saw.
   The app now gives no result when the word (the task whose time in the air weighs most) has no pause at all,
-  and asks for it letter by letter. The first eight volunteers did the check before that rule existed:
+  and asks for it letter by letter. 8 volunteers did the check before that rule existed:
   3 of 8 wrote the word in a single drag and were told 'usual pattern' with the lowest score; today they would get no result.
+
+Recorded with the version that checks the tasks: 1 volunteer
+  laps of the circle 4.3 (asked 4, counts from 2.5) | 'le' 4.0 (asked 4, counts from 2.5) | turns in the word 20 (counts from 10) | tasks repeated 0 | tasks with no result 0 | told: typical (29/100)
+  One person is an anecdote, not a calibration.
 
 Tinta's score by age band (healthy volunteers):
           count  median   max
 age                          
 30 to 59      4    0.32  0.48
-under 30      4    0.09  0.13
+under 30      5    0.12  0.29
 
 With so few people these are counts, not rates. They show whether the idea survives a real phone; they cannot say how it does with patients.

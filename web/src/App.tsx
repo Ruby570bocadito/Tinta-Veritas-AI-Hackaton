@@ -62,6 +62,8 @@ export default function App() {
   const [example, setExample] = useState<number | null>(null)
   const [closer, setCloser] = useState(false) // true once the person accepts the three extra tasks
   const [tries, setTries] = useState<Record<number, number>>({}) // how many times each task was done again
+  const [warned, setWarned] = useState<Record<number, string>>({}) // tasks where Tinta said something was missing, and what
+  const [redo, setRedo] = useState<number[]>([]) // tasks being done again from the result screen, in order
   const [history, setHistory] = useState<Entry[]>(loadHistory)
   const [replay, setReplay] = useState(0)
   const [age, setAge] = useState('')
@@ -93,9 +95,28 @@ export default function App() {
     first.focus({ preventScroll: true })
   }, [screen.name, step, review, example])
 
+  // In the middle of the check, a swipe back or a reload would throw the writing away: the browser asks first.
+  const busy = screen.name === 'task' || screen.name === 'closer'
+  useEffect(() => {
+    if (!busy) return
+    const ask = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', ask)
+    return () => window.removeEventListener('beforeunload', ask)
+  }, [busy])
+
+  /** Go back to one task and do it again, keeping everything else that was written. */
+  const doAgain = (id: number) => {
+    const list = closer ? [...TASKS, ...EXTRA] : TASKS
+    setInk((old) => ({ ...old, [id]: [] }))
+    setTries((old) => ({ ...old, [id]: (old[id] ?? 0) + 1 }))
+    setScreen({ name: 'task', index: list.findIndex((x) => x.id === id), review: false })
+  }
+
   const restart = () => {
     setInk({})
     setTries({})
+    setWarned({})
+    setRedo([])
     setExample(null)
     setCopied(false)
     setJustSaved(false)
@@ -309,14 +330,19 @@ export default function App() {
       if (wantsCloser(ink, sheets, forceCloser)) return setScreen({ name: 'closer' })
       finish(false)
     }
-    const goOn = () => (last ? afterLast() : setScreen({ name: 'task', index: screen.index + 1, review: false }))
-    // Was the task done as asked? If clearly not, Tinta says what she saw and offers another go.
-    const issue = screen.review ? check(task.id, strokes, sheets[task.id] ?? { w: 360, h: 340 }) : null
-    const tryAgain = () => {
-      setInk({ ...ink, [task.id]: [] })
-      setTries({ ...tries, [task.id]: (tries[task.id] ?? 0) + 1 })
-      setScreen({ ...screen, review: false })
+    // Coming from "no result": only the tasks that were missing are done again, then straight back to the result.
+    const redoing = redo.length > 0
+    const lastOne = redoing ? redo.length === 1 : last
+    const goOn = () => {
+      if (!redoing) return last ? afterLast() : setScreen({ name: 'task', index: screen.index + 1, review: false })
+      const rest = redo.slice(1)
+      setRedo(rest)
+      return rest.length ? doAgain(rest[0]) : afterLast()
     }
+    // Was the task done as asked? If clearly not, Tinta says what she saw and offers another go.
+    const sheet = sheets[task.id] ?? { w: 360, h: 340 }
+    const issue = screen.review ? check(task.id, strokes, sheet) : null
+    const tryAgain = () => doAgain(task.id)
     return (
       <main className="page" key={'task' + screen.index + screen.review}>
         <header className="taskbar">
@@ -335,7 +361,11 @@ export default function App() {
         </header>
         {screen.review && (
           <p className="bubble cheer">
-            {issue ? `${t.check.text(issue)} ${WARMUP_IDS.includes(task.id) ? t.check.practice : t.check.scored}` : t.task.cheers[screen.index]}
+            {issue
+              ? `${t.check.text(issue)} ${WARMUP_IDS.includes(task.id) ? t.check.practice : t.check.scored}`
+              : redoing
+                ? t.check.redone
+                : t.task.cheers[screen.index]}
           </p>
         )}
         {/* When Tinta has something to say about the task, her words are the heading. */}
@@ -385,7 +415,12 @@ export default function App() {
                 ↻ {t.task.again}
               </button>
             </p>
-            {!issue && (
+            {/* What was measured is always shown. When Tinta has something to say, it goes in one line to leave room for her words. */}
+            {issue ? (
+              <p className="fine measured">
+                {t.task.touches}: <b>{m.num_of_pendown}</b> · {t.task.air}: <b>{seconds(m.air_time)}</b> · {t.task.screen}: <b>{seconds(m.paper_time)}</b>
+              </p>
+            ) : (
               <dl className="stats">
                 <div>
                   <dt>{t.task.air}</dt>
@@ -412,7 +447,7 @@ export default function App() {
               </div>
             ) : (
               <button className="primary sticky" onClick={goOn}>
-                {last ? t.task.seeResult : t.task.next}
+                {lastOne ? t.task.seeResult : t.task.next}
               </button>
             )}
           </>
@@ -425,6 +460,8 @@ export default function App() {
               className="primary"
               onClick={() => {
                 navigator.vibrate?.(15)
+                const seen = check(task.id, strokes, sheet)
+                if (seen) setWarned({ ...warned, [task.id]: seen.kind })
                 setScreen({ ...screen, review: true })
               }}
               disabled={!strokes.length}
@@ -507,6 +544,7 @@ export default function App() {
     les: Number(les(ink[9] ?? [], sheetOf(9)).toFixed(1)),
     turns: turns(ink[16] ?? [], sheetOf(16)),
     still: Object.fromEntries(TASK_IDS.map((id) => [id, stillTime(ink[id] ?? [])])),
+    warned,
     tries,
     noResult: answer.noResult.map((n) => `${n.id}:${n.issue.kind}`),
   }
@@ -559,10 +597,18 @@ export default function App() {
             ))}
           </ul>
           {answer.noResult.some((n) => n.issue.kind === 'joined') && <p className="why">{t.result.joinedWhy}</p>}
-          {answer.noResult.some((n) => n.issue.kind !== 'joined') && <p className="why">{t.result.notAskedHard}</p>}
-          <button className="primary" onClick={restart}>
-            {t.result.restart}
+          {/* Nothing else is lost: only the tasks listed above are done again, then the result. */}
+          <button
+            className="primary"
+            onClick={() => {
+              const order = (closer ? [...TASKS, ...EXTRA] : TASKS).map((x) => x.id).filter((id) => answer.noResult.some((n) => n.id === id))
+              setRedo(order)
+              doAgain(order[0])
+            }}
+          >
+            {t.result.redo(answer.noResult.length)}
           </button>
+          {answer.noResult.some((n) => n.issue.kind !== 'joined') && <p className="why">{t.result.notAskedHard}</p>}
         </>
       ) : (
         <>
@@ -672,7 +718,8 @@ export default function App() {
           </button>
         </section>
       )}
-      <details className="fold" open={Boolean(ex)}>
+      {/* With no result, what was measured is shown open: the lifts and pauses were still counted. */}
+      <details className="fold" open={Boolean(ex) || invalid}>
         <summary>{t.result.measurements}</summary>
         <table className="table">
           <thead>

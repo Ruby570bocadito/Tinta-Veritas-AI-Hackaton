@@ -150,20 +150,22 @@ export default function InkCanvas({ strokes, onChange, showInvisibleInk = false,
     return { x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() }
   }
 
+  // Only the first finger writes. A second finger, or the side of the hand resting on the glass, would
+  // otherwise count as extra touches, and touches are one of the two things the model reads.
   const down = (e: React.PointerEvent) => {
-    if (!onChange) return
+    if (!onChange || !e.isPrimary) return
     e.currentTarget.setPointerCapture(e.pointerId)
     drawing.current = true
     live.current = [...live.current, [point(e)]]
     draw(ref.current!, live.current, false, guide)
   }
   const move = (e: React.PointerEvent) => {
-    if (!drawing.current) return
+    if (!drawing.current || !e.isPrimary) return
     live.current[live.current.length - 1].push(point(e))
     draw(ref.current!, live.current, false, guide)
   }
-  const up = () => {
-    if (!drawing.current) return
+  const up = (e: React.PointerEvent) => {
+    if (!drawing.current || !e.isPrimary) return
     drawing.current = false
     const r = ref.current!.getBoundingClientRect()
     onChange?.(live.current, { w: r.width, h: r.height })
@@ -177,6 +179,7 @@ export default function InkCanvas({ strokes, onChange, showInvisibleInk = false,
       onPointerMove={move}
       onPointerUp={up}
       onPointerCancel={up}
+      onLostPointerCapture={up}
       aria-label={onChange ? 'Writing area' : 'Your writing with invisible ink shown'}
     />
   )

@@ -18,7 +18,7 @@ A web app (also an offline Android app). Carmen does two practice tasks and thre
 
 ## What I added
 
-The public study needs 25 tasks on a professional tablet. I cut it to tasks that work with a finger, kept only measures that ignore overall speed, tested what breaks that idea, recorded eight people on real phones, had testers attack the app, and made it show real cases it gets wrong.
+The public study needs 25 tasks on a professional tablet. I cut it to tasks that work with a finger, kept only measures that ignore overall speed, tested what breaks that idea, recorded nine people on real phones, had testers attack the app, and made it show real cases it gets wrong.
 
 ## How it works
 
@@ -51,8 +51,8 @@ Nested 5-fold cross-validation, repeated 3 or 4 times.
 ![Patients caught and healthy people wrongly flagged under different device changes](docs/what-breaks.png)
 
 - *A different device* (simulated). 1.5 times slower: a stopwatch flags 64% of healthy people, while a share and a count do not change, by arithmetic. But pauses twice as long: half of healthy people flagged. Strokes twice as long: more than half of patients missed.
-- *On real phones: my own data* (`ml/results/10_own_data.txt`). Eight healthy volunteers, one of them me: none was told "worth mentioning". But a tablet sees the pen hovering and a phone cannot see a finger in the air. In the study nobody had zero time in the air; on a phone a word written in one drag has exactly that, a value the model never saw. Three of my eight did it and got "usual pattern" with the lowest possible score. The app now gives no result then, and asks for the word letter by letter. Phone scores run low, and **no patient has tried it on a phone.**
-- *Done wrong on purpose* (`ml/results/11_done_wrong.txt`). A tester scribbled through the tasks and was told "usual pattern": the model reads pauses, not whether the task was done. Now plain geometry checks each task first, 26 made-up people run through the app's logic in `npm test`, and nine role-playing testers (language models) tried to fool it. Still open: Tinta cannot read, so a long scribble with a few lifts gets a score, and very slow writing with the finger down looks "usual": ignoring speed also ignores slowness.
+- *On real phones: my own data* (`ml/results/10_own_data.txt`). Nine healthy volunteers, one of them me (eight when the video was made): none was told "worth mentioning". But a tablet sees the pen hovering and a phone cannot see a finger in the air. In the study nobody had zero time in the air; on a phone a word written in one drag has exactly that, a value the model never saw. Three of the first eight did it and got "usual pattern" with the lowest possible score. The app now gives no result then, and asks for the word letter by letter. Phone scores run low, and **no patient has tried it on a phone.**
+- *Done wrong on purpose* (`ml/results/11_done_wrong.txt`). A tester scribbled through the tasks and was told "usual pattern": the model reads pauses, not whether the task was done. Now plain geometry checks each task first, 26 made-up people run through the app's logic in `npm test`, and nine role-playing testers (language models) tried to fool it. The first real person on this version was scored without repeating a task; a task left undone can be done again on its own. Still open: Tinta cannot read, so a long scribble with a few lifts gets a score, and very slow writing with the finger down looks "usual": ignoring speed also ignores slowness.
 - *Slow writers.* 35% of slow healthy test cases were flagged (9 of 26), against 15 to 18% of the rest. The data has no age or sex to check.
 - *My first idea was wrong.* Each task against the person's own warm-up pace scores 59% alone. Removed.
 - *Not early detection.* Patients were already diagnosed and are half the sample; in real life most "worth mentioning" results would be false alarms.

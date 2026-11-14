@@ -359,6 +359,15 @@ select:focus-visible {
   box-shadow: var(--lift);
 }
 
+/* The three measures of a task in one line, under Tinta's words. */
+.measured {
+  margin: 0;
+}
+
+.measured b {
+  color: var(--ink);
+}
+
 /* What was missing from the tasks, when there is no score to give. */
 .issues {
   margin: 0;

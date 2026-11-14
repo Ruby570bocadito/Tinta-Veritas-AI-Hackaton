@@ -36,7 +36,10 @@ def load_own():
         if not line or line.startswith("#"):
             continue
         rec = json.loads(line)
-        row = {"age": rec.get("age", ""), "app_score": rec.get("score"), "verdict": rec.get("verdict", ""), "closer": bool(rec.get("closer"))}
+        row = {"age": rec.get("age", ""), "app_score": rec.get("score"), "verdict": rec.get("verdict", ""), "closer": bool(rec.get("closer")),
+               # Saved only by the version of the app that checks the tasks: laps of the circle, how many "le", turns in the word.
+               "laps": rec.get("laps", np.nan), "les": rec.get("les", np.nan), "turns": rec.get("turns", np.nan),
+               "no_result": len(rec.get("noResult", [])), "repeats": sum(rec.get("tries", {}).values())}
         for task, m in rec["tasks"].items():
             for name in MEASURES:
                 row[f"{name}{task}"] = m[name]
@@ -119,10 +122,20 @@ def main():
               f"{100 * share.median():2.0f}%. With exactly zero time in the air: study {zero} of {len(darwin)}, our volunteers {ours} of {n}")
     print("  Zero time in the air never happens in the study and is common on a phone: for the model it is a value it never saw.")
     print("  The app now gives no result when the word (the task whose time in the air weighs most) has no pause at all,")
-    print("  and asks for it letter by letter. The first eight volunteers did the check before that rule existed:")
     word = tasks[0]
-    drag = int((own[f"air_time{word}"] == 0).sum())
-    print(f"  {drag} of {n} wrote the word in a single drag and were told 'usual pattern' with the lowest score; today they would get no result.\n")
+    before = own[own["laps"].isna()]
+    drag = int((before[f"air_time{word}"] == 0).sum())
+    print(f"  and asks for it letter by letter. {len(before)} volunteers did the check before that rule existed:")
+    print(f"  {drag} of {len(before)} wrote the word in a single drag and were told 'usual pattern' with the lowest score; today they would get no result.\n")
+
+    # 6. The checks of the tasks on real fingers. Their limits were set with drawings made by a formula
+    # (a task counts from 2.5 of its 4 repetitions; a word needs 10 turns), so every real person matters here.
+    after = own[own["laps"].notna()]
+    print(f"Recorded with the version that checks the tasks: {len(after)} volunteer{'s' if len(after) != 1 else ''}")
+    for _, r in after.iterrows():
+        print(f"  laps of the circle {r['laps']:.1f} (asked 4, counts from 2.5) | 'le' {r['les']:.1f} (asked 4, counts from 2.5) | turns in the word {int(r['turns'])} (counts from 10)"
+              f" | tasks repeated {int(r['repeats'])} | tasks with no result {int(r['no_result'])} | told: {r['verdict']} ({int(r['app_score'])}/100)")
+    print("  One person is an anecdote, not a calibration.\n" if len(after) < 5 else "")
 
     by_age = own.assign(p=p).groupby("age")["p"].agg(["count", "median", "max"]).round(2)
     print("Tinta's score by age band (healthy volunteers):")
