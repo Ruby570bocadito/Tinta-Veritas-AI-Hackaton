@@ -2,7 +2,7 @@
 
 **Track:** AI + Health · **Team:** solo · **Starting point:** my own idea
 
-<img src="docs/qr.png" width="104" align="right" alt="QR code that opens the app on a phone">
+<img src="docs/qr.png" width="128" align="right" alt="QR code that opens the app on a phone">
 
 **[Try it in your browser](https://ruby570bocadito.github.io/Tinta-Veritas-AI-Hackaton/)** (best on a phone: scan the code; English and Spanish; works offline after the first visit)
 
@@ -70,7 +70,7 @@ Record people over 65 and people with a diagnosis on real phones, and relearn th
 ## Sources
 
 - **Dataset:** Fontanella, F. (2022). DARWIN. UCI Machine Learning Repository, CC BY 4.0, https://doi.org/10.24432/C55D0K (Cilia et al. 2022; task list: https://arxiv.org/abs/2405.00755).
-- **Code:** scikit-learn, pandas, NumPy, matplotlib; React, Vite, TypeScript, Fontsource; AndroidX WebKit.
+- **Code:** scikit-learn, pandas, NumPy, matplotlib; React, Vite, TypeScript, Fontsource; AndroidX WebKit; qrcode (the QR picture).
 - **Images:** generated with Meta's Muse Image model from my prompts. **Health facts:** WHO; US National Institute on Aging.
 - **AI tools:** Claude Code (Anthropic) helped plan, write and debug the code, draft this text, review the project and play the testers. I ran and checked every experiment and can explain each part.
 
