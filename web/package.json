@@ -12,7 +12,7 @@
     "check:model": "vite-node tools/parity.ts",
     "personas": "vite-node tools/personas.test.ts",
     "try": "vite-node tools/try.ts",
-    "test": "vite-node tools/ink.test.ts && vite-node tools/check.test.ts && vite-node tools/strings.test.ts && vite-node tools/resume.test.ts && vite-node tools/personas.test.ts && vite-node tools/parity.ts"
+    "test": "vite-node tools/ink.test.ts && vite-node tools/check.test.ts && vite-node tools/strings.test.ts && vite-node tools/resume.test.ts && vite-node tools/demo.test.ts && vite-node tools/personas.test.ts && vite-node tools/parity.ts"
   },
   "dependencies": {
     "react": "^19.3.1",

@@ -19,7 +19,6 @@ export type Mood =
   | 'task-lines'
   | 'task-circle'
   | 'task-loops'
-  | 'task-phone'
   | 'task-reverse'
   | 'task-copy'
   | 'closer-look'

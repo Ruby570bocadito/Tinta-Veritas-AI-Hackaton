@@ -229,10 +229,10 @@ await press(t.task.done)
 await press(t.task.seeResult)
 await shot('closer-look')
 await press(t.closer.more)
-for (const taskId of [6, 22, 23]) {
+for (const taskId of [6, 10, 18]) {
   await task(taskId, { seconds: 2 })
   await press(t.task.done)
-  await press(taskId === 23 ? t.task.seeResult : t.task.next)
+  await press(taskId === 18 ? t.task.seeResult : t.task.next)
 }
 await shot('result')
 expect('a check done as asked ends with a number on the scale', await js(`Boolean(document.querySelector('.meter'))`))

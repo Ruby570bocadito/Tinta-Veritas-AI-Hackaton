@@ -5,8 +5,9 @@ Design (see experiments.py, model_search.py, device_shift.py, deep_search.py and
   - Stage 1: 3 tasks, two measures each (share of time in the air, number of touches), logistic regression.
     These two measures do not depend on how fast the person or the device is (see ablation.py).
   - Stage 2, only when stage 1 is unsure: 3 more tasks and a blend of three models on all 6
-    (logistic regression, RBF support vector machine, random forest).
-  - Tasks and settings are chosen with the training people only; 20% of people are held out.
+    (logistic regression, RBF support vector machine, random forest). The 3 tasks are short ones where
+    people lift the pen (adaptive.py says why); the first version let the data choose and got two phone numbers.
+  - Stage 1 tasks and all settings are chosen with the training people only; 20% of people are held out.
 
 Writes web/src/model.json.   Run:  python ml/train_export.py
 """
@@ -18,7 +19,7 @@ import pandas as pd
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold, train_test_split
 
-from adaptive import HI, LO, SPLIT, blend, disagreement, stage2, told
+from adaptive import CLOSER, HI, LO, SPLIT, blend, disagreement, stage2, told
 from ablation import reshape
 from device_shift import HARD, WARMUP, logit, pick, shape, slower
 from experiments import POOL, Stopwatch, stopwatch
@@ -36,18 +37,6 @@ def rates(y, p):
                 missed=int(((pred == 0) & (y == 1)).sum()), patients=int(y.sum()),
                 false_alarms=int(((pred == 1) & (y == 0)).sum()), healthy=int((1 - y).sum()),
                 auc=round(float(roc_auc_score(y, p)), 3))
-
-
-def more_tasks(d, y, chosen, k):
-    """Continue the forward selection from the tasks already fixed."""
-    cv = StratifiedKFold(n_splits=4, shuffle=True, random_state=0)
-    chosen = list(chosen)
-    for _ in range(k):
-        def score(t):
-            X = shape(d, chosen + [t])
-            return np.mean([roc_auc_score(y[b], logit().fit(X[a], y[a]).proba(X[b])) for a, b in cv.split(X, y)])
-        chosen.append(max([t for t in HARD if t not in chosen], key=score))
-    return chosen
 
 
 def export_blend(members):
@@ -105,7 +94,8 @@ def main():
     model = logit().fit(shape(dtr, tasks), y[tr])
     sw_tasks = pick(dtr, y[tr], 3, Stopwatch, stopwatch, POOL)
     sw = Stopwatch().fit(stopwatch(dtr, sw_tasks), y[tr])
-    all_tasks = more_tasks(dtr, y[tr], tasks, 3)
+    # The closer look is fixed by a rule that does not look at the diagnosis (short tasks where people lift the pen: see adaptive.py).
+    all_tasks = tasks + [t for t in CLOSER if t not in tasks]
     members = [m.fit(shape(dtr, all_tasks), y[tr]) for m in stage2()]
     print("stage 1 tasks:", tasks, "| stage 2 adds:", all_tasks[3:], "| stopwatch tasks:", sw_tasks)
     print("chosen settings:", [m.best_params_ for m in members])

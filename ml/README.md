@@ -30,7 +30,7 @@ Saved outputs are in `ml/results/`, in the order the work happened:
 | `4_device_shift.txt` | `device_shift.py` | What happens to a stopwatch when the device is uniformly slower? |
 | `6_deep_search.txt` | `deep_search.py` | 64 combinations of task count, measures and model (first design, with the warm-up measure). |
 | `8_ablation.txt` | `ablation.py` | What is the model really using? What breaks it? Slow and fast writers. |
-| `7_adaptive.txt` | `adaptive.py` | The shipped adaptive check (two measures per task). |
+| `7_adaptive.txt` | `adaptive.py` | The shipped adaptive check (two measures per task), why its three extra tasks are those, and what the first choice (two phone numbers) scored. |
 | `5_shipped_model.txt` | `train_export.py` | Trains the shipped models and writes `web/src/model.json`. |
 | `9_repeatability.txt` | `repeatability.py` | How much the answer would move on a simulated second attempt. |
 

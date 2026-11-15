@@ -20,6 +20,7 @@
 //   {"reload": true}              reload the page, as a user might by accident
 // Options: "lang" en | es, "size" WIDTHxHEIGHT in CSS pixels, "params" added to the address ("?closer", "?friends", "?study"),
 //          "dialogs" ok | cancel: what to answer when the app asks a yes/no question (default ok).
+//          "motion" true: let the app move (by default it is asked to keep still, so that pictures are always the same).
 // The app must be running: by default at http://localhost:4199/ (set TINTA_URL for another address).
 import { spawn } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
@@ -51,7 +52,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const chrome = spawn(CHROME, [
   '--headless=new', `--remote-debugging-port=${PORT}`, `--user-data-dir=${mkdtempSync(join(tmpdir(), 'tinta-drive-'))}`,
-  '--no-first-run', '--hide-scrollbars', '--force-prefers-reduced-motion', 'about:blank',
+  '--no-first-run', '--hide-scrollbars', ...(plan.motion ? [] : ['--force-prefers-reduced-motion']), 'about:blank',
 ])
 const stop = (code) => {
   chrome.kill()

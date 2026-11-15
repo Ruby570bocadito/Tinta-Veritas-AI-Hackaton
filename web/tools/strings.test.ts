@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict'
 import type { Issue } from '../src/lib/check'
 import { counts, metrics } from '../src/lib/model'
-import { STRINGS, type Strings } from '../src/lib/strings'
+import { parts, plain as unmarked, STRINGS, type Strings } from '../src/lib/strings'
 
 let passed = 0
 function test(name: string, run: () => void) {
@@ -34,10 +34,8 @@ const ISSUES: Issue[] = [
   { kind: 'lifted', seen: 5 },
   { kind: 'part' },
   { kind: 'little' },
-  { kind: 'joined', digits: false, lifted: false },
-  { kind: 'joined', digits: true, lifted: false },
-  { kind: 'joined', digits: false, lifted: true },
-  { kind: 'joined', digits: true, lifted: true },
+  { kind: 'joined', lifted: false },
+  { kind: 'joined', lifted: true },
 ]
 
 /** Every text that is built from numbers, with numbers a real result could have. */
@@ -46,7 +44,6 @@ function built(t: Strings): string[] {
   return [
     ...ISSUES.map((i) => t.check.text(i)),
     t.task.step(3, 5, t.tasks[5].title),
-    t.task.noVoice('3 4 7'),
     t.result.score(42),
     t.result.realCase(3, 35, t.result.patient),
     t.result.noResult(1),
@@ -125,9 +122,21 @@ test('buttons that sit side by side are short enough for a small phone', () => {
 // Four tasks in a row say "without lifting your finger". On real phones, 7 of our first 15 volunteers then wrote
 // the backwards word in a single drag, which leaves no pause to time. So the word must say, up front, to lift.
 test('the backwards word asks, from the start, to lift the finger after each letter', () => {
-  assert.match(en.tasks[16].instruction, /lift your finger after each letter/)
-  assert.match(es.tasks[16].instruction, /levanta el dedo después de cada letra/)
-  for (const t of [en, es]) for (const id of [2, 3, 5]) assert.match(t.tasks[id].instruction, /without lifting|sin levantar/, `task ${id}`)
+  assert.match(unmarked(en.tasks[16].instruction), /Lift your finger after each letter/)
+  assert.match(unmarked(es.tasks[16].instruction), /Levanta el dedo después de cada letra/)
+  for (const t of [en, es]) for (const id of [2, 3, 5, 9]) assert.match(unmarked(t.tasks[id].instruction), /without lifting|sin levantar/, `task ${id}`)
+})
+// People said the instructions were not obvious. Each one now marks the two things that matter (how many times,
+// and whether the finger lifts) so that the screen can show them in another colour.
+test('every instruction marks its key words, and whether the finger lifts is always one of them', () => {
+  for (const [lang, t] of Object.entries(STRINGS))
+    for (const [id, task] of Object.entries(t.tasks)) {
+      const key = parts(task.instruction).filter((piece) => piece.key).map((piece) => piece.text.toLowerCase())
+      assert.equal(task.instruction.split('*').length % 2, 1, `${lang} task ${id}: a mark is not closed`)
+      assert.ok(key.length >= 1, `${lang} task ${id}: nothing is marked`)
+      assert.ok(key.some((k) => /lift|levant/.test(k)), `${lang} task ${id}: lifting is not marked`)
+      assert.ok(!unmarked(task.instruction).includes('*'))
+    }
 })
 test('leaving a scored task as it is says what it costs, on the button itself', () => {
   assert.match(en.check.leave, /no result/)

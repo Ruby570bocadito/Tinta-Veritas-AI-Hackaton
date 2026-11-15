@@ -77,10 +77,10 @@ test('loops: small writing and a shaky hand are counted the same', () => {
 // ---- how much was written
 test('turns: writing made very small still counts as the whole word or number', () => {
   // Small writing loses some turns (they get smaller than a shaky finger's wobble), but never enough to look unfinished.
-  for (const task of [16, 6, 22, 23]) assert.equal(issue(task, { where: 'tiny' }), null, `task ${task}`)
+  for (const task of [16, 6, 10, 18]) assert.equal(issue(task, { where: 'tiny' }), null, `task ${task}`)
 })
 test('turns: lifting the finger never makes the writing look smaller', () => {
-  for (const task of [16, 6, 22, 23]) for (let lifts = 1; lifts <= 15; lifts++) assert.ok(turns(done(task, { lifts }), SHEET) >= turns(done(task), SHEET) - 1, `task ${task}, ${lifts} lifts`)
+  for (const task of [16, 6, 10, 18]) for (let lifts = 1; lifts <= 15; lifts++) assert.ok(turns(done(task, { lifts }), SHEET) >= turns(done(task), SHEET) - 1, `task ${task}, ${lifts} lifts`)
 })
 test('travelled: taps go nowhere, writing does', () => {
   assert.ok(travelled(ink(taps(30))) < 40)
@@ -89,7 +89,7 @@ test('travelled: taps go nowhere, writing does', () => {
 
 // ---- the decision for each task
 test('check: every task done as asked has nothing wrong with it', () => {
-  for (const task of [2, 3, 5, 9, 16, 6, 22, 23]) assert.equal(issue(task), null, `task ${task}`)
+  for (const task of [2, 3, 5, 9, 16, 6, 10, 18]) assert.equal(issue(task), null, `task ${task}`)
 })
 test('check: each kind of problem is named for what it is', () => {
   assert.deepEqual(issue(5, { amount: 0.25 }), { kind: 'laps', seen: 1, asked: 4 })
@@ -99,8 +99,8 @@ test('check: each kind of problem is named for what it is', () => {
   assert.deepEqual(issue(3, { lifts: 5 }), { kind: 'lifted', seen: 5 })
   assert.deepEqual(issue(16, { amount: 0.4 }), { kind: 'part' })
   assert.deepEqual(issue(16, { do: 'taps', n: 30 }), { kind: 'little' })
-  assert.deepEqual(issue(16, { lifts: 0 }), { kind: 'joined', digits: false, lifted: false })
-  assert.deepEqual(issue(22, { lifts: 0 }), { kind: 'joined', digits: true, lifted: false })
+  assert.deepEqual(issue(16, { lifts: 0 }), { kind: 'joined', lifted: false })
+  assert.deepEqual(issue(10, { lifts: 0 }), { kind: 'joined', lifted: false })
 })
 test('check: the limit is two and a half of the four repetitions', () => {
   assert.equal(issue(5, { amount: 0.6 })?.kind, 'laps')
@@ -117,7 +117,7 @@ test('check: the circle and the loops in one go are fine (that is what they ask)
 test('check: lifting the finger, however often, is never "not done" in a task that counts', () => {
   for (const task of [5, 9]) for (let lifts = 1; lifts <= 20; lifts++) assert.equal(issue(task, { lifts }), null, `task ${task}, ${lifts} lifts`)
   // Words and numbers: with very few lifts there may be too little pause to time, but the writing is never "missing".
-  for (const task of [16, 6, 22, 23])
+  for (const task of [16, 6, 10, 18])
     for (let lifts = 1; lifts <= 20; lifts++) {
       const found = issue(task, { lifts })
       assert.ok(found === null || found.kind === 'joined', `task ${task}, ${lifts} lifts: ${found?.kind}`)
@@ -125,9 +125,9 @@ test('check: lifting the finger, however often, is never "not done" in a task th
 })
 test('check: a word with one quick lift has less time in the air than anyone in the study: no pause worth timing', () => {
   // The study's lowest on the backwards word is 12.5% of the task. One lift of a quarter of a second in 3.5 s is 7%.
-  assert.deepEqual(issue(16, { lifts: 1, pause: 0.25 }), { kind: 'joined', digits: false, lifted: true })
+  assert.deepEqual(issue(16, { lifts: 1, pause: 0.25 }), { kind: 'joined', lifted: true })
   // A break of a tenth of a second is a skip of the finger, not a lift at all.
-  assert.deepEqual(issue(16, { lifts: 1, pause: 0.1 }), { kind: 'joined', digits: false, lifted: false })
+  assert.deepEqual(issue(16, { lifts: 1, pause: 0.1 }), { kind: 'joined', lifted: false })
   // Letter by letter, as with a pen: fine.
   assert.equal(issue(16, { lifts: 4, pause: 0.45 }), null)
 })
@@ -141,7 +141,7 @@ test('check: only the practice lines say anything about lifting, and only from t
   assert.equal(issue(2, { lifts: 3 })?.kind, 'lifted')
 })
 test('check: nothing written, a single dot and thirty taps are all "hardly any writing"', () => {
-  for (const task of [2, 3, 5, 9, 16, 6, 22, 23]) {
+  for (const task of [2, 3, 5, 9, 16, 6, 10, 18]) {
     assert.deepEqual(check(task, [], SHEET), { kind: 'little' }, `task ${task}, nothing`)
     assert.deepEqual(check(task, [[{ x: 100, y: 100, t: 0 }]], SHEET), { kind: 'little' }, `task ${task}, a dot`)
     assert.deepEqual(issue(task, { do: 'taps', n: 30 }), { kind: 'little' }, `task ${task}, taps`)

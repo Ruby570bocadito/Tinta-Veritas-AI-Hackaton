@@ -8,6 +8,7 @@ export type Size = { w: number; h: number }
 type Props = {
   strokes: Stroke[]
   onChange?: (strokes: Stroke[], sheet: Size) => void // omit to make the canvas read-only
+  onStart?: () => void // the finger has just touched the sheet (the example on it can go away)
   from?: Size // size of the sheet the strokes were written on, so a smaller replay shows all of it
   showInvisibleInk?: boolean // replay the writing and reveal the pauses in orange
   guide?: Guide
@@ -113,13 +114,15 @@ function draw(canvas: HTMLCanvasElement, strokes: Stroke[], invisible: boolean, 
   }
 }
 
-export default function InkCanvas({ strokes, onChange, showInvisibleInk = false, guide, from }: Props) {
+export default function InkCanvas({ strokes, onChange, onStart, showInvisibleInk = false, guide, from }: Props) {
   const ref = useRef<HTMLCanvasElement>(null)
   const live = useRef<Stroke[]>(strokes)
   const drawing = useRef(false)
 
   useEffect(() => {
-    live.current = strokes
+    // Not in the middle of a stroke: the screen may draw itself again while the finger is down (the example
+    // on the sheet goes away at the first touch), and the stroke being written must not be thrown away.
+    if (!drawing.current) live.current = strokes
     const canvas = ref.current!
     const still = () => draw(canvas, live.current, showInvisibleInk, guide, Infinity, from)
     window.addEventListener('resize', still)
@@ -158,6 +161,7 @@ export default function InkCanvas({ strokes, onChange, showInvisibleInk = false,
   const down = (e: React.PointerEvent) => {
     if (!onChange || !e.isPrimary) return
     e.currentTarget.setPointerCapture(e.pointerId)
+    onStart?.()
     drawing.current = true
     live.current = [...live.current, [point(e)]]
     draw(ref.current!, live.current, false, guide)

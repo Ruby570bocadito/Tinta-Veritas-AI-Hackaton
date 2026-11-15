@@ -8,7 +8,7 @@ import { judge } from '../src/lib/judge'
 import { KEEP_MS, pack, unpack, type Progress } from '../src/lib/resume'
 import { SHEET, perform, toStrokes } from './shapes.mjs'
 
-const ORDER = [2, 3, 5, 9, 16, 6, 22, 23] // the task behind each screen of the check, as in App.tsx
+const ORDER = [2, 3, 5, 9, 16, 6, 10, 18] // the task behind each screen of the check, as in App.tsx
 const NOW = 1_800_000_000_000
 
 let passed = 0
@@ -56,11 +56,11 @@ test('reloaded on the replay of a task: that task was finished, so it is kept', 
 })
 
 test('the closer look comes back with its three extra tasks and the list of tasks being done again', () => {
-  const before = { ...written([2, 3, 5, 9, 16, 6, 22], { name: 'task', index: 7, review: false }, true), redo: [23] }
+  const before = { ...written([2, 3, 5, 9, 16, 6, 10], { name: 'task', index: 7, review: false }, true), redo: [18] }
   const after = back(before)!
   assert.equal(after.closer, true)
-  assert.deepEqual(after.redo, [23])
-  assert.deepEqual(Object.keys(after.ink).map(Number).sort((a, b) => a - b), [2, 3, 5, 6, 9, 16, 22])
+  assert.deepEqual(after.redo, [18])
+  assert.deepEqual(Object.keys(after.ink).map(Number).sort((a, b) => a - b), [2, 3, 5, 6, 9, 10, 16])
 })
 
 test('after half an hour away the check starts from the beginning', () => {

@@ -5,7 +5,13 @@ import type { Verdict } from './model'
 
 export type Lang = 'en' | 'es'
 
-type TaskText = { title: string; instruction: string; prompt?: string; speak?: string }
+/** An instruction without the marks around its key words: for the voice and for plain text. */
+export const plain = (text: string) => text.replace(/\*/g, '')
+/** An instruction cut into pieces, the key words apart, so that the screen can colour them. */
+export const parts = (text: string) => text.split('*').map((piece, i) => ({ text: piece, key: i % 2 === 1 })).filter((piece) => piece.text)
+
+// An instruction marks its key words with *asterisks*; the screen shows them in another colour (see `parts`).
+type TaskText = { title: string; instruction: string; prompt?: string }
 type Qa = { q: string; a: string[] }
 
 export type Strings = {
@@ -24,9 +30,9 @@ export type Strings = {
     quitConfirm: string
     back: string // said once when the page was reloaded in the middle of the check and the writing was kept
     read: string
-    listen: string
-    noVoice: (n: string) => string
     writeHere: string
+    example: string // the label on the example Tinta draws before each task
+    exampleWord: string // a short word for the examples that must not give the answer away
     rotate: string
     startOver: string
     done: string
@@ -162,19 +168,18 @@ const en: Strings = {
     begin: 'Begin',
   },
   tasks: {
-    2: { title: 'Practice', instruction: 'Join the two dots with a line, back and forth four times, without lifting your finger.' },
-    3: { title: 'Practice', instruction: 'Now up and down: join the two dots four times, without lifting your finger.' },
+    2: { title: 'Practice', instruction: 'Draw a line from dot to dot *four times*, back and forth, *without lifting* your finger.' },
+    3: { title: 'Practice', instruction: 'Now up and down: from dot to dot *four times*, *without lifting* your finger.' },
     // The four tasks before this one all say "without lifting your finger", and people carried on that way here:
     // 7 of our first 15 volunteers wrote the word in a single drag, which leaves a phone no pause to time.
     // In the study the healthy group's median was 4 pen-downs for the 4 letters of "casa", which fits one per letter.
-    16: { title: 'Backwards', instruction: 'Copy this word backwards: start from its last letter, and lift your finger after each letter.', prompt: 'house' },
-    6: { title: 'Letters', instruction: 'Copy these three letters, one at a time.', prompt: 'l  m  p' },
-    5: { title: 'Circle', instruction: 'Trace over the circle four times in a row, without lifting your finger.' },
-    9: { title: 'Loops', instruction: 'Write "le" four times in joined-up writing, in one smooth movement.', prompt: 'le le le le' },
-    23: { title: 'Phone number', instruction: 'Tap "Listen", then write the phone number you hear, one digit at a time.', speak: '3 4 7. 5 9 2. 0 1 6 8' },
-    15: { title: 'Backwards', instruction: 'Copy this word backwards, starting from its last letter.', prompt: 'bottle' },
-    18: { title: 'Name it', instruction: 'Write the name of the object in the picture.' },
-    22: { title: 'Copy a number', instruction: 'Copy this phone number, one digit at a time.', prompt: '091 748 2356' },
+    16: { title: 'Backwards', instruction: 'Write this word *backwards*, from its last letter to its first. *Lift your finger* after each letter.', prompt: 'house' },
+    5: { title: 'Circle', instruction: 'Go round the circle *four times*, *without lifting* your finger.' },
+    9: { title: 'Loops', instruction: 'Write "le" *four times*, joined up, *without lifting* your finger.', prompt: 'le le le le' },
+    // The closer look: three short tasks where people lift the pen (ml/adaptive.py says how they were chosen).
+    6: { title: 'Letters', instruction: 'Copy these three letters. *Lift your finger* after each one.', prompt: 'l  m  p' },
+    10: { title: 'A word', instruction: 'Copy this word. *Lift your finger* after each letter.', prompt: 'paper' },
+    18: { title: 'Name it', instruction: 'What is this? Write its name. *Lift your finger* after each letter.' },
   },
   task: {
     step: (i, n, title) => `Step ${i} of ${n} · ${title}`,
@@ -182,9 +187,9 @@ const en: Strings = {
     quitConfirm: 'Stop the check and go back to the start?',
     back: 'Welcome back. Your finished tasks are safe.',
     read: 'Read it to me',
-    listen: 'Listen',
-    noVoice: (n) => `This device has no voice. Ask someone to read this number aloud to you: ${n}`,
     writeHere: 'Write here with your finger',
+    example: 'Example',
+    exampleWord: 'sun',
     rotate: 'Turn the phone upright: there is more room to write.',
     startOver: 'Start over',
     done: "I'm done",
@@ -224,10 +229,10 @@ const en: Strings = {
         case 'little':
           return 'I can hardly see any writing. Did you finish it?'
         case 'joined':
-          return `${i.lifted ? 'You hardly lifted your finger, so there is too little pause for me to time.' : 'You did not lift your finger, so there is no pause for me to time.'} Please write it again one ${i.digits ? 'digit' : 'letter'} at a time, as with a pen.`
+          return `${i.lifted ? 'You hardly lifted your finger, so there is too little pause for me to time.' : 'You did not lift your finger, so there is no pause for me to time.'} Please write it again one letter at a time, as with a pen.`
       }
     },
-    practice: 'It is only practice, so nothing is scored yet.',
+    practice: 'It is only practice: nothing is scored yet. Try again and I will show you once more.',
     again: 'Try again',
     keep: 'Keep it',
     leave: 'Leave it as it is (no result)',
@@ -326,7 +331,7 @@ const en: Strings = {
     told: (p, h) =>
       `What those people would actually be told by the app: of the ${p.usual + p.unsure + p.mention} patients, ${p.mention} "worth mentioning", ${p.unsure} "I can't tell" and ${p.usual} "usual pattern" (those ${p.usual} are the dangerous misses). Of the ${h.usual + h.unsure + h.mention} healthy people, ${h.usual} "usual pattern", ${h.unsure} "I can't tell" and ${h.mention} "worth mentioning" (false alarms).`,
     closer: (a, test) =>
-      `When the short check is unsure, Tinta asks for three more tasks and averages three models. With that closer look (${a.closer_look} of the ${test} needed it), she missed ${a.missed} patients and raised ${a.false_alarms} false alarm${a.false_alarms === 1 ? '' : 's'}, and still said "I can't tell" for ${a.still_unsure}.`,
+      `When the short check is unsure, Tinta asks for three more short tasks and averages three models. Of the ${test} people, ${a.closer_look} needed that closer look: it gave a clear answer to ${a.closer_look - a.still_unsure} of them, and the other ${a.still_unsure} were still told "I can't tell". The three tasks are short on purpose. The first version used two phone numbers, which decided more often but were long to write.`,
     device: (s, m) =>
       `But a phone is not that tablet. If a device makes everyone 1.5 times slower, the stopwatch raises ${s.false_alarms} false alarms out of ${s.healthy} healthy people. Tinta still raises ${m.false_alarms}: her two measures are a share and a count, so overall speed cancels out. That is arithmetic, not a discovery.`,
     uneven: (pauses, screen) =>
@@ -517,16 +522,14 @@ const es: Strings = {
     begin: 'Vamos',
   },
   tasks: {
-    2: { title: 'Práctica', instruction: 'Une los dos puntos con una línea, ida y vuelta cuatro veces, sin levantar el dedo.' },
-    3: { title: 'Práctica', instruction: 'Ahora de arriba abajo: une los dos puntos cuatro veces, sin levantar el dedo.' },
-    16: { title: 'Al revés', instruction: 'Copia esta palabra al revés: empieza por la última letra y levanta el dedo después de cada letra.', prompt: 'casa' },
-    6: { title: 'Letras', instruction: 'Copia estas tres letras, una a una.', prompt: 'l  m  p' },
-    5: { title: 'Círculo', instruction: 'Repasa el círculo cuatro veces seguidas, sin levantar el dedo.' },
-    9: { title: 'Bucles', instruction: 'Escribe «le» cuatro veces seguidas, con letra ligada y sin levantar el dedo.', prompt: 'le le le le' },
-    23: { title: 'Teléfono', instruction: 'Pulsa «Escuchar» y escribe el número de teléfono que oigas, cifra a cifra.', speak: '3, 4, 7. 5, 9, 2. 0, 1, 6, 8' },
-    15: { title: 'Al revés', instruction: 'Copia esta palabra al revés, empezando por la última letra.', prompt: 'botella' },
-    18: { title: '¿Qué es?', instruction: 'Escribe el nombre del objeto del dibujo.' },
-    22: { title: 'Copia un número', instruction: 'Copia este número de teléfono, cifra a cifra.', prompt: '091 748 2356' },
+    2: { title: 'Práctica', instruction: 'Traza una línea de punto a punto *cuatro veces*, ida y vuelta, *sin levantar* el dedo.' },
+    3: { title: 'Práctica', instruction: 'Ahora de arriba abajo: de punto a punto *cuatro veces*, *sin levantar* el dedo.' },
+    16: { title: 'Al revés', instruction: 'Escribe esta palabra *al revés*, de la última letra a la primera. *Levanta el dedo* después de cada letra.', prompt: 'casa' },
+    5: { title: 'Círculo', instruction: 'Repasa el círculo *cuatro veces*, *sin levantar* el dedo.' },
+    9: { title: 'Bucles', instruction: 'Escribe «le» *cuatro veces* seguidas, *sin levantar* el dedo.', prompt: 'le le le le' },
+    6: { title: 'Letras', instruction: 'Copia estas tres letras. *Levanta el dedo* después de cada una.', prompt: 'l  m  p' },
+    10: { title: 'Una palabra', instruction: 'Copia esta palabra. *Levanta el dedo* después de cada letra.', prompt: 'folio' },
+    18: { title: '¿Qué es?', instruction: '¿Qué es esto? Escribe su nombre. *Levanta el dedo* después de cada letra.' },
   },
   task: {
     step: (i, n, title) => `Paso ${i} de ${n} · ${title}`,
@@ -534,9 +537,9 @@ const es: Strings = {
     quitConfirm: '¿Dejar la prueba y volver al principio?',
     back: 'Hola otra vez. Lo que hiciste sigue aquí.',
     read: 'Léemelo',
-    listen: 'Escuchar',
-    noVoice: (n) => `Este móvil no tiene voz. Pide a alguien que te lea este número en voz alta: ${n}`,
     writeHere: 'Escribe aquí con el dedo',
+    example: 'Ejemplo',
+    exampleWord: 'sol',
     rotate: 'Pon el móvil de pie: hay más sitio para escribir.',
     startOver: 'Borrar',
     done: 'Ya está',
@@ -576,10 +579,10 @@ const es: Strings = {
         case 'little':
           return 'Casi no veo nada escrito. ¿La has terminado?'
         case 'joined':
-          return `${i.lifted ? 'Casi no has levantado el dedo, así que apenas hay pausas que cronometrar.' : 'No has levantado el dedo, así que no tengo ninguna pausa que cronometrar.'} Vuelve a escribir ${i.digits ? 'cifra a cifra' : 'letra a letra'}, como con un boli.`
+          return `${i.lifted ? 'Casi no has levantado el dedo, así que apenas hay pausas que cronometrar.' : 'No has levantado el dedo, así que no tengo ninguna pausa que cronometrar.'} Vuelve a escribir letra a letra, como con un boli.`
       }
     },
-    practice: 'Es solo práctica: todavía no puntúa nada.',
+    practice: 'Es solo práctica: todavía no puntúa nada. Repítela y te lo enseño otra vez.',
     again: 'Repetirla',
     keep: 'Dejarla así',
     leave: 'Dejarla así (sin resultado)',
@@ -678,7 +681,7 @@ const es: Strings = {
     told: (p, h) =>
       `Lo que la app les diría de verdad a esas personas: de los ${p.usual + p.unsure + p.mention} pacientes, a ${p.mention} «coméntalo», a ${p.unsure} «no lo sé» y a ${p.usual} «dentro de lo habitual» (esos ${p.usual} son los fallos peligrosos). De las ${h.usual + h.unsure + h.mention} personas sanas, a ${h.usual} «dentro de lo habitual», a ${h.unsure} «no lo sé» y a ${h.mention} «coméntalo» (falsas alarmas).`,
     closer: (a, test) =>
-      `Cuando la prueba corta duda, Tinta pide tres tareas más y hace la media de tres modelos. Con esa segunda mirada (la necesitaron ${a.closer_look} de las ${test}), se le escaparon ${a.missed} pacientes, dio ${a.false_alarms} falsa${a.false_alarms === 1 ? '' : 's'} alarma${a.false_alarms === 1 ? '' : 's'} y siguió diciendo «no lo sé» en ${a.still_unsure}.`,
+      `Cuando la prueba corta duda, Tinta pide tres tareas cortas más y hace la media de tres modelos. De las ${test} personas, ${a.closer_look} necesitaron esa segunda mirada: a ${a.closer_look - a.still_unsure} les dio una respuesta clara y a las otras ${a.still_unsure} les siguió diciendo «no lo sé». Las tres tareas son cortas a propósito. La primera versión usaba dos números de teléfono: decidía más veces, pero eran largos de escribir.`,
     device: (s, m) =>
       `Pero un móvil no es esa tableta. Si un aparato hace a todo el mundo 1,5 veces más lento, el cronómetro da ${s.false_alarms} falsas alarmas entre ${s.healthy} personas sanas. Tinta sigue dando ${m.false_alarms}: sus dos medidas son una proporción y un recuento, así que la velocidad general no cuenta. Eso es aritmética, no un descubrimiento.`,
     uneven: (pauses, screen) =>

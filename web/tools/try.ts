@@ -10,7 +10,7 @@
 //     "lang":      "en" | "es" }
 //
 // Tasks: 2 and 3 are practice lines (not scored); 5 circle, 9 loops "le le le le", 16 word backwards (scored);
-//        6 letters, 22 and 23 phone numbers (only in the closer look).
+//        6 letters, 10 a word to copy, 18 the name of an object (only in the closer look).
 //
 // How a task is done (all optional):
 //   "do":      "asked" (default) | "scribble" | "taps" | "dash"
@@ -43,7 +43,7 @@ try {
 
 const KEYS = ['name', 'all', 'tasks', 'onWarning', 'closer', 'lang']
 const HOW = ['do', 'amount', 'lifts', 'pause', 'seconds', 'where', 'shaky', 'n']
-const TASKS = ['2', '3', '5', '9', '16', '6', '22', '23']
+const TASKS = ['2', '3', '5', '9', '16', '6', '10', '18']
 const complain = (what: string) => {
   console.error(what + '\nRun with --help to see the format.')
   process.exit(1)

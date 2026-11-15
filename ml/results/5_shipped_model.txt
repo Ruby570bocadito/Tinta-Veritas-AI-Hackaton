@@ -1,7 +1,7 @@
-stage 1 tasks: [16, 5, 9] | stage 2 adds: [6, 23, 22] | stopwatch tasks: [15, 23, 6]
-chosen settings: [{'logisticregression__C': 0.3}, {'svc__C': 10, 'svc__gamma': 0.01}, {'randomforestclassifier__max_depth': 5, 'randomforestclassifier__min_samples_leaf': 5}]
-largest difference between sklearn and the exported maths: 0.00000
-told (adaptive): {'patients': {'usual': 3, 'unsure': 1, 'mention': 14}, 'healthy': {'usual': 12, 'unsure': 2, 'mention': 3}} | short: {'patients': {'usual': 1, 'unsure': 7, 'mention': 10}, 'healthy': {'usual': 9, 'unsure': 7, 'mention': 1}}
+stage 1 tasks: [16, 5, 9] | stage 2 adds: [6, 10, 18] | stopwatch tasks: [15, 23, 6]
+chosen settings: [{'logisticregression__C': 0.03}, {'svc__C': 10, 'svc__gamma': 0.01}, {'randomforestclassifier__max_depth': 5, 'randomforestclassifier__min_samples_leaf': 1}]
+largest difference between sklearn and the exported maths: 0.00001
+told (adaptive): {'patients': {'usual': 1, 'unsure': 7, 'mention': 10}, 'healthy': {'usual': 11, 'unsure': 5, 'mention': 1}} | short: {'patients': {'usual': 1, 'unsure': 7, 'mention': 10}, 'healthy': {'usual': 9, 'unsure': 7, 'mention': 1}}
 {
  "1.0": {
   "model": {
@@ -27,17 +27,19 @@ told (adaptive): {'patients': {'usual': 3, 'unsure': 1, 'mention': 14}, 'healthy
   "patients": 18,
   "false_alarms": 4,
   "healthy": 17,
-  "auc": 0.856,
+  "auc": 0.905,
   "closer_look": 14,
-  "still_unsure": 3
+  "still_unsure": 12
  },
  "long": {
-  "accuracy": 0.8,
+  "accuracy": 0.743,
   "missed": 3,
   "patients": 18,
-  "false_alarms": 4,
+  "false_alarms": 6,
   "healthy": 17,
-  "auc": 0.912
+  "auc": 0.879
  }
 }
-wrote C:\Users\rby\Desktop\Veritas AI - Hackaton\tinta\web\src\model.json 123 KB
+crowd: healthy under 35: 49 of 85 | patients over 65: 41 of 89
+lowest share of time in the air in the study, by task: {'16': 0.125, '6': 0.133, '10': 0.111, '18': 0.129}
+wrote C:\Users\rby\Desktop\Veritas AI - Hackaton\tinta\web\src\model.json 157 KB

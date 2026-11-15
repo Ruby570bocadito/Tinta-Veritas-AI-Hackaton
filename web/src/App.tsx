@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties } from 'react'
 import History from './components/History'
 import Playground from './components/Playground'
 import Crowd from './components/Crowd'
+import Demo from './components/Demo'
 import InkCanvas, { type Guide, type Size } from './components/InkCanvas'
 import Mascot, { type Mood } from './components/Mascot'
 import { addToHistory, clearHistory, loadHistory, loadPeople, savePeople, type Entry } from './lib/history'
@@ -10,7 +11,7 @@ import { measure, seconds, stillTime, type Measures, type Stroke } from './lib/i
 import { judge, score as scoreOf, wantsCloser, type Answer } from './lib/judge'
 import { counts, examples, isGrey, crowd, metrics, airShare, onScale, typical, EXTRA_IDS, TASK_IDS, WARMUP_IDS, type Verdict } from './lib/model'
 import { clearProgress, loadProgress, saveProgress } from './lib/resume'
-import { initialLang, SOURCES, STRINGS, type Lang } from './lib/strings'
+import { initialLang, parts, plain, SOURCES, STRINGS, type Lang } from './lib/strings'
 import { canSpeak, say } from './lib/voice'
 
 type Task = { id: number; pose: Mood; guide?: Guide; picture?: string }
@@ -25,17 +26,20 @@ const TASKS: Task[] = [
   { id: 16, pose: 'task-reverse' },
 ]
 
-// Three more tasks (6, 22 and 23 of the original protocol), asked only when the short check is unsure.
+// Three more tasks (6, 10 and 18 of the original protocol), asked only when the short check is unsure.
+// Short ones where people lift the pen: three letters, a word, and the name of an object in a picture.
+// (The first version had two phone numbers here; volunteers found them long. ml/adaptive.py has both.)
 const EXTRA: Task[] = [
   { id: 6, pose: 'task-copy' },
-  { id: 22, pose: 'watching' },
-  { id: 23, pose: 'task-phone' },
+  { id: 10, pose: 'read' },
+  { id: 18, pose: 'think', picture: 'obj-chair' },
 ]
 
 // A check that was under way when the page was reloaded (a call, a pull on the screen, a tab thrown away by the
 // browser): it comes back at the same step. Read once, before the first screen. See lib/resume.ts.
 const kept = loadProgress([...TASKS, ...EXTRA].map((task) => task.id))
 
+const NOTHING: Stroke[] = [] // one empty sheet for every task not written yet, so that an empty sheet never looks like a new one
 const GUIDE_POSES: Mood[] = ['onb-pauses', 'onb-yourself', 'onb-private']
 const VERDICT_MOOD: Record<Verdict, Mood> = { typical: 'jump', unsure: 'unsure', mention: 'caring' }
 const LOCALE: Record<Lang, string> = { en: 'en-GB', es: 'es-ES' }
@@ -73,6 +77,7 @@ export default function App() {
   const [tries, setTries] = useState<Record<number, number>>(kept?.tries ?? {}) // how many times each task was done again
   const [warned, setWarned] = useState<Record<number, string>>(kept?.warned ?? {}) // tasks where Tinta said something was missing, and what
   const [redo, setRedo] = useState<number[]>(kept?.redo ?? []) // tasks being done again from the result screen, in order
+  const [touched, setTouched] = useState('') // the task being written since the finger first touched its sheet: its example is gone
   const [doodle, setDoodle] = useState<Stroke[]>([]) // the free sheet: never scored, never saved
   const [doodleSheet, setDoodleSheet] = useState<Size>({ w: 360, h: 340 })
   const [history, setHistory] = useState<Entry[]>(loadHistory)
@@ -444,7 +449,7 @@ export default function App() {
     const list = closer ? [...TASKS, ...EXTRA] : TASKS
     const task = list[screen.index]
     const text = t.tasks[task.id]
-    const strokes = ink[task.id] ?? []
+    const strokes = ink[task.id] ?? NOTHING
     const m = measure(strokes)
     const last = screen.index === list.length - 1
     // After the fifth task Tinta already has a first answer. If it is unsure, she asks for a closer look.
@@ -466,6 +471,7 @@ export default function App() {
     const sheet = sheets[task.id] ?? { w: 360, h: 340 }
     const issue = screen.review ? check(task.id, strokes, sheet) : null
     const practice = WARMUP_IDS.includes(task.id)
+    const attempt = `${task.id}:${tries[task.id] ?? 0}` // this go at this task
     const tryAgain = () => doAgain(task.id)
     return (
       <main className="page" key={'task' + screen.index + screen.review}>
@@ -499,27 +505,23 @@ export default function App() {
           </p>
         )}
         {/* When Tinta has something to say about the task, her words are the heading. */}
-        {!issue && <h2>{screen.review ? t.task.inkTitle : text.instruction}</h2>}
-        {/* What to copy and "read it to me" share one line: on a small phone every line saved goes to the sheet. */}
-        {!screen.review && (text.prompt || (canSpeak && !text.speak)) && (
+        {!issue && (
+          <h2>
+            {screen.review ? t.task.inkTitle : parts(text.instruction).map((piece, i) => (piece.key ? <em key={i}>{piece.text}</em> : piece.text))}
+          </h2>
+        )}
+        {/* What to copy (or the picture to name) and "read it to me" share one line: on a small phone every line saved goes to the sheet. */}
+        {!screen.review && (text.prompt || task.picture || canSpeak) && (
           <div className="asked">
             {text.prompt && <p className="prompt">{text.prompt}</p>}
-            {canSpeak && !text.speak && (
-              <button className="link" onClick={() => say(text.instruction, t.voice)}>
+            {task.picture && <img className="picture" src={`${import.meta.env.BASE_URL}img/tinta-${task.picture}.webp`} alt="" width={84} height={84} />}
+            {canSpeak && (
+              <button className="link" onClick={() => say(plain(text.instruction), t.voice)}>
                 ▶ {t.task.read}
               </button>
             )}
           </div>
         )}
-        {task.picture && !screen.review && (
-          <img className="picture" src={`${import.meta.env.BASE_URL}img/tinta-${task.picture}.webp`} alt="" width={150} height={150} />
-        )}
-        {text.speak && !screen.review && canSpeak && (
-          <button className="ghost" onClick={() => say(text.speak!, t.voice)}>
-            ▶ {t.task.listen}
-          </button>
-        )}
-        {text.speak && !screen.review && !canSpeak && <p className="why">{t.task.noVoice(text.speak)}</p>}
         {/* Only shown by the styles when the phone is on its side and the sheet would be cramped. */}
         {!screen.review && <p className="why rotate">{t.task.rotate}</p>}
         <div className="sheet">
@@ -536,13 +538,11 @@ export default function App() {
                     setSheets({ ...sheets, [task.id]: sheet })
                   }
             }
+            onStart={() => setTouched(attempt)}
             showInvisibleInk={screen.review}
           />
-          {!screen.review && strokes.length === 0 && (
-            <div className={'hint hint-' + (task.guide ?? 'write')} aria-hidden="true">
-              {task.guide ? <span className="finger" /> : <span className="here">{t.task.writeHere}</span>}
-            </div>
-          )}
+          {/* Tinta does it first: the example plays on the empty sheet until the finger touches it. */}
+          {!screen.review && strokes.length === 0 && touched !== attempt && <Demo task={task.id} prompt={text.prompt} example={t.task.exampleWord} tag={t.task.example} />}
         </div>
         {screen.review ? (
           <>
@@ -604,7 +604,14 @@ export default function App() {
           </>
         ) : (
           <div className="row sticky">
-            <button className="ghost" onClick={() => setInk({ ...ink, [task.id]: [] })} disabled={!strokes.length}>
+            <button
+              className="ghost"
+              onClick={() => {
+                setInk({ ...ink, [task.id]: [] })
+                setTouched('') // an empty sheet again: the example comes back
+              }}
+              disabled={!strokes.length}
+            >
               {t.task.startOver}
             </button>
             <button

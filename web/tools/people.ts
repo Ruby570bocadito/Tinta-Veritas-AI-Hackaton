@@ -5,7 +5,7 @@ import { check, laps, les, type Issue } from '../src/lib/check'
 import { measure, seconds, type Stroke } from '../src/lib/ink'
 import { judge, score, wantsCloser, type Answer } from '../src/lib/judge'
 import { EXTRA_IDS, TASK_IDS, WARMUP_IDS, airShare, onScale } from '../src/lib/model'
-import { STRINGS, type Lang } from '../src/lib/strings'
+import { plain, STRINGS, type Lang } from '../src/lib/strings'
 import { SHEET, perform, toStrokes } from './shapes.mjs'
 
 /** How one task is done. See perform() in shapes.mjs. */
@@ -23,7 +23,7 @@ export type How = {
 export type Person = {
   name?: string
   all?: How // how every task is done, unless `tasks` says otherwise
-  tasks?: Record<number, How> // by task number: 2 3 (practice) 5 9 16 (scored) 6 22 23 (closer look)
+  tasks?: Record<number, How> // by task number: 2 3 (practice) 5 9 16 (scored) 6 10 18 (closer look)
   onWarning?: 'retry' | 'keep' // when Tinta says a task cannot be compared: do it again properly, or keep it
   closer?: 'more' | 'stop' // when Tinta offers three more tasks
   lang?: Lang
@@ -56,7 +56,7 @@ export function play(person: Person): Played {
     const text = t.tasks[id]
     const practice = WARMUP_IDS.includes(id)
     lines.push('', `== ${t.task.step(index + 1, of, text.title)}${practice ? '  (practice, not scored)' : ''}`)
-    lines.push(`   Screen: "${text.instruction}"${text.prompt ? `  [${text.prompt}]` : ''}`)
+    lines.push(`   Screen: "${plain(text.instruction)}"${text.prompt ? `  [${text.prompt}]` : ''}`)
     const attempt = (h: How): Issue | null => {
       ink[id] = toStrokes(perform(id, h), SHEET, clock)
       sheets[id] = SHEET

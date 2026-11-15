@@ -1,3 +1,20 @@
+Why these three tasks for the closer look (everyone in the study, no diagnosis involved):
+  task  median seconds  median pen-downs  done in one stroke
+     5            16.1                 1          101 of 174
+     6             7.8                 4            2 of 174  <- closer look
+     8             5.3                 1          115 of 174
+     9             7.8                 1           90 of 174
+    10             4.8                 5            3 of 174  <- closer look
+    12             5.9                 3           30 of 174
+    14            12.2                12            1 of 174
+    15            18.7                12            0 of 174
+    16             6.1                 5           13 of 174
+    18             3.7                 4            7 of 174  <- closer look
+    20            12.1                15            0 of 174
+    22            10.2                12            0 of 174
+    23             9.6                12            0 of 174
+    24            49.0                25            0 of 174
+
 fold 1/20 done
 fold 2/20 done
 fold 3/20 done
@@ -21,14 +38,20 @@ fold 20/20 done
 
 Accuracy on unseen people (5-fold x 4 repeats, fully nested)
 
-short only (3 tasks)         acc 0.743 ±0.069 | sens 0.696 | spec 0.791 | AUC 0.811
-long only (6 tasks, blend)   acc 0.790 ±0.078 | sens 0.766 | spec 0.815 | AUC 0.876
-adaptive                     acc 0.773 ±0.071 | sens 0.735 | spec 0.812 | AUC 0.828
+short only (3 tasks)                       acc 0.743 ±0.069 | sens 0.696 | spec 0.791 | AUC 0.811   = 74.3% right, 69.6% of patients caught, 20.9% of healthy people flagged
+long only (all tasks, blend)               acc 0.770 ±0.072 | sens 0.755 | spec 0.785 | AUC 0.854   = 77.0% right, 75.5% of patients caught, 21.5% of healthy people flagged
+adaptive                                   acc 0.756 ±0.081 | sens 0.727 | spec 0.785 | AUC 0.817   = 75.6% right, 72.7% of patients caught, 21.5% of healthy people flagged
+adaptive, closer look chosen by the data   acc 0.773 ±0.071 | sens 0.735 | spec 0.812 | AUC 0.828   = 77.3% right, 73.5% of patients caught, 18.8% of healthy people flagged
+
+'adaptive' is what the app does: the short check, then the closer look with tasks [6, 10, 18] when it is unsure.
+The last row is the first version, kept for comparison: there the data chose the three extra tasks,
+most often task 8 (11 of 20 folds), task 14 (9 of 20 folds), task 16 (8 of 20 folds), task 10 (7 of 20 folds).
+Still 'I can't tell' with the closer look chosen by the data: 14.1%
 
 People sent to the closer look: 31.7%
-Average number of scored tasks: 3.95
-Still 'I can't tell' after the closer look: 14.1%
-Accuracy among the people who get a clear answer: 0.810
+Average number of scored tasks: 3.92  (the closer look adds 2.9 tasks on average: fewer than 3 when the short check of a fold already has one of them)
+Still 'I can't tell' after the closer look: 17.8%
+Accuracy among the people who get a clear answer: 0.796
 The three models disagree by more than 50%: 0.3% of people
 
 What people are told, short check only (share of each group):
@@ -38,5 +61,5 @@ healthy               57%            33%               10%
 
 What people are told, adaptive check (what the app does) (share of each group):
             usual pattern  I cannot tell  worth mentioning
-patients              19%            15%               65%
-healthy               74%            13%               14%
+patients              20%            18%               62%
+healthy               69%            18%               14%

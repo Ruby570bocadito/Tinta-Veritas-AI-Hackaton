@@ -83,9 +83,10 @@ const ASKED = {
   5: { shape: (amount) => circle(4 * amount), seconds: 9, pause: 0.4 },
   9: { shape: (amount) => loops(4 * amount), seconds: 5, pause: 0.5, joined: true },
   16: { shape: (amount) => word(5 * amount), seconds: 3.5, pause: 0.45 },
+  // The closer look: three letters, a word to copy, the name of an object.
   6: { shape: (amount) => word(3 * amount, 0.2, 0.25), seconds: 2.5, pause: 0.5 },
-  22: { shape: (amount) => word(10 * amount, 0.05, 0.09), seconds: 5, pause: 0.35 },
-  23: { shape: (amount) => word(10 * amount, 0.05, 0.09), seconds: 5.5, pause: 0.45 },
+  10: { shape: (amount) => word(5 * amount), seconds: 3, pause: 0.4 },
+  18: { shape: (amount) => word(5 * amount), seconds: 3, pause: 0.45 },
 }
 export const TASK_NUMBERS = Object.keys(ASKED).map(Number)
 

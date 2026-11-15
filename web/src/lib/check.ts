@@ -25,14 +25,16 @@ export type Issue =
   | { kind: 'lifted'; seen: number } // practice only: lifted the finger many times in a task meant to be done in one go
   | { kind: 'part' } // a word or a number: it looks like only part of it is there
   | { kind: 'little' } // hardly anything was written: a tap, a dot, a dash
-  | { kind: 'joined'; digits: boolean; lifted: boolean } // a word or a number with less pause than anyone in the study: nothing to time
+  | { kind: 'joined'; lifted: boolean } // letters or a word with less pause than anyone in the study: nothing to time
 
 const ASKED = 4 // the study asks for four lines, four circles and four "le"
 const ENOUGH = ASKED - 1.5 // from two and a half of the four, the task counts as done
 const DOTS = 0.32 // the practice dots sit this far from the middle of the sheet, as a share of its size
-// Words and numbers: the fewest changes of direction that still look like the whole thing.
-// (Made-up writing of the whole task gives about twice these numbers; see tools/personas.test.ts.)
-const FEWEST_TURNS: Record<number, number> = { 16: 10, 15: 10, 6: 6, 18: 6, 22: 16, 23: 16 }
+// Words and letters: the fewest changes of direction that still look like the whole thing.
+// (Made-up writing of the whole task gives about twice these numbers; see tools/personas.test.ts. Seven real
+// people wrote the four letters of the backwards word with 17 to 25 turns.) The three tasks of the closer look
+// have no real finger behind them yet, so their limits are kept low: a warning that is wrong costs more there.
+const FEWEST_TURNS: Record<number, number> = { 16: 10, 6: 6, 10: 8, 18: 6 }
 
 function box(strokes: Stroke[]) {
   let minX = Infinity
@@ -165,5 +167,5 @@ export function check(task: number, strokes: Stroke[], sheet: Sheet): Issue | nu
   const m = measure(done)
   const floor = AIR_FLOOR[task]
   if (floor === undefined || m.air_time / Math.max(m.total_time, 1) >= floor) return null
-  return { kind: 'joined', digits: task === 22 || task === 23, lifted: m.num_of_pendown > 1 }
+  return { kind: 'joined', lifted: m.num_of_pendown > 1 }
 }
