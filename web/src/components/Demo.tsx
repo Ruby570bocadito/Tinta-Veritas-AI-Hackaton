@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { demoFor, duration, type Demo as Plan, type Point, type Step } from '../lib/demo'
+import { demoFor, duration, type Count, type Demo as Plan, type Point, type Step } from '../lib/demo'
 
 // The example Tinta draws on the empty sheet before each task (see lib/demo.ts for what it shows and why).
 // It plays again and again until the person touches the sheet. With "reduce motion" on, the finished
@@ -72,12 +72,30 @@ function paint(canvas: HTMLCanvasElement, plan: Plan, at: number, alpha: number)
   let begun = 0
   let finger: { p: Point; down: boolean } | null = null
   let last: Point | null = null
-  let latest: { n: number; at: Point } | null = null
-  const number = (c: { n: number; at: Point }) => {
+  let latest: { count: Count; age: number } | null = null
+  /** A short arrow: which way this pass goes. */
+  const arrow = (from: Point, dir: Point, length: number) => {
+    const to = { x: from.x + dir.x * length, y: from.y + dir.y * length }
+    ctx.beginPath()
+    ctx.moveTo(from.x, from.y)
+    ctx.lineTo(to.x, to.y)
+    for (const turn of [2.5, -2.5]) {
+      ctx.moveTo(to.x, to.y)
+      ctx.lineTo(to.x + 0.36 * length * (dir.x * Math.cos(turn) - dir.y * Math.sin(turn)), to.y + 0.36 * length * (dir.x * Math.sin(turn) + dir.y * Math.cos(turn)))
+    }
+    ctx.stroke()
+  }
+  /** The count. A new number lands a little bigger, to catch the eye; `both`: arrows both ways, for the finished example. */
+  const number = (c: Count, age = Infinity, both = false) => {
+    const size = small * 0.13
     ctx.globalAlpha = alpha
     ctx.fillStyle = NUMBER
-    ctx.font = hand(small * 0.13)
+    ctx.font = hand(size * (1 + 0.4 * Math.max(0, 1 - age / 180)))
     ctx.fillText(String(c.n), c.at.x, c.at.y)
+    if (!c.dir) return
+    ctx.strokeStyle = NUMBER
+    ctx.lineWidth = 2.5
+    for (const d of both ? [c.dir, { x: -c.dir.x, y: -c.dir.y }] : [c.dir]) arrow({ x: c.at.x + d.x * size * 0.6, y: c.at.y + d.y * size * 0.66 }, d, size * 0.8)
   }
   for (let i = 0; i < plan.steps.length; i++) {
     const step = plan.steps[i]
@@ -87,16 +105,16 @@ function paint(canvas: HTMLCanvasElement, plan: Plan, at: number, alpha: number)
       const upto = Math.max(1, Math.round(u * (step.pts.length - 1)))
       ctx.globalAlpha = alpha
       ctx.strokeStyle = GHOST
-      ctx.lineWidth = 3.5
+      ctx.lineWidth = 3
       ctx.beginPath()
       ctx.moveTo(step.pts[0].x, step.pts[0].y)
       for (let k = 1; k <= upto; k++) ctx.lineTo(step.pts[k].x, step.pts[k].y)
       ctx.stroke()
       if (u < 1) finger = { p: step.pts[upto], down: true }
-      else if (step.count) {
-        if (step.count.keep) number(step.count)
-        else latest = step.count
-      }
+      // A number that stays (under each "le") is written when its part is done. The one that changes is said while
+      // its pass is being drawn, as one counts aloud: "one" on the way there, "two" on the way back.
+      if (step.count?.keep && u >= 1) number(step.count)
+      if (step.count && !step.count.keep) latest = { count: step.count, age: at - begun }
       last = step.pts[step.pts.length - 1]
     } else if (step.kind === 'letter') {
       ctx.globalAlpha = alpha * Math.min(1, 0.25 + 1.5 * u)
@@ -125,7 +143,7 @@ function paint(canvas: HTMLCanvasElement, plan: Plan, at: number, alpha: number)
     }
     begun += step.ms
   }
-  if (latest) number(latest)
+  if (latest) number(latest.count, latest.age, !finger)
   if (!finger) return
   // The finger: full when it touches, a ring when it is in the air.
   ctx.globalAlpha = alpha * 0.18

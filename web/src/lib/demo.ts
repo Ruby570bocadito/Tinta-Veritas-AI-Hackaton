@@ -6,6 +6,10 @@
 // orange dashes (finger in the air), the same colours the app uses afterwards for the invisible ink.
 // Everything is in pixels of the sheet, so the dots and the circle fall exactly on the printed ones.
 //
+// A line that is gone over again looks like one line. So each pass of the practice lines bows a little to its
+// own side, and each lap of the circle drifts a little, as a hand's do: four passes are seen as four. (The first
+// version drew them exactly on top of each other, and it looked as if Tinta went from dot to dot only once.)
+//
 // Two rules keep the example honest:
 //   - Tinta's own example must pass her own check of the task (tools/demo.test.ts).
 //   - The example never gives the answer away. Writing a word backwards and naming an object are the thinking
@@ -16,9 +20,15 @@ export type Point = { x: number; y: number }
 export type Size = { w: number; h: number }
 
 export type Step =
-  | { kind: 'stroke'; pts: Point[]; ms: number; count?: { n: number; at: Point; keep: boolean } } // finger down, drawing
+  | { kind: 'stroke'; pts: Point[]; ms: number; count?: Count } // finger down, drawing
   | { kind: 'letter'; ch: string; at: Point; size: number; ms: number } // finger down, writing one letter
   | { kind: 'lift'; to: Point; ms: number } // finger in the air, on its way to the next touch
+
+/**
+ * The number Tinta counts with. `keep`: it stays on the sheet (under each "le"); otherwise it is the one number
+ * that changes as she goes. `dir`: which way that pass goes, shown as a small arrow beside the number.
+ */
+export type Count = { n: number; at: Point; keep: boolean; dir?: Point }
 
 export type Demo = {
   steps: Step[]
@@ -32,27 +42,45 @@ export type Words = { prompt?: string; example: string }
 
 const DOTS = 0.32 // the practice dots, as in InkCanvas.tsx
 const RING = 37.8 * 1.5 // the printed circle is 3 cm across
+const APART = 6 // pixels between one pass of a practice line and the next, half way between the dots
+const WANDER = 4.5 // pixels the middle of a lap of the circle drifts from the printed one
 const ease = (u: number) => (1 - Math.cos(Math.PI * u)) / 2
 
-const line = (a: Point, b: Point, n = 24): Point[] =>
-  Array.from({ length: n + 1 }, (_, i) => ({ x: a.x + (b.x - a.x) * ease(i / n), y: a.y + (b.y - a.y) * ease(i / n) }))
-
-/** Four lines from dot to dot, there and back, in one go. */
+/**
+ * Four lines from dot to dot, there and back, in one go. Every line starts and ends on a dot and bows a little
+ * to its own side in between, so the second one is seen coming back under the first.
+ */
 function lines({ w, h }: Size, axis: 'x' | 'y'): Step[] {
-  const a = axis === 'x' ? { x: w * (0.5 - DOTS), y: h / 2 } : { x: w / 2, y: h * (0.5 - DOTS) }
-  const b = axis === 'x' ? { x: w * (0.5 + DOTS), y: h / 2 } : { x: w / 2, y: h * (0.5 + DOTS) }
-  const at = axis === 'x' ? { x: w / 2, y: h / 2 - 0.13 * h } : { x: w / 2 + 0.16 * w, y: h / 2 }
-  return [1, 2, 3, 4].map((n) => ({ kind: 'stroke', pts: n % 2 ? line(a, b) : line(b, a), ms: 620, count: { n, at, keep: false } }))
+  const flat = axis === 'x'
+  const a = flat ? { x: w * (0.5 - DOTS), y: h / 2 } : { x: w / 2, y: h * (0.5 - DOTS) }
+  const b = flat ? { x: w * (0.5 + DOTS), y: h / 2 } : { x: w / 2, y: h * (0.5 + DOTS) }
+  const at = flat ? { x: w / 2, y: h / 2 - 0.16 * h } : { x: w / 2 + 0.19 * w, y: h / 2 }
+  return [1, 2, 3, 4].map((n): Step => {
+    const [from, to] = n % 2 ? [a, b] : [b, a]
+    const bow = (n - 2.5) * APART
+    const pts = Array.from({ length: 25 }, (_, i) => {
+      const u = ease(i / 24)
+      const out = bow * Math.sin(Math.PI * u)
+      return { x: from.x + (to.x - from.x) * u + (flat ? 0 : out), y: from.y + (to.y - from.y) * u + (flat ? out : 0) }
+    })
+    const way = n % 2 ? 1 : -1
+    return { kind: 'stroke', pts, ms: 850, count: { n, at, keep: false, dir: flat ? { x: way, y: 0 } : { x: 0, y: way } } }
+  })
 }
 
-/** Four times round the printed circle, in one go. The count sits in the middle of it. */
+/**
+ * Four times round the printed circle, in one go. The count sits in the middle of it. The middle of the laps
+ * drifts once round a tiny circle of its own, so each lap leaves its own line and the fourth ends where the first began.
+ */
 function circle({ w, h }: Size): Step[] {
-  const lap = (): Point[] =>
+  const lap = (n: number): Point[] =>
     Array.from({ length: 41 }, (_, i) => {
-      const a = -Math.PI / 2 + (i / 40) * 2 * Math.PI
-      return { x: w / 2 + RING * Math.cos(a), y: h / 2 + RING * Math.sin(a) }
+      const done = n - 1 + i / 40 // laps so far
+      const a = -Math.PI / 2 + done * 2 * Math.PI
+      const drift = (done * Math.PI) / 2
+      return { x: w / 2 + WANDER * Math.cos(drift) + RING * Math.cos(a), y: h / 2 + WANDER * Math.sin(drift) + RING * Math.sin(a) }
     })
-  return [1, 2, 3, 4].map((n) => ({ kind: 'stroke', pts: lap(), ms: 760, count: { n, at: { x: w / 2, y: h / 2 }, keep: false } }))
+  return [1, 2, 3, 4].map((n): Step => ({ kind: 'stroke', pts: lap(n), ms: 900, count: { n, at: { x: w / 2, y: h / 2 }, keep: false } }))
 }
 
 /** "le" four times in joined-up writing: a tall loop and a short one each, all in one go. */

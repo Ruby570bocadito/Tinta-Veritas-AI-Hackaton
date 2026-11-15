@@ -39,6 +39,37 @@ test('the examples show four of everything: four lines, four laps, four "le"', (
   }
 })
 
+// A volunteer's question, and a fair one: "it only goes once, not there and back, does it?" The four passes were
+// drawn exactly on top of each other, so the eye saw one line. These two keep them apart.
+test('a line gone over four times is seen as four: the passes meet on the dots, part in between, and each says which way it goes', () => {
+  for (const sheet of SHEETS)
+    for (const [task, along, across] of [[2, 'x', 'y'], [3, 'y', 'x']] as const) {
+      const steps = demoFor(task, sheet, { example: '' }).steps as Extract<Step, { kind: 'stroke' }>[]
+      const [length, width] = along === 'x' ? [sheet.w, sheet.h] : [sheet.h, sheet.w]
+      const dots = [length * 0.18, length * 0.82]
+      const middles = steps.map((s) => s.pts[(s.pts.length - 1) / 2][across])
+      for (let i = 1; i < middles.length; i++) assert.ok(middles[i] - middles[i - 1] >= 4, `task ${task}: line ${i + 1} lies on line ${i}`)
+      steps.forEach((s, i) => {
+        const [first, last] = [s.pts[0], s.pts[s.pts.length - 1]]
+        assert.ok(Math.abs(first[along] - dots[i % 2]) < 0.5 && Math.abs(last[along] - dots[1 - (i % 2)]) < 0.5, `task ${task}: line ${i + 1} goes from one dot to the other`)
+        assert.ok(Math.abs(first[across] - width / 2) < 0.5 && Math.abs(last[across] - width / 2) < 0.5, `task ${task}: line ${i + 1} starts and ends on a dot`)
+        assert.equal(s.count?.dir?.[along], i % 2 ? -1 : 1, `task ${task}: the arrow of line ${i + 1}`)
+      })
+    }
+})
+
+test('four laps of the circle are seen as four: each lap leaves its own line, and the last one ends where the first began', () => {
+  for (const sheet of SHEETS) {
+    const steps = demoFor(5, sheet, { example: '' }).steps as Extract<Step, { kind: 'stroke' }>[]
+    for (let i = 1; i < steps.length; i++) {
+      const apart = Math.max(...steps[i].pts.map((q, k) => Math.hypot(q.x - steps[i - 1].pts[k].x, q.y - steps[i - 1].pts[k].y)))
+      assert.ok(apart >= 4, `lap ${i + 1} lies on lap ${i}`)
+    }
+    const [start, end] = [steps[0].pts[0], steps[3].pts[steps[3].pts.length - 1]]
+    assert.ok(Math.hypot(start.x - end.x, start.y - end.y) < 0.5)
+  }
+})
+
 test('every task has an example, it fits in the sheet and it is short', () => {
   for (const t of Object.values(STRINGS))
     for (const sheet of SHEETS)
