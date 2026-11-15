@@ -5,6 +5,9 @@ import type { Verdict } from './model'
 
 export type Lang = 'en' | 'es'
 
+/** Healthy volunteers who have done the check on a real phone so far (ml/results/10_own_data.txt). One number, said in both languages. */
+export const ON_PHONES = 17
+
 /** An instruction without the marks around its key words: for the voice and for plain text. */
 export const plain = (text: string) => text.replace(/\*/g, '')
 /** An instruction cut into pieces, the key words apart, so that the screen can colour them. */
@@ -171,7 +174,7 @@ const en: Strings = {
     2: { title: 'Practice', instruction: 'Draw a line from dot to dot *four times*, back and forth, *without lifting* your finger.' },
     3: { title: 'Practice', instruction: 'Now up and down: from dot to dot *four times*, *without lifting* your finger.' },
     // The four tasks before this one all say "without lifting your finger", and people carried on that way here:
-    // 7 of our first 15 volunteers wrote the word in a single drag, which leaves a phone no pause to time.
+    // 9 of our first 17 volunteers wrote the word in a single drag, which leaves a phone no pause to time.
     // In the study the healthy group's median was 4 pen-downs for the 4 letters of "casa", which fits one per letter.
     16: { title: 'Backwards', instruction: 'Write this word *backwards*, from its last letter to its first. *Lift your finger* after each letter.', prompt: 'house' },
     5: { title: 'Circle', instruction: 'Go round the circle *four times*, *without lifting* your finger.' },
@@ -283,7 +286,7 @@ const en: Strings = {
     redo: (n) => (n === 1 ? 'Do that task again' : 'Do those tasks again'),
     notAskedHard: 'If you were doing your best and a task was hard to finish, tell a doctor about that and show them this screen. It is useful for them to know.',
     joinedWhy: 'About writing with hardly a lift: in the study people used a pen, and the tablet could also see the pen hovering over the paper, so everybody had some time in the air (on the word, never under an eighth of the task). A phone cannot see a finger in the air. Three of my first eight phone volunteers wrote a word in a single drag too.',
-    caveat: 'Tinta learned from pen-on-tablet data. On phones, only 15 healthy volunteers have tried her, all under 60, and no patient has.',
+    caveat: `Tinta learned from pen-on-tablet data. On phones, only ${ON_PHONES} healthy volunteers have tried her, all under 60, and no patient has.`,
     score: (s) => `${s} out of 100 on my scale. 35 or under: usual pattern. 65 or over: worth mentioning. In between: I don't know. A higher number is not better, and it is not a percentage of risk.`,
     whatNow: 'What now?',
     measurements: 'See the measurements',
@@ -457,7 +460,7 @@ const en: Strings = {
         q: 'How often are you right?',
         a: [
           'About 3 times out of 4, tested on people in the study that the model had not been trained on. So I am wrong about 1 time in 4, in both directions. A simple stopwatch does a little better on the study\'s own tablet.',
-          'And that study used a pen on a tablet, which can also see the pen hovering over the paper. A phone cannot see your finger in the air, so on a phone my numbers run low. Only fifteen healthy volunteers, all under 60, have tried me on phones, and no patient has. I say so on every result.',
+          'And that study used a pen on a tablet, which can also see the pen hovering over the paper. A phone cannot see your finger in the air, so on a phone my numbers run low. Only ' + ON_PHONES + ' healthy volunteers, all under 60, have tried me on phones, and no patient has. I say so on every result.',
         ],
       },
       {
@@ -633,7 +636,7 @@ const es: Strings = {
     redo: (n) => (n === 1 ? 'Repetir esa tarea' : 'Repetir esas tareas'),
     notAskedHard: 'Si lo estabas haciendo lo mejor que podías y alguna tarea te costó terminarla, cuéntaselo a un médico y enséñale esta pantalla. Le sirve saberlo.',
     joinedWhy: 'Sobre escribir casi sin levantar el dedo: en el estudio se escribía con lápiz, y la tableta veía también el lápiz flotando sobre el papel, así que todo el mundo tenía algo de tiempo en el aire (en la palabra, nunca menos de una octava parte de la tarea). Un móvil no ve el dedo en el aire. Tres de mis ocho primeros voluntarios con móvil también escribieron una palabra de un solo trazo.',
-    caveat: 'Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado 15 voluntarios sanos, todos de menos de 60 años, y ningún paciente.',
+    caveat: `Tinta aprendió con datos de lápiz sobre tableta. En móviles solo la han probado ${ON_PHONES} voluntarios sanos, todos de menos de 60 años, y ningún paciente.`,
     score: (s) => `${s} sobre 100 en mi escala. 35 o menos: dentro de lo habitual. 65 o más: coméntalo. En medio: no lo sé. Un número más alto no es mejor, y tampoco es un porcentaje de riesgo.`,
     whatNow: '¿Y ahora qué?',
     measurements: 'Ver las medidas',
@@ -807,7 +810,7 @@ const es: Strings = {
         q: '¿Cuántas veces aciertas?',
         a: [
           'Unas 3 de cada 4, probando con personas del estudio con las que el modelo no se había entrenado. O sea, me equivoco 1 de cada 4, en los dos sentidos. Un simple cronómetro acierta un poco más en la tableta del estudio.',
-          'Y ese estudio se hizo con lápiz y una tableta que ve también el lápiz flotando sobre el papel. Un móvil no ve tu dedo en el aire, así que en un móvil mis números salen bajos. En móviles solo me han probado quince voluntarios sanos, todos de menos de 60 años, y ningún paciente. Lo digo en cada resultado.',
+          'Y ese estudio se hizo con lápiz y una tableta que ve también el lápiz flotando sobre el papel. Un móvil no ve tu dedo en el aire, así que en un móvil mis números salen bajos. En móviles solo me han probado ' + ON_PHONES + ' voluntarios sanos, todos de menos de 60 años, y ningún paciente. Lo digo en cada resultado.',
         ],
       },
       {

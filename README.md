@@ -20,7 +20,7 @@ A web app (also for Android). Carmen does two practice tasks and three scored on
 
 ## What I added
 
-The study needs 25 tasks on a professional tablet. I cut it to tasks that work with a finger, kept only measures that ignore speed, tested what breaks that, recorded 15 people on real phones, had testers attack the app, and dropped my first idea (pace against one's own warm-up: 59% alone).
+The study needs 25 tasks on a professional tablet. I cut it to tasks that work with a finger, kept only measures that ignore speed, tested what breaks that, recorded 17 people on real phones, had testers attack the app, and dropped my first idea (pace against one's own warm-up: 59% alone).
 
 ## How it works
 
@@ -56,7 +56,7 @@ Nested 5-fold cross-validation on the study's tablet. Baseline: a **stopwatch ru
 |---|---|
 | A slower or faster device (simulated) | At 1.5 times the tablet's time a stopwatch flags 64% of healthy people; at half the time it misses 77% of patients. A share and a count do not change. |
 | Pauses and strokes changed differently (simulated) | Pauses twice as long: half of healthy people flagged. Strokes twice as long: over half of patients missed. |
-| Real phones: 15 healthy volunteers, all under 60, one of them me | Nobody was told "worth mentioning", by Tinta or by the stopwatch. But a tablet sees the pen hovering and a phone cannot see a finger in the air: on the backwards word nobody in the study was under 12.5% in the air, and 7 of my 15 wrote it in one drag (0%). The app gives no result below the study's lowest. Asked to write the word again, 0 of 4 did, and several said the tasks were not obvious. So Tinta now asks for that word letter by letter and draws every task first. Nobody has tried that version yet. **No patient and nobody over 59 has tried it.** |
+| Real phones: 17 healthy volunteers, all under 60, one of them me | Nobody was told "worth mentioning", by Tinta or by the stopwatch. But a tablet sees the pen hovering and a phone cannot see a finger in the air: on the backwards word nobody in the study was under 12.5% in the air, and 9 of my 17 wrote it in one drag (0%). The app gives no result below the study's lowest. Asked to write the word again, 1 of 6 tried, in one drag again, and several said the tasks were not obvious. So Tinta now asks for that word letter by letter and draws every task first. Nobody has tried that version yet. **No patient and nobody over 59 has tried it.** |
 | Done wrong on purpose | A tester scribbled and was told "usual pattern". Geometry now checks each task first, 28 made-up people run in `npm test`, and role-playing testers (language models) attacked the app. Still open: Tinta cannot read; lifting on purpose gives "worth mentioning"; very slow writing with the finger down looks "usual". |
 | Slow writers | 35% of slow healthy test cases flagged, against 15 to 18% of the rest. The data has no age or sex. |
 | Not early detection | Patients were already diagnosed and are half the sample; in real life most "worth mentioning" results would be false alarms. |

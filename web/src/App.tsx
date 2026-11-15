@@ -583,9 +583,9 @@ export default function App() {
                 </button>
               </div>
             ) : issue ? (
-              // A task that counts. Four of the first four people who were asked to write the word again pressed
-              // "keep it" and left with no result, so doing it again is now the one big button, and leaving it is
-              // a smaller choice that says what it costs.
+              // A task that counts. None of the first six people who were asked to write the word again ended with a
+              // result: five pressed "keep it", one wrote it in one drag again. So doing it again is the one big
+              // button, and leaving it is a smaller choice that says what it costs.
               <div className="sticky stack">
                 <button className="primary" onClick={tryAgain}>
                   {t.check.again}

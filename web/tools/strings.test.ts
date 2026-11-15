@@ -119,7 +119,7 @@ test('buttons that sit side by side are short enough for a small phone', () => {
   }
 })
 
-// Four tasks in a row say "without lifting your finger". On real phones, 7 of our first 15 volunteers then wrote
+// Four tasks in a row say "without lifting your finger". On real phones, 9 of our first 17 volunteers then wrote
 // the backwards word in a single drag, which leaves no pause to time. So the word must say, up front, to lift.
 test('the backwards word asks, from the start, to lift the finger after each letter', () => {
   assert.match(unmarked(en.tasks[16].instruction), /Lift your finger after each letter/)

@@ -1,55 +1,56 @@
-15 healthy volunteers on a phone; age bands: {'under 30': 11, '30 to 59': 4}
+17 healthy volunteers on a phone; age bands: {'under 30': 13, '30 to 59': 4}
 
 Tinta's model alone (short check, the shipped weights), on everyone's timings
-  'worth mentioning': 0 of 15
-  'I can't tell': 2 of 15
-  'usual pattern': 13 of 15
-  numbers: [6, 6, 6, 6, 6, 8, 12, 13, 14, 24, 29, 30, 31, 39, 48]
+  'worth mentioning': 0 of 17
+  'I can't tell': 2 of 17
+  'usual pattern': 15 of 17
+  numbers: [6, 6, 6, 6, 6, 6, 6, 8, 12, 13, 14, 24, 29, 30, 31, 39, 48]
 
 What the app told them
-  no result (a scored task could not be compared with the study): 4 of 15
-  needed the closer look: 2 of 15
-  answers: {'usual pattern': 11, 'no result': 4}
-  wrongly told 'worth mentioning': 0 of 15
+  no result (a scored task could not be compared with the study): 6 of 17
+  needed the closer look: 2 of 17
+  answers: {'usual pattern': 11, 'no result': 6}
+  wrongly told 'worth mentioning': 0 of 17
   numbers shown: [6, 6, 6, 11, 12, 13, 14, 18, 24, 29, 31]
 
 Stopwatch rule learned on the study's tablet, same three tasks
-  wrongly flagged (score 50 or more): 0 of 15
-  Tinta's model with the same 50 cut-off: 0 of 15
+  wrongly flagged (score 50 or more): 0 of 17
+  Tinta's model with the same 50 cut-off: 0 of 17
 
 Median time per task: healthy people in the study (pen, tablet) vs our volunteers (finger, phone)
   task  2:   9.2 s  vs   2.6 s   phone / tablet = x0.29
   task  3:   6.6 s  vs   1.9 s   phone / tablet = x0.29
-  task 16:   4.2 s  vs   4.1 s   phone / tablet = x0.96
+  task 16:   4.2 s  vs   3.9 s   phone / tablet = x0.92
   task  5:  14.4 s  vs   4.8 s   phone / tablet = x0.34
-  task  9:   6.0 s  vs   5.6 s   phone / tablet = x0.93
-  the factor ranges from x0.29 to x0.96. If it were one number for every task, our simulation would be exact; the spread is what it misses.
+  task  9:   6.0 s  vs   5.5 s   phone / tablet = x0.91
+  the factor ranges from x0.29 to x0.92. If it were one number for every task, our simulation would be exact; the spread is what it misses.
 
 The model's two measures, per scored task: healthy people in the study (pen) vs our volunteers (finger)
             share of time in the air (median)      touches (median)      did it in a single touch
-  task 16:   study  46%   ours  14%          study  4.0   ours  3.0        study  8 of 85   ours 7 of 15
-  task  5:   study   6%   ours   0%          study  1.0   ours  1.0        study 64 of 85   ours 14 of 15
-  task  9:   study  21%   ours   0%          study  1.0   ours  1.0        study 56 of 85   ours 10 of 15
-  5 of 15 volunteers never lifted the finger during the three scored tasks.
+  task 16:   study  46%   ours   0%          study  4.0   ours  1.0        study  8 of 85   ours 9 of 17
+  task  5:   study   6%   ours   0%          study  1.0   ours  1.0        study 64 of 85   ours 16 of 17
+  task  9:   study  21%   ours   0%          study  1.0   ours  1.0        study 56 of 85   ours 12 of 17
+  7 of 17 volunteers never lifted the finger during the three scored tasks.
   A person who never lifts gets 6/100 from the model, the lowest number it can give for one touch per task.
 
 What a phone cannot see: time in the air of people in the study who did a task in ONE stroke (all of it is the pen hovering)
-  task 16:  13 of 174 people in the study did it in one stroke; their median share of time in the air was 22%. With exactly zero time in the air: study 0 of 174, our volunteers 7 of 15
-  task  5: 101 of 174 people in the study did it in one stroke; their median share of time in the air was  5%. With exactly zero time in the air: study 0 of 174, our volunteers 14 of 15
-  task  9:  90 of 174 people in the study did it in one stroke; their median share of time in the air was 12%. With exactly zero time in the air: study 0 of 174, our volunteers 10 of 15
+  task 16:  13 of 174 people in the study did it in one stroke; their median share of time in the air was 22%. With exactly zero time in the air: study 0 of 174, our volunteers 9 of 17
+  task  5: 101 of 174 people in the study did it in one stroke; their median share of time in the air was  5%. With exactly zero time in the air: study 0 of 174, our volunteers 16 of 17
+  task  9:  90 of 174 people in the study did it in one stroke; their median share of time in the air was 12%. With exactly zero time in the air: study 0 of 174, our volunteers 12 of 17
   Zero time in the air never happens in the study and is common on a phone: for the model it is a value it never saw.
 
 Today's rule: no result when a word or a number has less time in the air than anyone in the study had on that task
-  the backwards word: the study's lowest is 12.5%. Our volunteers: 0%, 0%, 0%, 0%, 0%, 0%, 0%, 14%, 21%, 23%, 27%, 29%, 35%, 49%, 55%
-  under that line: 7 of 15, all of them with the word written in a single drag
+  the backwards word: the study's lowest is 12.5%. Our volunteers: 0%, 0%, 0%, 0%, 0%, 0%, 0%, 0%, 0%, 14%, 21%, 23%, 27%, 29%, 35%, 49%, 55%
+  under that line: 9 of 17, all of them with the word written in a single drag
   the closest one above it: 13.9%. A line this sharp is a choice: a little less pause and that person would get no result.
-  the 2 who did the closer look: tasks under their line, 0 of 3 (lines: task 6 13.3%, task 23 23.8%, task 22 17.0%)
-  3 of those 7 used the app before it checked the tasks: they were told 'usual pattern' with its lowest numbers.
-  The other 4 were told there was no result (next section).
-  All of these timings were recorded before the app joined breaks under 150 ms into one stroke (a finger skipping on
-  glass), so the touches above may include skips. Only totals were saved, so that cannot be redone.
+  the 2 who did the closer look did its first version (letters and two phone numbers). Of its tasks that are still in the app,
+  under their line: 0 of 1 (task 6: 13.3%)
+  3 of those 9 used the app before it checked the tasks: they were told 'usual pattern' with its lowest numbers.
+  The other 6 were told there was no result (next section).
+  15 of the 17 were recorded before the app joined breaks under 150 ms into one stroke (a finger skipping on glass),
+  so their touches may include skips. Only totals were saved, so that cannot be redone.
 
-Recorded with the version that checks the tasks: 7 volunteers
+Recorded with the version that checks the tasks: 9 volunteers
   volunteer  9: laps 4.3 | 'le' 4.0 | turns in the word 20 | Tinta asked about: not recorded | done again: nothing | told: usual pattern (29/100)
   volunteer 10: laps 4.1 | 'le' 4.0 | turns in the word 17 | Tinta asked about: word (joined) | done again: nothing | told: no result
   volunteer 11: laps 3.5 | 'le' 4.0 | turns in the word 19 | Tinta asked about: word (joined) | done again: nothing | told: no result
@@ -57,15 +58,18 @@ Recorded with the version that checks the tasks: 7 volunteers
   volunteer 13: laps 4.1 | 'le' 4.0 | turns in the word 19 | Tinta asked about: word (joined) | done again: nothing | told: no result
   volunteer 14: laps 4.1 | 'le' 4.0 | turns in the word 25 | Tinta asked about: nothing | done again: nothing | told: usual pattern (31/100)
   volunteer 15: laps 4.2 | 'le' 4.0 | turns in the word 19 | Tinta asked about: practice line (passes) | done again: practice line x2 | told: usual pattern (14/100)
+  volunteer 16: laps 3.6 | 'le' 4.3 | turns in the word 23 | Tinta asked about: word (joined) | done again: nothing | told: no result
+  volunteer 17: laps 3.1 | 'le' 3.8 | turns in the word 19 | Tinta asked about: word (joined) | done again: word x1 | told: no result
   (asked 4 laps and 4 'le', counted from 2.5; a word counts from 10 turns)
-  practice line: Tinta asked 1 person to do it again; 1 did, 0 kept it and left with no result
-  circle: Tinta asked 1 person to do it again; 1 did, 0 kept it and left with no result
-  word: Tinta asked 4 people to do it again; 0 did, 4 kept it and left with no result
-  The word written without lifting the finger: 4 of 7 people. Asked to write it again letter by letter,
-  0 of 4 did. So the check that protects the result also left 4 of 7 people without one.
+  practice line: Tinta asked 1 person to do it again; 1 tried again
+  circle: Tinta asked 1 person to do it again; 1 tried again; 1 ended with the task done, 0 left with no result
+  word: Tinta asked 6 people to do it again; 1 tried again; 0 ended with the task done, 6 left with no result
+  The word written without lifting the finger: 6 of 9 people. Asked to write it again letter by letter,
+  1 of 6 tried, and 0 of 6 ended up lifting the finger. So the check that protects the result also left
+  6 of 9 people without one.
   The four tasks before the word all say 'without lifting your finger', and people carried on that way.
   After seeing this, the app asks for the word letter by letter from the start, and writing it again is the main button.
-  A finger resting on the glass for a quarter of a second or more during a scored task: 0 of 8 runs.
+  A finger resting on the glass for a quarter of a second or more during a scored task: 0 of 10 runs.
   That was measured as a quarter of a second with no touch event at all. A finger that rests still trembles and the phone
   keeps sending tiny moves, so these zeros may only mean that the measure was blind. The app now counts a rest when the
   finger stays within 3 pixels for that long. Runs recorded that way so far: 0.
@@ -79,6 +83,6 @@ The model's number by age band (healthy volunteers):
           count  median   max
 age                          
 30 to 59      4    0.32  0.48
-under 30     11    0.12  0.31
+under 30     13    0.08  0.31
 
 With so few people these are counts, not rates. They show whether the idea survives a real phone; they cannot say how it does with patients. Nobody over 59 and no patient is in this file.

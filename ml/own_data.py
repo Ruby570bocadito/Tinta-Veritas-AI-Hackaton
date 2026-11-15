@@ -52,7 +52,9 @@ def load_own():
                "still": sum(rec.get("still", {}).values()) if "still" in rec else np.nan,
                # "v" (when that copy of the app was built) is in the lines sent from 15 Nov on. Lines without it measured
                # a resting finger the old way.
-               "build": rec.get("v")}
+               "build": rec.get("v"),
+               # From 14 Nov 21:00 the app joins breaks under 150 ms into one stroke (a finger skipping on glass).
+               "skips_joined": bool(rec.get("skips_joined") or rec.get("v"))}
         for task, m in rec["tasks"].items():
             for name in MEASURES:
                 row[f"{name}{task}"] = m[name]
@@ -156,15 +158,19 @@ def main():
     print(f"  under that line: {int(below.sum())} of {n}, all of them with the word written in a single drag" if (own.loc[below, f"num_of_pendown{word}"] <= 1).all()
           else f"  under that line: {int(below.sum())} of {n}")
     print(f"  the closest one above it: {share[~below].min():.1f}%. A line this sharp is a choice: a little less pause and that person would get no result.")
+    # The closer look these volunteers did was its first version (three letters and two phone numbers). The phone
+    # numbers are no longer in the app, so only the tasks that are still there can be held against today's lines.
     looked = own[own["closer"]]
-    extra = [t for t in model["extra_tasks"] if t in floor]
-    under = int(sum(((100 * looked[f"air_time{t}"] / looked[f"total_time{t}"].clip(lower=1)) < 100 * floor[t]).any() for t in extra)) if len(looked) else 0
-    print(f"  the {len(looked)} who did the closer look: tasks under their line, {under} of {len(extra)} (lines: {', '.join(f'task {t} {100 * floor[t]:.1f}%' for t in extra)})")
+    still = [t for t in model["extra_tasks"] if t in floor and f"air_time{t}" in looked.columns and looked[f"air_time{t}"].notna().any()]
+    under = int(sum(((100 * looked[f"air_time{t}"] / looked[f"total_time{t}"].clip(lower=1)) < 100 * floor[t]).any() for t in still)) if len(looked) else 0
+    print(f"  the {len(looked)} who did the closer look did its first version (letters and two phone numbers). Of its tasks that are still in the app,")
+    print(f"  under their line: {under} of {len(still)} ({', '.join(f'task {t}: {100 * floor[t]:.1f}%' for t in still)})")
     early = below & ~own["checked"]
     print(f"  {int(early.sum())} of those {int(below.sum())} used the app before it checked the tasks: they were told 'usual pattern' with its lowest numbers.")
     print(f"  The other {int((below & own['checked']).sum())} were told there was no result (next section).")
-    print("  All of these timings were recorded before the app joined breaks under 150 ms into one stroke (a finger skipping on")
-    print("  glass), so the touches above may include skips. Only totals were saved, so that cannot be redone.\n")
+    old = int((~own["skips_joined"]).sum())
+    print(f"  {old} of the {n} were recorded before the app joined breaks under 150 ms into one stroke (a finger skipping on glass),")
+    print("  so their touches may include skips. Only totals were saved, so that cannot be redone.\n")
 
     # 6. The checks of the tasks on real fingers. Their limits were set with drawings made by a formula
     # (a task counts from 2.5 of its 4 repetitions; a word needs 10 turns), so every real person matters here.
@@ -188,12 +194,18 @@ def main():
         print(f"  volunteer {int(r['number']):>2}: laps {r['laps']:.1f} | 'le' {r['les']:.1f} | turns in the word {int(r['turns'])} | Tinta asked about: {about} | done again: {again} | told: {said}")
     print("  (asked 4 laps and 4 'le', counted from 2.5; a word counts from 10 turns)")
     for task in sorted(asked):
-        print(f"  {names.get(task, task)}: Tinta asked {asked[task]} {'person' if asked[task] == 1 else 'people'} to do it again; "
-              f"{redone.get(task, 0)} did, {kept.get(task, 0)} kept it and left with no result")
+        people = f"{asked[task]} {'person' if asked[task] == 1 else 'people'}"
+        if task in WARMUP:   # practice is not scored: leaving it wrong costs nothing, so only the second tries are known
+            print(f"  {names.get(task, task)}: Tinta asked {people} to do it again; {redone.get(task, 0)} tried again")
+        else:
+            print(f"  {names.get(task, task)}: Tinta asked {people} to do it again; {redone.get(task, 0)} tried again; "
+                  f"{asked[task] - kept.get(task, 0)} ended with the task done, {kept.get(task, 0)} left with no result")
     stopped = asked.get(word, 0)
     if stopped:
+        tried, done = redone.get(word, 0), stopped - kept.get(word, 0)
         print(f"  The word written without lifting the finger: {stopped} of {len(after)} people. Asked to write it again letter by letter,")
-        print(f"  {redone.get(word, 0)} of {stopped} did. So the check that protects the result also left {kept.get(word, 0)} of {len(after)} people without one.")
+        print(f"  {tried} of {stopped} tried, and {done} of {stopped} ended up lifting the finger. So the check that protects the result also left")
+        print(f"  {kept.get(word, 0)} of {len(after)} people without one.")
         print("  The four tasks before the word all say 'without lifting your finger', and people carried on that way.")
         print("  After seeing this, the app asks for the word letter by letter from the start, and writing it again is the main button.")
     old = everyone.loc[everyone["checked"] & everyone["build"].isna(), "still"]
