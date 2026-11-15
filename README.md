@@ -10,7 +10,7 @@
 
 ## The problem
 
-Carmen, 72, repeats questions and left the stove on last week. Is it normal forgetfulness, or should her family see a doctor? People with Alzheimer's hesitate more while writing: the pen spends longer in the air. Paper hides that. A touchscreen can time it.
+Carmen, 72, repeats questions and left the stove on last week. Is it normal forgetfulness, or should her family see a doctor? People with Alzheimer's hesitate more while writing. In the study, copying one four-letter word backwards, their pen spent 7.5 s in the air against 1.9 s for healthy people (medians). Paper hides that. A touchscreen can time it.
 
 ## What I built
 
@@ -61,7 +61,7 @@ Nested 5-fold cross-validation on the study's tablet. Baseline: a **stopwatch ru
 | Slow writers | 35% of slow healthy test cases flagged, against 15 to 18% of the rest. The data has no age or sex. |
 | Not early detection | Patients were already diagnosed and are half the sample; in real life most "worth mentioning" results would be false alarms. |
 
-Every number is in `ml/results/` (files 3, 4, 7, 8, 10, 11).
+Every number is in `ml/results/` (files 3, 4, 7, 8, 10, 11, 12).
 
 ## What I'd do next
 

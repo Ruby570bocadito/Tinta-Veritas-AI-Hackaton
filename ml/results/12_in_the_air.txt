@@ -1,0 +1,17 @@
+85 healthy people and 89 with Alzheimer's. Medians, in seconds.
+
+task                                        group           on paper  in the air  share in the air  pen-downs
+16: a four-letter word, copied backwards    healthy              2.3         1.9              46%          4
+16: a four-letter word, copied backwards    Alzheimer's          3.2         7.5              65%          6
+                                            the Alzheimer's group: 1.4 times as long on paper, 3.9 times as long in the air
+
+5: a circle, four times round               healthy             13.7         0.8               6%          1
+5: a circle, four times round               Alzheimer's         16.3         2.1              13%          2
+                                            the Alzheimer's group: 1.2 times as long on paper, 2.8 times as long in the air
+
+9: "le" four times, joined up               healthy              4.2         1.0              21%          1
+9: "le" four times, joined up               Alzheimer's          7.6         3.1              32%          4
+                                            the Alzheimer's group: 1.8 times as long on paper, 2.9 times as long in the air
+
+On the word, writing itself takes 1.4 times as long, and the time in the air takes about 4 times as long.
+That is why Tinta reads the pauses and not the speed.

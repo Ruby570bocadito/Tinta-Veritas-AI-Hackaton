@@ -33,6 +33,7 @@ Saved outputs are in `ml/results/`, in the order the work happened:
 | `7_adaptive.txt` | `adaptive.py` | The shipped adaptive check (two measures per task), why its three extra tasks are those, and what the first choice (two phone numbers) scored. |
 | `5_shipped_model.txt` | `train_export.py` | Trains the shipped models and writes `web/src/model.json`. |
 | `9_repeatability.txt` | `repeatability.py` | How much the answer would move on a simulated second attempt. |
+| `12_in_the_air.txt` | `in_the_air.py` | Where the extra time goes: on paper and in the air, for each group. The demo video opens with it. |
 
 Files 2, 3, 4 and 6 belong to the first design, which also measured each task against the person's own warm-up pace. `ablation.py` showed that measure adds almost nothing, so the shipped model dropped it. They are kept because they are how the decision was reached.
 
