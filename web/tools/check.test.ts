@@ -148,4 +148,31 @@ test('check: nothing written, a single dot and thirty taps are all "hardly any w
   }
 })
 
+// A tester drew four quick laps that slid sideways, like a coil, and Tinta read "about two turns" and stopped them.
+test('laps: four loops that drift sideways like a coil are still four laps', () => {
+  const coil = (drift: number): Stroke[] => [
+    Array.from({ length: 121 }, (_, i) => {
+      const a = (i / 30) * 2 * Math.PI
+      return { x: SHEET.w / 2 + drift * 56 * (i / 120 - 0.5) + 56 * Math.cos(a), y: SHEET.h / 2 + 56 * Math.sin(a), t: i * 16 }
+    }),
+  ]
+  for (const drift of [0, 1, 2, 3, 4]) {
+    const seen = laps(coil(drift))
+    assert.ok(seen >= 3.6 && seen <= 4.2, `drifting ${drift} radii: ${seen.toFixed(2)} laps`)
+    assert.equal(check(5, coil(drift), SHEET), null, `drifting ${drift} radii`)
+  }
+})
+
+test('laps: a line gone over again and again is still not a circle', () => {
+  const scribble: Stroke[] = [
+    Array.from({ length: 161 }, (_, i) => {
+      const u = i / 20 // eight passes
+      const along = u % 2 < 1 ? u % 1 : 1 - (u % 1)
+      return { x: SHEET.w * (0.2 + 0.6 * along), y: SHEET.h / 2 + 3 * Math.sin(i * 1.7), t: i * 16 }
+    }),
+  ]
+  assert.ok(laps(scribble) < 1, `${laps(scribble).toFixed(2)} laps`)
+  assert.equal(check(5, scribble, SHEET)?.kind, 'laps')
+})
+
 console.log(`\n${passed} checks of the geometry passed.`)

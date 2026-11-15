@@ -1023,9 +1023,10 @@ h2:focus,
   }
 }
 
-/* The way in breathes a little, so the eye finds it. */
+/* The way in breathes twice, so the eye finds it, and then keeps still: a button that never stops moving is
+   hard to press for some people and for the tools that press it for them. */
 .intro > .primary {
-  animation: land 0.42s cubic-bezier(0.2, 0.9, 0.3, 1) 0.15s backwards, nudge 2.6s ease-in-out 1.6s infinite;
+  animation: land 0.42s cubic-bezier(0.2, 0.9, 0.3, 1) 0.15s backwards, nudge 2.6s ease-in-out 1.6s 2;
 }
 
 @keyframes nudge {
@@ -1204,6 +1205,7 @@ h2:focus,
   }
   .noprint,
   .row,
+  .quit,
   .page > button,
   .honest:not(.note),
   .fold,

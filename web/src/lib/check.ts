@@ -32,7 +32,9 @@ const ENOUGH = ASKED - 1.5 // from two and a half of the four, the task counts a
 const DOTS = 0.32 // the practice dots sit this far from the middle of the sheet, as a share of its size
 // Words and letters: the fewest changes of direction that still look like the whole thing.
 // (Made-up writing of the whole task gives about twice these numbers; see tools/personas.test.ts. Seven real
-// people wrote the four letters of the backwards word with 17 to 25 turns.) The three tasks of the closer look
+// people wrote the four letters of the backwards word with 17 to 25 turns. The first volunteer over 59 wrote it
+// well with 11, one above the limit: it may be too high for small handwriting, and is the next thing to look at
+// when more people of that age have tried the app.) The three tasks of the closer look
 // have no real finger behind them yet, so their limits are kept low: a warning that is wrong costs more there.
 const FEWEST_TURNS: Record<number, number> = { 16: 10, 6: 6, 10: 8, 18: 6 }
 
@@ -51,7 +53,33 @@ function box(strokes: Stroke[]) {
   return { minX, maxX, minY, maxY }
 }
 
-/** How many times the writing goes round its own middle. Four full circles give 4. */
+/**
+ * How many loops the line itself makes, wherever they are on the sheet: the total turn of its direction.
+ * Four laps that drift sideways like a coil are four loops, though they do not all go round one middle
+ * (a tester's four quick laps were read as "about two" for that reason).
+ */
+function loops(strokes: Stroke[]): number {
+  const { minX, maxX, minY, maxY } = box(strokes)
+  const [w, h] = [maxX - minX, maxY - minY]
+  if (Math.min(w, h) < 0.35 * Math.max(w, h)) return 0 // a line gone over again and again is not a loop
+  const step = Math.max(6, 0.06 * Math.max(w, h)) // long enough for the tremble of a finger not to count as turning
+  let total = 0
+  for (const s of strokes) {
+    const far = [s[0]]
+    for (const p of s) if (Math.hypot(p.x - far[far.length - 1].x, p.y - far[far.length - 1].y) >= step) far.push(p)
+    let turned = 0
+    for (let i = 2; i < far.length; i++) {
+      let d = Math.atan2(far[i].y - far[i - 1].y, far[i].x - far[i - 1].x) - Math.atan2(far[i - 1].y - far[i - 2].y, far[i - 1].x - far[i - 2].x)
+      if (d > Math.PI) d -= 2 * Math.PI
+      if (d < -Math.PI) d += 2 * Math.PI
+      turned += d
+    }
+    total += Math.abs(turned)
+  }
+  return total / (2 * Math.PI)
+}
+
+/** How many times the writing goes round: round its own middle, or as loops of the line, whichever is more. Four full circles give 4. */
 export function laps(strokes: Stroke[]): number {
   const { minX, maxX, minY, maxY } = box(strokes)
   if (minX === Infinity) return 0
@@ -72,7 +100,7 @@ export function laps(strokes: Stroke[]): number {
     }
     total += Math.abs(turned) // each stroke counts, so lifting the finger half way round loses nothing
   }
-  return total / (2 * Math.PI)
+  return Math.max(total / (2 * Math.PI), loops(strokes))
 }
 
 /** How many lines were drawn from one practice dot to the other. */

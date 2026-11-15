@@ -163,8 +163,10 @@ def main():
     looked = own[own["closer"]]
     still = [t for t in model["extra_tasks"] if t in floor and f"air_time{t}" in looked.columns and looked[f"air_time{t}"].notna().any()]
     under = int(sum(((100 * looked[f"air_time{t}"] / looked[f"total_time{t}"].clip(lower=1)) < 100 * floor[t]).any() for t in still)) if len(looked) else 0
-    print(f"  the {len(looked)} who did the closer look did its first version (letters and two phone numbers). Of its tasks that are still in the app,")
-    print(f"  under their line: {under} of {len(still)} ({', '.join(f'task {t}: {100 * floor[t]:.1f}%' for t in still)})")
+    todays = [t for t in model["extra_tasks"] if f"air_time{t}" in looked.columns]
+    whole = looked[[f"air_time{t}" for t in todays]].notna().all(axis=1) if len(todays) == len(model["extra_tasks"]) else looked["closer"] & False
+    print(f"  {len(looked)} did a closer look: {int((~whole).sum())} its first version (letters and two phone numbers), {int(whole.sum())} today's (letters, a word, an object).")
+    print(f"  Of today's tasks that they did, with someone under the line of that task: {under} of {len(still)} ({', '.join(f'task {t}: {100 * floor[t]:.1f}%' for t in still)})")
     early = below & ~own["checked"]
     print(f"  {int(early.sum())} of those {int(below.sum())} used the app before it checked the tasks: they were told 'usual pattern' with its lowest numbers.")
     print(f"  The other {int((below & own['checked']).sum())} were told there was no result (next section).")
@@ -231,11 +233,22 @@ def main():
             print(f"  {same} both times ('{TOLD[r['verdict']]}'), {gap} points apart. One person, and the screen changed too: an anecdote about how much the number moves between tries.")
         print()
 
+    # The version of Sunday 15 Nov draws each task before the person does and asks for the word letter by letter.
+    shown = own[own["build"].notna() & (own["build"].fillna("") >= "2026-11-15T09")]
+    print(f"With the version that draws each task first and asks for the word letter by letter: {len(shown)} volunteer(s)")
+    for _, r in shown.iterrows():
+        print(f"  volunteer {int(r['number'])} ({r['age']}): the word in {int(r[f'num_of_pendown{word}'])} touches, {100 * r[f'air_time{word}'] / max(r[f'total_time{word}'], 1):.0f}% of it in the air; "
+              f"{r['laps']:.1f} laps, {r['les']:.1f} 'le'; nothing to do again; told: {TOLD[r['verdict']]} ({int(r['app_score'])}/100)" if not r["warned"] else f"  volunteer {int(r['number'])}: asked to do something again")
+    if len(shown):
+        print("  One person is an anecdote, not a test of the new instructions.\n")
+
     by_age = own.assign(p=p).groupby("age")["p"].agg(["count", "median", "max"]).round(2)
     print("The model's number by age band (healthy volunteers):")
     print(by_age.to_string())
     print("\nWith so few people these are counts, not rates. They show whether the idea survives a real phone;",
-          "they cannot say how it does with patients. Nobody over 59 and no patient is in this file.")
+          "they cannot say how it does with patients. "
+          + {0: "Nobody over 59", 1: "Only one person over 59"}.get(int((own["age"] == "60 or over").sum()), f"Only {int((own['age'] == '60 or over').sum())} people over 59")
+          + " and no patient is in this file.")
 
 
 if __name__ == "__main__":

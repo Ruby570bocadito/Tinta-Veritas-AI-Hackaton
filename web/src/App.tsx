@@ -752,6 +752,10 @@ export default function App() {
         <p className="step">
           {ex ? t.result.realCase(example! + 1, examples.length, ex.label === 'patient' ? t.result.patient : t.result.healthy) : t.result.yours}
         </p>
+        {/* The way back was only at the very bottom of a long page: a tester did not find it. */}
+        <button className="link quit" onClick={restart}>
+          {t.result.home}
+        </button>
       </header>
       <h1 className={'verdict ' + kind}>{invalid ? t.result.noResultTitle : v.title}</h1>
       {invalid ? (
