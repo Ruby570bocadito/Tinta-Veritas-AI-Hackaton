@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tinta – Veritas AI Final</title>
+<style>
+@font-face { font-family: 'Fraunces'; font-weight: 400; font-style: normal; src: url(../web/node_modules/@fontsource/fraunces/files/fraunces-latin-400-normal.woff2); }
+@font-face { font-family: 'Fraunces'; font-weight: 600; font-style: normal; src: url(../web/node_modules/@fontsource/fraunces/files/fraunces-latin-600-normal.woff2); }
+@font-face { font-family: 'Fraunces'; font-weight: 600; font-style: italic; src: url(../web/node_modules/@fontsource/fraunces/files/fraunces-latin-600-italic.woff2); }
+@font-face { font-family: 'Fraunces'; font-weight: 700; font-style: normal; src: url(../web/node_modules/@fontsource/fraunces/files/fraunces-latin-700-normal.woff2); }
+@font-face { font-family: 'Atkinson'; font-weight: 400; src: url(../web/node_modules/@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-400-normal.woff2); }
+@font-face { font-family: 'Atkinson'; font-weight: 700; src: url(../web/node_modules/@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-700-normal.woff2); }
+@font-face { font-family: 'Hand'; font-weight: 400; src: url(../web/node_modules/@fontsource/patrick-hand/files/patrick-hand-latin-400-normal.woff2); }
+
+:root {
+  --paper: #f3ede2; --card: #fffaf0; --ink: #1c2340; --felt: #27305a; --soft: #4a5370;
+  --air: #e8622a; --air-text: #b23c0c; --ok: #1f6a4a; --line: #dccfb8; --cream-muted: #c9c3d6;
+  --lift: 0 2px 0 #e6dac4, 0 4px 0 #efe6d4, 0 18px 40px rgba(39, 48, 90, 0.20);
+}
+@page { size: 1920px 1080px; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #888; font-family: 'Atkinson', sans-serif; color: var(--ink); }
+.slide {
+  width: 1920px; height: 1080px; position: relative; overflow: hidden;
+  background: var(--paper); page-break-after: always; break-after: page;
+  padding: 140px 120px 0;
+}
+.slide.felt { background: var(--felt); color: var(--card); }
+.slide.ink { background: var(--ink); color: var(--card); }
+.grain::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .55;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.kicker { font: 700 26px/1 'Atkinson'; letter-spacing: .14em; text-transform: uppercase; color: var(--air-text); margin-bottom: 26px; }
+.felt .kicker, .ink .kicker { color: var(--air); }
+.display { font-family: 'Fraunces'; font-weight: 700; line-height: 1.02; letter-spacing: -0.01em; }
+.serif { font-family: 'Fraunces'; }
+.hand { font-family: 'Hand'; }
+.orange { color: var(--air); }
+.muted { color: var(--soft); }
+.felt .muted, .ink .muted { color: var(--cream-muted); }
+.photo { position: absolute; border-radius: 28px; box-shadow: var(--lift); object-fit: cover; }
+.mascot { position: absolute; object-fit: contain; filter: drop-shadow(0 14px 18px rgba(28,35,64,.25)); }
+.dash { display: block; height: 0; border-top: 7px dashed var(--air); border-radius: 4px; }
+.page-no { position: absolute; right: 60px; bottom: 44px; font: 400 22px 'Atkinson'; color: var(--soft); opacity: .7; }
+.felt .page-no, .ink .page-no { color: var(--cream-muted); }
+.card { background: var(--card); border-radius: 28px; box-shadow: var(--lift); color: var(--ink); }
+.tag { position: absolute; left: 60px; bottom: 44px; font: 700 20px 'Atkinson'; letter-spacing: .12em; color: var(--air-text); }
+
+/* 1 cover */
+.s1 h1 { font-size: 250px; margin: -10px 0 20px -8px; }
+.s1 .tagline { font: 400 66px/1.12 'Fraunces'; width: 780px; }
+.s1 .sub { font-size: 44px; line-height: 1.15; margin-top: 70px; width: 780px; }
+
+/* 2 problem */
+.s2 .right { position: absolute; left: 1100px; top: 190px; width: 720px; }
+.s2 h2 { font-size: 100px; }
+.s2 p.lead { font: 400 48px/1.22 'Fraunces'; margin-top: 24px; }
+.s2 p.q { font: italic 600 50px/1.18 'Fraunces'; color: var(--air); margin-top: 30px; }
+.s2 .rule { height: 2px; background: var(--soft); margin: 54px 0 34px; }
+.s2 .stat { display: flex; gap: 30px; align-items: center; }
+.s2 .stat b { font: 700 100px/1 'Fraunces'; }
+.s2 .stat span { font-size: 30px; line-height: 1.35; color: var(--cream-muted); }
+
+/* 3 clue */
+.s3 h2 { font: 600 82px/1.1 'Fraunces'; width: 1100px; }
+.s3 h2.it { font-style: italic; color: var(--air); margin-top: 26px; }
+.s3 .dash { width: 1000px; margin: 22px 0 60px 6px; }
+.s3 p { font-size: 42px; color: var(--soft); }
+.s3 .src { position: absolute; left: 120px; bottom: 60px; font-size: 32px; }
+
+/* 4 demo */
+.s4 h2 { font-size: 180px; }
+.s4 .hand { font-size: 52px; color: var(--air); margin: 26px 0 60px; }
+.s4 ol { list-style: none; }
+.s4 li { display: flex; align-items: center; gap: 28px; font-size: 42px; margin-bottom: 30px; }
+.s4 li i { font: 700 28px/60px 'Atkinson'; font-style: normal; width: 60px; height: 60px; border-radius: 50%; background: var(--felt); text-align: center; flex: none; }
+.s4 li:last-child i { background: var(--air); }
+.s4 .qr { position: absolute; left: 1300px; top: 170px; width: 500px; padding: 40px 40px 34px; text-align: center; }
+.s4 .qr img { width: 420px; height: 420px; display: block; }
+.s4 .qr b { display: block; font-size: 36px; margin-top: 18px; }
+.s4 .qr small { display: block; font-size: 21px; color: var(--soft); margin-top: 8px; }
+
+/* 5 how */
+.s5 h2 { font-size: 96px; margin-bottom: 70px; }
+.s5 .flow { display: flex; align-items: stretch; gap: 28px; }
+.s5 .step { flex: 1; padding: 44px 44px 40px; position: relative; }
+.s5 .step .n { font: 700 92px/1 'Fraunces'; color: var(--air); }
+.s5 .step h3 { font: 700 46px/1.1 'Fraunces'; margin: 8px 0 22px; }
+.s5 .step p { font-size: 31px; line-height: 1.35; color: var(--soft); }
+.s5 .step p b { color: var(--ink); }
+.s5 .arrow { align-self: center; font: 700 64px 'Atkinson'; color: var(--air); }
+.s5 .bar { display: flex; height: 26px; border-radius: 13px; overflow: hidden; margin: 6px 0 22px; }
+.s5 .bar span:nth-child(1) { flex: 35; background: var(--ok); }
+.s5 .bar span:nth-child(2) { flex: 30; background: var(--line); }
+.s5 .bar span:nth-child(3) { flex: 35; background: var(--air); }
+.s5 .legend { font-size: 27px; line-height: 1.45; }
+.s5 .legend div::before { content: ''; display: inline-block; width: 18px; height: 18px; border-radius: 50%; margin-right: 12px; vertical-align: -1px; }
+.s5 .legend .g::before { background: var(--ok); } .s5 .legend .u::before { background: var(--line); } .s5 .legend .o::before { background: var(--air); }
+.s5 .foot { margin-top: 48px; font-size: 30px; color: var(--soft); }
+.s5 .foot b { color: var(--ink); }
+
+/* 6 stopwatch */
+.s6 h2 { font-size: 92px; width: 1100px; }
+.s6 .rows { position: absolute; left: 120px; top: 420px; width: 1060px; }
+.s6 .row { padding: 34px 44px; margin-bottom: 30px; }
+.s6 .row h4 { font: 700 26px 'Atkinson'; letter-spacing: .1em; text-transform: uppercase; color: var(--soft); margin-bottom: 16px; }
+.s6 .pair { display: flex; gap: 60px; align-items: baseline; }
+.s6 .pair div { font-size: 30px; color: var(--soft); }
+.s6 .pair b { font: 700 84px/1 'Fraunces'; color: var(--ink); margin-right: 14px; }
+.s6 .pair .win b { color: var(--ok); } .s6 .pair .lose b { color: var(--air-text); }
+.s6 .note { font-size: 26px; color: var(--soft); margin-top: 14px; }
+.s6 .take { position: absolute; left: 1260px; top: 790px; width: 560px; font: italic 600 50px/1.15 'Fraunces'; color: var(--air); }
+
+/* 7 built with */
+.s7 h2 { font-size: 96px; margin-bottom: 70px; }
+.s7 .grid { display: grid; grid-template-columns: repeat(2, 640px); gap: 30px; }
+.s7 .tile { padding: 36px 40px; }
+.s7 .tile h3 { font: 700 26px 'Atkinson'; letter-spacing: .12em; text-transform: uppercase; color: var(--air-text); margin-bottom: 14px; }
+.s7 .tile p { font: 400 36px/1.3 'Fraunces'; }
+
+/* 8 impact */
+.s8 h2 { font-size: 96px; margin-bottom: 60px; }
+.s8 .stats { display: flex; gap: 30px; width: 1100px; }
+.s8 .stat { flex: 1; padding: 36px 36px 34px; }
+.s8 .stat b { display: block; white-space: nowrap; font: 700 84px/1 'Fraunces'; color: var(--air); }
+.s8 .stat span { display: block; font-size: 29px; line-height: 1.3; margin-top: 14px; color: var(--soft); }
+.s8 .honest { margin-top: 44px; width: 1100px; padding: 34px 40px; border-radius: 28px; border: 3px dashed var(--air); }
+.s8 .honest h3 { font: 700 26px 'Atkinson'; letter-spacing: .12em; text-transform: uppercase; color: var(--air-text); margin-bottom: 14px; }
+.s8 .honest p { font-size: 32px; line-height: 1.35; }
+
+/* 9 thanks */
+.s9 { text-align: left; }
+.s9 .q { font: 600 96px/1.08 'Fraunces'; width: 1080px; margin-top: 50px; }
+.s9 .q em { font-style: italic; color: var(--air); }
+.s9 .thanks { font-family: 'Hand'; font-size: 64px; color: var(--cream-muted); margin-top: 50px; }
+.s9 .qr { position: absolute; right: 120px; bottom: 120px; width: 300px; padding: 26px; text-align: center; }
+.s9 .qr img { width: 248px; display: block; }
+.s9 .qr small { display: block; font-size: 22px; margin-top: 8px; color: var(--soft); }
+
+/* backups */
+.bk .kicker { color: var(--air-text); }
+.bk h2 { font-size: 72px; margin-bottom: 40px; }
+.bk table { border-collapse: collapse; font-size: 26px; }
+.bk th, .bk td { white-space: nowrap; padding: 12px 22px; text-align: left; border-bottom: 2px solid var(--line); }
+.bk th { font-weight: 700; color: var(--soft); font-size: 22px; letter-spacing: .06em; text-transform: uppercase; }
+.bk td.n { text-align: right; font-variant-numeric: tabular-nums; }
+.bk tr.hl td { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- 1 · COVER -->
+<section class="slide grain s1" data-notes="0:00 – 0:10
+- &quot;Hi, I'm [name], and this is Tinta: an app that listens to what your handwriting says when you stop writing.&quot;
+- Smile. Slow down. Click.">
+  <div class="kicker">Veritas AI Hackathon · AI + Health</div>
+  <h1 class="display">Tinta</h1>
+  <p class="tagline">The <span class="orange">invisible ink</span><br>that paper hides.</p>
+  <span class="dash" style="width:420px;margin:14px 0 0 120px"></span>
+  <p class="sub hand muted">A two-minute writing check on a phone, for families worried about memory.</p>
+  <img class="photo" src="../docs/scene-cover.jpg" style="left:940px;top:150px;width:860px;height:574px;transform:rotate(1.5deg)">
+  <img class="mascot" src="../web/public/img/tinta-wave.webp" style="left:1560px;top:700px;width:300px;height:300px">
+  <div class="tag">SOLO PROJECT · PROTOTYPE, NOT MEDICAL ADVICE</div>
+</section>
+
+<!-- 2 · PROBLEM -->
+<section class="slide felt s2" data-notes="0:10 – 0:30
+- &quot;Imagine Carmen. She's 72. She repeats the same questions, and last week she left the stove on.&quot;
+- &quot;Her family wonders: is this normal forgetfulness, or should we see a doctor?&quot;
+- &quot;More than 55 million people live with dementia, and many families don't know when to worry.&quot;
+- Carmen is an illustrative persona, not a real patient.">
+  <img class="photo" src="../docs/scene-family.jpg" style="left:110px;top:200px;width:900px;height:600px;transform:rotate(-1.2deg)">
+  <div class="right">
+    <div class="kicker">The problem</div>
+    <h2 class="display">Carmen, 72.</h2>
+    <p class="lead">She repeats questions. Last week she left the stove on.</p>
+    <p class="q">Normal forgetfulness, or time to see a doctor?</p>
+    <div class="rule"></div>
+    <div class="stat"><b>55M+</b><span>people live with dementia worldwide (WHO). Many families don't know when to worry.</span></div>
+  </div>
+  <div class="page-no">2</div>
+</section>
+
+<!-- 3 · CLUE -->
+<section class="slide grain s3" data-notes="0:30 – 0:45
+- &quot;But there's a clue that paper hides: people with Alzheimer's hesitate more while writing. The pen spends more time in the air.&quot;
+- &quot;A touchscreen can measure that.&quot;
+- Transition: &quot;Let me show you, live.&quot; → next slide, then switch to the phone.">
+  <div class="kicker">The clue</div>
+  <h2>People with Alzheimer's hesitate more while writing.</h2>
+  <h2 class="it">The pen spends longer in the air.</h2>
+  <span class="dash"></span>
+  <p>Paper hides it. A touchscreen can time it.</p>
+  <p class="src hand">From the DARWIN study: 174 people writing on a tablet (Cilia et al., 2022)</p>
+  <img class="mascot" src="../web/public/img/tinta-onb-pauses.webp" style="left:1250px;top:200px;width:600px;height:600px">
+  <div class="page-no">3</div>
+</section>
+
+<!-- 4 · DEMO -->
+<section class="slide ink s4" data-notes="0:45 – 2:30 · SWITCH TO THE PHONE
+- Before: app open, NO ?closer, airplane mode ON, screen mirrored, brightness max.
+- &quot;The phone is in airplane mode: Tinta works offline, and nothing leaves the phone.&quot;
+- Practice tasks: fast, say little.
+- While drawing 'house' backwards, the circle, the loops: &quot;It doesn't ask me to hurry. Tinta doesn't measure speed. It measures what share of the time the finger is in the air, and how often I lift it.&quot;
+- Replay: &quot;This is the invisible ink: where I lifted my finger, and for how long. What paper can't see.&quot;
+- Result: &quot;Usual pattern, worth mentioning to a doctor, or I can't tell. If a task isn't really done, Tinta says so and gives no result.&quot;
+- If it says 'I can't tell': &quot;That's exactly what I wanted to show you: when it's unsure, it doesn't guess.&quot;
+- If the phone fails: hidden backup slide A.">
+  <div class="kicker">Live demo</div>
+  <h2 class="display">Let's try it.</h2>
+  <p class="hand">Airplane mode on: nothing leaves the phone.</p>
+  <ol>
+    <li><i>1</i>2 practice tasks</li>
+    <li><i>2</i>3 scored tasks</li>
+    <li><i>3</i>The invisible ink replay</li>
+    <li><i>4</i>One of three answers</li>
+  </ol>
+  <div class="card qr">
+    <img src="../docs/qr.png">
+    <b>Try it on your phone</b>
+    <small>ruby570bocadito.github.io/Tinta-Veritas-AI-Hackaton</small>
+  </div>
+  <img class="mascot" src="../web/public/img/tinta-writing.webp" style="left:900px;top:640px;width:380px;height:380px">
+  <div class="page-no">4</div>
+</section>
+
+<!-- 5 · HOW IT DECIDES -->
+<section class="slide grain s5" data-notes="2:30 – 3:00
+- &quot;I trained the model on DARWIN, a public dataset of 174 people: 89 with Alzheimer's and 85 healthy.&quot;
+- &quot;It's a logistic regression using only two numbers per task: time in the air and number of touches.&quot;
+- &quot;If the score falls in the uncertain zone, it asks for three more tasks, and three models vote: logistic regression, an SVM and a random forest.&quot;
+- The 35–65 band was set by hand.">
+  <div class="kicker">How the AI decides</div>
+  <h2 class="display">Two numbers. Never speed.</h2>
+  <div class="flow">
+    <div class="card step">
+      <div class="n">3</div>
+      <h3>short tasks</h3>
+      <p>"house" written backwards, a circle traced four times, joined-up "le" loops.</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="card step">
+      <div class="n">2</div>
+      <h3>measures per task</h3>
+      <p><b>Share of the time</b> the finger is in the air.<br><b>Number of touch-downs.</b></p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="card step" style="flex:1.25">
+      <div class="n">1</div>
+      <h3>score, 0 to 100</h3>
+      <div class="bar"><span></span><span></span><span></span></div>
+      <div class="legend">
+        <div class="g">Under 35: usual pattern</div>
+        <div class="u">35–65: 3 more tasks, 3 models vote</div>
+        <div class="o">Over 65: worth mentioning to a doctor</div>
+      </div>
+    </div>
+  </div>
+  <p class="foot">Trained on <b>DARWIN</b>: 174 people (89 with Alzheimer's, 85 healthy) · logistic regression, then SVM + random forest for a closer look · <b>runs on the phone</b></p>
+  <div class="page-no">5</div>
+</section>
+
+<!-- 6 · WHY NOT A STOPWATCH -->
+<section class="slide grain s6" data-notes="3:00 – 3:25
+- &quot;And I'll be honest: a simple stopwatch is slightly more accurate on the study's tablet, 80% against 77%.&quot;
+- &quot;But if the phone is 50% slower, the stopwatch flags almost two out of three healthy people. Tinta doesn't change, because it measures proportions, not speed.&quot;
+- The slower phone is simulated. If asked: ml/results/4_device_shift.txt and 8_ablation.txt.">
+  <div class="kicker">The honest part</div>
+  <h2 class="display">Why not just use a stopwatch?</h2>
+  <div class="rows">
+    <div class="card row">
+      <h4>On the study's own tablet · accuracy</h4>
+      <div class="pair"><div class="win"><b>80%</b>stopwatch</div><div><b>77%</b>Tinta</div></div>
+    </div>
+    <div class="card row">
+      <h4>On a phone 1.5× slower · healthy people wrongly flagged</h4>
+      <div class="pair"><div class="lose"><b>64%</b>stopwatch</div><div class="win"><b>18%</b>Tinta, unchanged</div></div>
+      <p class="note">Slower device simulated on the study data.</p>
+    </div>
+  </div>
+  <img class="photo" src="../docs/scene-compare.jpg" style="left:1260px;top:150px;width:560px;height:560px;object-position:30% 50%">
+  <p class="take">Tinta measures proportions, not speed.</p>
+  <div class="page-no">6</div>
+</section>
+
+<!-- 7 · BUILT WITH -->
+<section class="slide grain s7" data-notes="3:25 – 3:40
+- &quot;Python and scikit-learn for the model; React and TypeScript for the app, which also runs on Android.&quot;
+- &quot;The model runs inside the phone, and tests check that it matches Python exactly. Claude Code helped me code and test the app.&quot;
+- Keep it to one breath; details are for questions.">
+  <div class="kicker">What I used</div>
+  <h2 class="display">Built with</h2>
+  <div class="grid">
+    <div class="card tile"><h3>Data & model</h3><p>Python, scikit-learn, pandas · nested cross-validation</p></div>
+    <div class="card tile"><h3>App</h3><p>React + TypeScript · offline web app · Android</p></div>
+    <div class="card tile"><h3>On the device</h3><p>Model runs in the phone; tests match Python to 0.00005</p></div>
+    <div class="card tile"><h3>AI assistant</h3><p>Claude Code: planning, coding, playing testers. I checked every result.</p></div>
+  </div>
+  <img class="mascot" src="../web/public/img/tinta-onb-private.webp" style="left:1460px;top:300px;width:420px;height:520px">
+  <div class="page-no">7</div>
+</section>
+
+<!-- 8 · IMPACT -->
+<section class="slide grain s8" data-notes="3:40 – 4:20
+- &quot;Tinta turns a scary question into a small step: two minutes at home, free and private, with a summary to show the doctor.&quot;
+- &quot;In the study, it would tell 65 out of 100 patients to mention it to a doctor.&quot;
+- &quot;But it doesn't diagnose. I've tested it with 15 healthy volunteers on real phones, all under 60. The next step is testing it with older people and patients, and relearning the thresholds from finger data.&quot;">
+  <div class="kicker">Impact</div>
+  <h2 class="display">A scary question, made small.</h2>
+  <div class="stats">
+    <div class="card stat"><b>2 min</b><span>at home, free, with a summary to show the doctor</span></div>
+    <div class="card stat"><b>65/100</b><span>patients in the study told "worth mentioning to a doctor"</span></div>
+    <div class="card stat"><b>0</b><span>data sent anywhere: it all stays on the phone</span></div>
+  </div>
+  <div class="honest">
+    <h3>Not a diagnosis · what comes next</h3>
+    <p>Tested on 15 healthy volunteers on real phones, all under 60. Next: people over 65 and diagnosed patients, then relearn the thresholds from finger data.</p>
+  </div>
+  <img class="photo" src="../docs/scene-phone.jpg" style="left:1300px;top:340px;width:520px;height:620px;object-position:40% 50%">
+  <div class="page-no">8</div>
+</section>
+
+<!-- 9 · THANK YOU -->
+<section class="slide ink s9" data-notes="4:20 – 4:35
+- &quot;Tinta doesn't replace a doctor. It helps people take the step of going. I built it with one rule: when I don't know, I say so. Thank you.&quot;
+- Stop. Smile. Wait for questions. Backup slides A and B are hidden after this one.">
+  <div class="kicker">Tinta</div>
+  <p class="q">It doesn't replace a doctor.<br>It helps people go to one.<br><em>When I don't know, I say so.</em></p>
+  <p class="thanks">Thank you!</p>
+  <img class="mascot" src="../web/public/img/tinta-party.webp" style="left:1260px;top:110px;width:520px;height:520px">
+  <div class="card qr"><img src="../docs/qr.png"><small>Try Tinta</small></div>
+</section>
+
+<!-- A · BACKUP DEMO -->
+<section class="slide grain bk" data-skip="1" data-notes="BACKUP · only if the live demo fails.
+- Walk left to right: start screen, Tinta noticing one lap instead of four, the invisible ink replay, a result, and 'no result this time'.">
+  <div class="kicker">Backup · the demo in pictures</div>
+  <h2 class="display">If the phone won't cooperate</h2>
+  <img class="photo" src="../docs/screens.jpg" style="left:120px;top:330px;width:1680px;height:718px;object-fit:contain;background:var(--card)">
+</section>
+
+<!-- B · BACKUP RESULTS -->
+<section class="slide grain bk" data-skip="1" data-notes="BACKUP · for jury questions about numbers.
+- Nested 5-fold cross-validation on the study's tablet data.
+- Chart: what happens when a device changes pauses and strokes differently (simulated).">
+  <div class="kicker">Backup · results</div>
+  <h2 class="display">The numbers behind it</h2>
+  <table style="position:absolute;left:120px;top:320px">
+    <tr><th>Cut at 50 on the scale</th><th>Accuracy</th><th>Patients caught</th><th>Healthy flagged</th></tr>
+    <tr><td>Stopwatch rule, 3 tasks</td><td class="n">80%</td><td class="n">78%</td><td class="n">19%</td></tr>
+    <tr><td>Air share alone, 3 tasks</td><td class="n">75%</td><td class="n">75%</td><td class="n">25%</td></tr>
+    <tr><td>Tinta, short check</td><td class="n">74%</td><td class="n">70%</td><td class="n">21%</td></tr>
+    <tr class="hl"><td>Tinta, adaptive (4.0 tasks)</td><td class="n">77%</td><td class="n">74%</td><td class="n">19%</td></tr>
+  </table>
+  <table style="position:absolute;left:120px;top:690px">
+    <tr><th>What people are told</th><th>Usual</th><th>Can't tell</th><th>Mention</th></tr>
+    <tr><td>Of 100 patients</td><td class="n">19</td><td class="n">15</td><td class="n">65</td></tr>
+    <tr><td>Of 100 healthy people</td><td class="n">74</td><td class="n">13</td><td class="n">14</td></tr>
+  </table>
+  <img class="photo" src="../docs/what-breaks.png" style="left:1000px;top:640px;width:820px;height:300px;object-fit:contain;background:#fff;padding:10px">
+  <p style="position:absolute;left:1000px;top:960px;width:820px;font-size:22px;line-height:1.4;color:var(--soft)">With all 25 study tasks a trained model reaches 91% (stopwatch 81%), but 25 tasks is not realistic on a phone. Slow healthy writers: 35% flagged vs 15–18% of others.</p>
+</section>
+
+</body>
+</html>
