@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Tinta – Guion de la final</title>
+<style>
+@font-face { font-family: 'Fraunces'; font-weight: 700; src: url(../web/node_modules/@fontsource/fraunces/files/fraunces-latin-700-normal.woff2); }
+@font-face { font-family: 'Fraunces'; font-weight: 600; font-style: italic; src: url(../web/node_modules/@fontsource/fraunces/files/fraunces-latin-600-italic.woff2); }
+@font-face { font-family: 'Atkinson'; font-weight: 400; src: url(../web/node_modules/@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-400-normal.woff2); }
+@font-face { font-family: 'Atkinson'; font-weight: 700; src: url(../web/node_modules/@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-700-normal.woff2); }
+@font-face { font-family: 'Atkinson'; font-weight: 400; font-style: italic; src: url(../web/node_modules/@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-400-italic.woff2); }
+:root { --paper:#fffaf0; --ink:#1c2340; --felt:#27305a; --soft:#4a5370; --air:#e8622a; --air-text:#b23c0c; --line:#dccfb8; --tint:#f3ede2; }
+@page { size: A4; margin: 16mm 15mm 16mm; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font: 10.5pt/1.45 'Atkinson', sans-serif; color: var(--ink); }
+h1 { font: 700 30pt/1.05 'Fraunces'; }
+h2 { font: 700 17pt/1.15 'Fraunces'; margin: 0 0 6pt; }
+h3 { font: 700 12.5pt/1.2 'Fraunces'; }
+.kicker { font: 700 8.5pt 'Atkinson'; letter-spacing: .14em; text-transform: uppercase; color: var(--air-text); margin-bottom: 4pt; }
+.sub { color: var(--soft); margin-top: 6pt; font-size: 11pt; }
+.cover { border-bottom: 3px dashed var(--air); padding-bottom: 12pt; margin-bottom: 14pt; }
+table.time { width: 100%; border-collapse: collapse; margin: 8pt 0 14pt; }
+table.time th, table.time td { text-align: left; padding: 4pt 8pt; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.time th { font-size: 8.5pt; letter-spacing: .08em; text-transform: uppercase; color: var(--soft); }
+table.time td.t { white-space: nowrap; font-weight: 700; color: var(--air-text); }
+table.time tr.total td { font-weight: 700; border-bottom: 0; }
+.sec { break-inside: avoid; margin: 0 0 12pt; border: 1px solid var(--line); border-radius: 8pt; overflow: hidden; }
+.sec-head { display: flex; align-items: baseline; gap: 10pt; background: var(--tint); padding: 7pt 12pt; }
+.sec-head .t { font: 700 11pt 'Atkinson'; color: var(--paper); background: var(--felt); border-radius: 5pt; padding: 1pt 7pt; white-space: nowrap; }
+.sec-head .slide { margin-left: auto; font-size: 9pt; color: var(--soft); white-space: nowrap; }
+.dir { padding: 6pt 12pt 0; font-style: italic; color: var(--soft); font-size: 9.5pt; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; }
+.cols > div { padding: 8pt 12pt 10pt; }
+.cols > div + div { border-left: 1px solid var(--line); }
+.lang { font: 700 8pt 'Atkinson'; letter-spacing: .14em; color: var(--air-text); margin-bottom: 3pt; }
+.cols p { margin-bottom: 5pt; }
+.cols p:last-child { margin-bottom: 0; }
+.stage { font-style: italic; color: var(--soft); }
+.trans { background: #fdf1ea; border-top: 1px dashed var(--air); padding: 6pt 12pt; font-size: 9.5pt; }
+.trans b { color: var(--air-text); }
+.box { border: 2px dashed var(--air); border-radius: 8pt; padding: 9pt 12pt; margin: 0 0 12pt; break-inside: avoid; }
+.box ul { padding-left: 14pt; }
+.box li { margin-bottom: 2pt; }
+.pb { break-before: page; }
+.qa { break-inside: avoid; border-bottom: 1px solid var(--line); padding: 7pt 0; }
+.qa h3 { margin-bottom: 4pt; }
+.qa h3 span { color: var(--soft); font-family: 'Atkinson'; font-weight: 400; font-style: italic; font-size: 10.5pt; }
+.qa .cols > div { padding: 2pt 10pt 0 0; }
+.qa .cols > div + div { padding-left: 10pt; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="kicker">Veritas AI Hackathon · Final · AI + Health</div>
+  <h1>Tinta · Guion de la presentación</h1>
+  <p class="sub">Texto completo en español e inglés, con tiempos, cambios de diapositiva, frases de paso entre apartados, preparación de la demo y respuestas para el jurado. Duración: <b>4 min 35 s</b> (25 s de margen sobre 5 min).</p>
+</div>
+
+<h2>Reparto del tiempo</h2>
+<table class="time">
+  <tr><th>Tiempo</th><th>Apartado</th><th>Diapositiva</th><th>Duración</th></tr>
+  <tr><td class="t">0:00 – 0:10</td><td>Presentación</td><td>1 · Portada</td><td>10 s</td></tr>
+  <tr><td class="t">0:10 – 0:30</td><td>El problema</td><td>2 · Carmen, 72</td><td>20 s</td></tr>
+  <tr><td class="t">0:30 – 0:45</td><td>La pista</td><td>3 · El bolígrafo en el aire</td><td>15 s</td></tr>
+  <tr><td class="t">0:45 – 2:30</td><td>Demo en vivo</td><td>4 · Demo → pantalla del móvil</td><td>1 min 45 s</td></tr>
+  <tr><td class="t">2:30 – 3:00</td><td>Cómo funciona la IA</td><td>5 · Cómo decide</td><td>30 s</td></tr>
+  <tr><td class="t">3:00 – 3:25</td><td>Por qué no un cronómetro</td><td>6 · La parte honesta</td><td>25 s</td></tr>
+  <tr><td class="t">3:25 – 3:40</td><td>Qué he utilizado</td><td>7 · Hecho con</td><td>15 s</td></tr>
+  <tr><td class="t">3:40 – 4:20</td><td>Impacto y límites</td><td>8 · Impacto</td><td>40 s</td></tr>
+  <tr><td class="t">4:20 – 4:35</td><td>Cierre</td><td>9 · Gracias</td><td>15 s</td></tr>
+  <tr class="total"><td class="t">4:35</td><td>Total · después, preguntas del jurado</td><td>A y B ocultas (reserva)</td><td>+25 s de margen</td></tr>
+</table>
+
+<div class="box">
+  <h3 style="margin-bottom:4pt">Antes de subir al escenario</h3>
+  <ul>
+    <li>Abre la app en el móvil una vez <b>con internet</b> antes (para que funcione sin conexión), y luego activa el <b>modo avión</b>.</li>
+    <li>Ábrela en el idioma en el que presentes y <b>sin <code>?closer</code></b> en la dirección (si no, la demo dura casi un minuto más).</li>
+    <li>Pantalla del móvil proyectada (cable, AirPlay o la app abierta en el portátil), brillo al máximo, "no molestar" activado, batería cargada.</li>
+    <li>El PDF de las diapositivas abierto en pantalla completa. Si la demo falla, ve a la diapositiva de reserva A.</li>
+  </ul>
+</div>
+
+<!-- 1 -->
+<div class="sec">
+  <div class="sec-head"><span class="t">0:00 – 0:10</span><h3>1 · Presentación</h3><span class="slide">Diapositiva 1 · Portada</span></div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div><p>Hola, soy [tu nombre] y este es Tinta: una app que escucha lo que tu escritura dice cuando dejas de escribir.</p></div>
+    <div><div class="lang">ENGLISH</div><p>Hi, I'm [your name], and this is Tinta: an app that listens to what your handwriting says when you stop writing.</p></div>
+  </div>
+  <div class="trans"><b>Paso al problema:</b> sonríe, respira y pasa a la diapositiva 2.</div>
+</div>
+
+<!-- 2 -->
+<div class="sec">
+  <div class="sec-head"><span class="t">0:10 – 0:30</span><h3>2 · El problema</h3><span class="slide">Diapositiva 2 · Carmen, 72</span></div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div>
+      <p>Imaginad a Carmen. Tiene 72 años. Repite las mismas preguntas y la semana pasada se dejó el fuego encendido. Su familia se pregunta: ¿es un despiste normal, o vamos al médico?</p>
+      <p>Más de 55 millones de personas viven con demencia, y muchas familias no saben cuándo preocuparse.</p></div>
+    <div><div class="lang">ENGLISH</div>
+      <p>Imagine Carmen. She's 72. She repeats the same questions, and last week she left the stove on. Her family wonders: is this normal forgetfulness, or should we see a doctor?</p>
+      <p>More than 55 million people live with dementia, and many families don't know when to worry.</p></div>
+  </div>
+  <div class="trans"><b>Paso a la pista:</b> diapositiva 3, sin pausa: "Pero hay una pista…" / "But there's a clue…"</div>
+</div>
+
+<!-- 3 -->
+<div class="sec">
+  <div class="sec-head"><span class="t">0:30 – 0:45</span><h3>3 · La pista</h3><span class="slide">Diapositiva 3 · El bolígrafo en el aire</span></div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div><p>Pero hay una pista que el papel esconde: las personas con Alzheimer dudan más al escribir. El bolígrafo pasa más tiempo en el aire. Una pantalla táctil sí puede medirlo.</p></div>
+    <div><div class="lang">ENGLISH</div><p>But there's a clue that paper hides: people with Alzheimer's hesitate more while writing. The pen spends more time in the air. A touchscreen can measure that.</p></div>
+  </div>
+  <div class="trans"><b>Paso a la demo:</b> "Os lo enseño en directo." / "Let me show you, live." → diapositiva 4 y cambia a la pantalla del móvil.</div>
+</div>
+
+<!-- 4 -->
+<div class="sec">
+  <div class="sec-head"><span class="t">0:45 – 2:30</span><h3>4 · Demo en vivo</h3><span class="slide">Diapositiva 4 → pantalla del móvil</span></div>
+  <div class="dir">0:45 – 1:05 · Modo avión y las dos prácticas (hazlas rápido y sin hablar más)</div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div><p>El móvil está en modo avión: Tinta funciona sin internet y nada sale del teléfono. Primero, dos prácticas para acostumbrarse al dedo.</p></div>
+    <div><div class="lang">ENGLISH</div><p>The phone is in airplane mode: Tinta works offline, and nothing leaves the phone. First, two practice tasks to get used to the finger.</p></div>
+  </div>
+  <div class="dir">1:05 – 2:00 · Las tres tareas puntuadas: "casa" al revés, el círculo y los bucles "le" (habla mientras dibujas)</div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div><p>Ahora, tres tareas de un estudio clínico real: escribir "casa" al revés, repasar un círculo y escribir "le" ligado. Fijaos: no me pide ir rápido. Tinta no mide la velocidad, porque cada persona y cada móvil van a un ritmo distinto. Mide qué parte del tiempo está el dedo en el aire y cuántas veces lo levanto.</p></div>
+    <div><div class="lang">ENGLISH</div><p>Now three tasks from a real clinical study: writing "house" backwards, tracing a circle, and writing joined-up "le". Notice it doesn't ask me to hurry. Tinta doesn't measure speed, because every person and every phone has a different pace. It measures what share of the time the finger is in the air, and how often I lift it.</p></div>
+  </div>
+  <div class="dir">2:00 – 2:30 · La repetición de la tinta invisible y el resultado</div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div><p>Esta es la tinta invisible: dónde levanté el dedo y cuánto tiempo. Lo que el papel no ve. Y el resultado es una de tres respuestas: "patrón habitual", "vale la pena comentarlo con un médico" o "no lo sé". Si alguien no hace bien una tarea, Tinta lo dice y no da resultado. Prefiere callar antes que equivocarse.</p>
+      <p class="stage">Si sale "no lo sé" o "sin resultado": "Justo lo que quería enseñaros: cuando duda, no adivina."</p></div>
+    <div><div class="lang">ENGLISH</div><p>This is the invisible ink: where I lifted my finger, and for how long. What paper can't see. The result is one of three answers: "usual pattern", "worth mentioning to a doctor", or "I can't tell". If someone doesn't really do a task, Tinta says so and gives no result. It would rather stay quiet than be wrong.</p>
+      <p class="stage">If it says "I can't tell" or "no result": "That's exactly what I wanted to show you: when it's unsure, it doesn't guess."</p></div>
+  </div>
+  <div class="trans"><b>Paso a la IA:</b> vuelve a las diapositivas (5): "¿Cómo decide?" / "So how does it decide?"</div>
+</div>
+
+<!-- 5 -->
+<div class="sec">
+  <div class="sec-head"><span class="t">2:30 – 3:00</span><h3>5 · Cómo funciona la IA</h3><span class="slide">Diapositiva 5 · Cómo decide</span></div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div><p>Entrené el modelo con DARWIN, un conjunto de datos público de 174 personas: 89 con Alzheimer y 85 sanas.</p>
+      <p>Es una regresión logística con solo dos números por tarea: tiempo en el aire y número de toques. Si la puntuación queda en la zona de duda, entre 35 y 65, pide tres tareas más y votan tres modelos: regresión logística, SVM y random forest.</p></div>
+    <div><div class="lang">ENGLISH</div><p>I trained the model on DARWIN, a public dataset of 174 people: 89 with Alzheimer's and 85 healthy.</p>
+      <p>It's a logistic regression using only two numbers per task: time in the air and number of touches. If the score falls in the uncertain zone, between 35 and 65, it asks for three more tasks, and three models vote: logistic regression, an SVM and a random forest.</p></div>
+  </div>
+  <div class="trans"><b>Paso a la parte honesta:</b> diapositiva 6: "Y os soy sincero…" / "And I'll be honest…"</div>
+</div>
+
+<!-- 6 -->
+<div class="sec">
+  <div class="sec-head"><span class="t">3:00 – 3:25</span><h3>6 · Por qué no un cronómetro</h3><span class="slide">Diapositiva 6 · La parte honesta</span></div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div><p>Y os soy sincero: un simple cronómetro acierta algo más en la tableta del estudio, un 80% frente a un 77%. Pero si el móvil es un 50% más lento, el cronómetro marca como sospechosas a casi dos de cada tres personas sanas. Tinta no cambia, porque mide proporciones y no velocidad.</p></div>
+    <div><div class="lang">ENGLISH</div><p>And I'll be honest: a simple stopwatch is slightly more accurate on the study's tablet, 80% against 77%. But if the phone is 50% slower, the stopwatch flags almost two out of three healthy people. Tinta doesn't change, because it measures proportions, not speed.</p></div>
+  </div>
+  <div class="trans"><b>Paso a las herramientas:</b> diapositiva 7, sin frase de paso.</div>
+</div>
+
+<!-- 7 -->
+<div class="sec">
+  <div class="sec-head"><span class="t">3:25 – 3:40</span><h3>7 · Qué he utilizado</h3><span class="slide">Diapositiva 7 · Hecho con</span></div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div><p>Python y scikit-learn para el modelo; React y TypeScript para la app, que también funciona en Android. El modelo corre dentro del móvil, y unos tests comprueban que da lo mismo que en Python. Claude Code me ayudó a programar y a probar la app.</p></div>
+    <div><div class="lang">ENGLISH</div><p>Python and scikit-learn for the model; React and TypeScript for the app, which also runs on Android. The model runs inside the phone, and tests check that it matches Python exactly. Claude Code helped me code and test the app.</p></div>
+  </div>
+  <div class="trans"><b>Paso al impacto:</b> diapositiva 8: "¿Y para qué sirve todo esto?" / "So why does this matter?"</div>
+</div>
+
+<!-- 8 -->
+<div class="sec">
+  <div class="sec-head"><span class="t">3:40 – 4:20</span><h3>8 · Impacto y límites</h3><span class="slide">Diapositiva 8 · Impacto</span></div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div><p>Tinta convierte una duda que da miedo en un paso pequeño: dos minutos en casa, gratis y privado, con un resumen para enseñar al médico. En el estudio, a 65 de cada 100 pacientes les diría "coméntalo con un médico".</p>
+      <p>Pero no diagnostica. Lo he probado con 15 voluntarios sanos en móviles reales, todos menores de 60. El siguiente paso es probarlo con personas mayores y con pacientes, y volver a aprender los umbrales con datos de dedo.</p></div>
+    <div><div class="lang">ENGLISH</div><p>Tinta turns a scary question into a small step: two minutes at home, free and private, with a summary to show the doctor. In the study, it would tell 65 out of 100 patients to mention it to a doctor.</p>
+      <p>But it doesn't diagnose. I've tested it with 15 healthy volunteers on real phones, all under 60. The next step is testing it with older people and patients, and relearning the thresholds from finger data.</p></div>
+  </div>
+  <div class="trans"><b>Paso al cierre:</b> diapositiva 9 y baja el ritmo.</div>
+</div>
+
+<!-- 9 -->
+<div class="sec">
+  <div class="sec-head"><span class="t">4:20 – 4:35</span><h3>9 · Cierre</h3><span class="slide">Diapositiva 9 · Gracias</span></div>
+  <div class="cols">
+    <div><div class="lang">ESPAÑOL</div><p>Tinta no sustituye al médico. Ayuda a dar el paso de ir. La construí con una regla: cuando no sé, lo digo. Gracias.</p></div>
+    <div><div class="lang">ENGLISH</div><p>Tinta doesn't replace a doctor. It helps people take the step of going. I built it with one rule: when I don't know, I say so. Thank you.</p></div>
+  </div>
+  <div class="trans"><b>Después:</b> para, sonríe y espera las preguntas. Las diapositivas A (demo en capturas) y B (resultados) están ocultas después de la 9.</div>
+</div>
+
+<!-- Q&A -->
+<div class="pb"></div>
+<div class="kicker">Después de los 5 minutos</div>
+<h2>Preguntas del jurado · respuestas preparadas</h2>
+<p class="sub" style="margin-bottom:8pt">Responde cada una en menos de 30 segundos. Si piden cifras, muestra la diapositiva de reserva B.</p>
+
+<div class="qa"><h3>1. Si un cronómetro acierta más, ¿para qué la IA? <span>· If a stopwatch is more accurate, why use AI?</span></h3><div class="cols">
+  <div>Solo acierta más en el dispositivo en el que se calibró. En un móvil un 50% más lento marca como sospechosas al 64% de las personas sanas; Tinta se queda en el 18%. Las proporciones no dependen de la velocidad del teléfono.</div>
+  <div>It's only more accurate on the device it was calibrated on. On a phone 50% slower it flags 64% of healthy people; Tinta stays at 18%. Proportions don't depend on the phone's speed.</div></div></div>
+
+<div class="qa"><h3>2. ¿Sirven los datos de tableta para un dedo en un móvil? <span>· Does tablet data transfer to a finger on a phone?</span></h3><div class="cols">
+  <div>Es el mayor riesgo, y lo he medido. La tableta ve el bolígrafo flotando; el móvil no ve el dedo en el aire. 7 de mis 15 voluntarios escribieron una palabra sin levantar el dedo, así que la tarea ahora pide escribir letra a letra. Si los datos quedan fuera de lo que vio el estudio, Tinta no da resultado.</div>
+  <div>It's the biggest risk, and I measured it. The tablet sees the pen hovering; a phone can't see a finger in the air. 7 of my 15 volunteers wrote a word without lifting, so the task now asks for it letter by letter. If the data falls outside what the study saw, Tinta gives no result.</div></div></div>
+
+<div class="qa"><h3>3. ¿Qué pasa con los falsos positivos? <span>· What about false alarms?</span></h3><div class="cols">
+  <div>Existen: alrededor del 14% de las personas sanas. Por eso el mensaje nunca es "tienes Alzheimer", sino "vale la pena comentarlo con un médico". Fuera del estudio hay muchos menos enfermos, así que la mayoría de los avisos serían falsas alarmas, y lo digo en la documentación.</div>
+  <div>They exist: about 14% of healthy people. That's why the message is never "you have Alzheimer's" but "worth mentioning to a doctor". Outside the study far fewer people are ill, so most flags would be false alarms, and I say so in the documentation.</div></div></div>
+
+<div class="qa"><h3>4. ¿Es detección temprana? <span>· Is this early detection?</span></h3><div class="cols">
+  <div>No. Los pacientes del estudio ya estaban diagnosticados. No puedo afirmar que detecte fases tempranas.</div>
+  <div>No. The study's patients were already diagnosed. I can't claim it detects early stages.</div></div></div>
+
+<div class="qa"><h3>5. ¿Por qué un modelo tan simple? <span>· Why such a simple model?</span></h3><div class="cols">
+  <div>Con 174 personas, un modelo complejo memoriza en vez de aprender. Los modelos más grandes solo ganan con las 25 tareas del estudio (91% frente a 81%), algo que en un móvil no es realista. Y un modelo simple se puede explicar.</div>
+  <div>With 174 people, a complex model memorises instead of learning. Bigger models only win with all 25 study tasks (91% vs 81%), which isn't realistic on a phone. And a simple model can be explained.</div></div></div>
+
+<div class="qa"><h3>6. ¿Y la privacidad? <span>· What about privacy?</span></h3><div class="cols">
+  <div>Todo se calcula en el teléfono y funciona sin internet. No hay servidor ni cuentas, y no se envía nada.</div>
+  <div>Everything runs on the phone, and it works offline. There's no server, no account, and nothing is sent.</div></div></div>
+
+<div class="qa"><h3>7. ¿Se puede engañar? <span>· Can it be fooled?</span></h3><div class="cols">
+  <div>En algunos casos sí, y lo documento. Detecta garabatos y tareas mal hechas, pero si alguien levanta el dedo a propósito sale "coméntalo con un médico". Es una ayuda, no un examen.</div>
+  <div>In some cases, yes, and I document it. It catches scribbles and tasks not done properly, but lifting the finger on purpose gives "worth mentioning". It's a support tool, not an exam.</div></div></div>
+
+<div class="qa"><h3>8. ¿Influyen la edad o la lentitud? <span>· Do age or slowness matter?</span></h3><div class="cols">
+  <div>Sí. El 35% de las personas sanas lentas reciben aviso, frente al 15–18% del resto. El conjunto de datos no incluye la edad: otra razón para probarlo con personas mayores.</div>
+  <div>Yes. 35% of slow healthy writers get flagged, against 15–18% of the others. The dataset has no age: another reason to test it with older people.</div></div></div>
+
+<div class="qa"><h3>9. ¿Cómo sigues? <span>· What's next?</span></h3><div class="cols">
+  <div>Grabar a personas mayores de 65 y a pacientes con móviles reales, volver a aprender los umbrales con datos de dedo y colaborar con una unidad de memoria o un neurólogo.</div>
+  <div>Record people over 65 and patients on real phones, relearn the thresholds from finger data, and partner with a memory clinic or a neurologist.</div></div></div>
+
+<div class="qa"><h3>10. ¿Qué hiciste tú y qué hizo la IA? <span>· What did you do and what did the AI do?</span></h3><div class="cols">
+  <div>Claude Code me ayudó a escribir y depurar código y a hacer de probador. Las decisiones, los experimentos y la comprobación de cada número son míos, y puedo explicar cada parte.</div>
+  <div>Claude Code helped me write and debug code and played the testers. The decisions, the experiments and checking every number are mine, and I can explain every part.</div></div></div>
+
+</body>
+</html>
