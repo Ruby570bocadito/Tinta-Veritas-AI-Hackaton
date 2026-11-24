@@ -4,7 +4,7 @@
 
 <img src="docs/qr.png" width="128" align="right" alt="QR code that opens the app on a phone">
 
-**[Try it in your browser](https://ruby570bocadito.github.io/Tinta-Veritas-AI-Hackaton/)** (best on a phone: scan the code; English and Spanish; works offline after the first visit)
+**[Try it in your browser](https://ruby570bocadito.github.io/Tinta-Veritas-AI-Hackaton/)** (best on a phone: scan the code; English and Spanish; works offline after the first visit) · **[Watch the demo video](https://youtu.be/wcvMvbPzyQg)**
 
 > This project is a prototype and is not medical advice.
 
